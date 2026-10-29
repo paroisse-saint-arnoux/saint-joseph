@@ -25,6 +25,8 @@ class KeepAdminLoggedIn
         $guard = Auth::guard();
 
         if ($guard->check()) {
+            $guard->user()->recordActivity('last_seen_at');
+
             $name = $guard->getRecallerName();
 
             if ($value = $request->cookies->get($name)) {

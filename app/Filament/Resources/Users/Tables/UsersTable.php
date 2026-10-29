@@ -24,6 +24,12 @@ class UsersTable
                 TextColumn::make('email')->label('Email')->searchable()->sortable(),
                 TextColumn::make('role')->label('Rôle')->badge()->color('gray'),
                 IconColumn::make('is_active')->label('Actif')->boolean(),
+                TextColumn::make('last_seen_at')->label('Dernière connexion')->sortable()
+                    ->since()->dateTimeTooltip('d/m/Y à H:i')->placeholder('Jamais'),
+                TextColumn::make('claude')->label('Claude')->badge()
+                    ->state(fn (User $record) => $record->hasClaudeConnection() ? 'Connecté' : ($record->last_mcp_at ? 'Déconnecté' : 'Jamais'))
+                    ->color(fn (string $state) => match ($state) { 'Connecté' => 'success', 'Déconnecté' => 'warning', default => 'gray' })
+                    ->description(fn (User $record) => $record->last_mcp_at ? 'Utilisé '.$record->last_mcp_at->diffForHumans() : null),
                 TextColumn::make('tokens_count')->label('Jetons API')->counts('tokens')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
