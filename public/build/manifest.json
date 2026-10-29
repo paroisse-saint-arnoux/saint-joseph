@@ -1,0 +1,100 @@
+{
+  "_rolldown-runtime-WkwZ5CU-.js": {
+    "file": "assets/rolldown-runtime-WkwZ5CU-.js",
+    "name": "rolldown-runtime"
+  },
+  "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-ext-opsz-italic.woff2": {
+    "file": "assets/fraunces-latin-ext-opsz-italic-CGbN9UgK.woff2",
+    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-ext-opsz-italic.woff2"
+  },
+  "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-ext-opsz-normal.woff2": {
+    "file": "assets/fraunces-latin-ext-opsz-normal-CJcjJNj7.woff2",
+    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-ext-opsz-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2": {
+    "file": "assets/fraunces-latin-opsz-italic-lSdLDfvT.woff2",
+    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2"
+  },
+  "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2": {
+    "file": "assets/fraunces-latin-opsz-normal-DihXLNYH.woff2",
+    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/fraunces/files/fraunces-vietnamese-opsz-italic.woff2": {
+    "file": "assets/fraunces-vietnamese-opsz-italic-DxWqP7Ku.woff2",
+    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-vietnamese-opsz-italic.woff2"
+  },
+  "node_modules/@fontsource-variable/fraunces/files/fraunces-vietnamese-opsz-normal.woff2": {
+    "file": "assets/fraunces-vietnamese-opsz-normal-Czevyj-6.woff2",
+    "src": "node_modules/@fontsource-variable/fraunces/files/fraunces-vietnamese-opsz-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-cyrillic-ext-wght-normal.woff2": {
+    "file": "assets/hanken-grotesk-cyrillic-ext-wght-normal-D_UHSL_T.woff2",
+    "src": "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-cyrillic-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-ext-wght-normal.woff2": {
+    "file": "assets/hanken-grotesk-latin-ext-wght-normal-Dg-wlmqe.woff2",
+    "src": "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2": {
+    "file": "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2",
+    "src": "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-vietnamese-wght-normal.woff2": {
+    "file": "assets/hanken-grotesk-vietnamese-wght-normal-CHiFlh_0.woff2",
+    "src": "node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-vietnamese-wght-normal.woff2"
+  },
+  "resources/js/admin/cropper.js": {
+    "file": "assets/cropper-URV96liE.js",
+    "name": "cropper",
+    "src": "resources/js/admin/cropper.js",
+    "isEntry": true,
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js"
+    ],
+    "css": [
+      "assets/cropper-cx_wrqbx.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-WwS8PBog.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_rolldown-runtime-WkwZ5CU-.js"
+    ],
+    "css": [
+      "assets/app-EQXZMCMO.css"
+    ],
+    "assets": [
+      "assets/fraunces-vietnamese-opsz-normal-Czevyj-6.woff2",
+      "assets/fraunces-latin-ext-opsz-normal-CJcjJNj7.woff2",
+      "assets/fraunces-latin-opsz-normal-DihXLNYH.woff2",
+      "assets/fraunces-vietnamese-opsz-italic-DxWqP7Ku.woff2",
+      "assets/fraunces-latin-ext-opsz-italic-CGbN9UgK.woff2",
+      "assets/fraunces-latin-opsz-italic-lSdLDfvT.woff2",
+      "assets/hanken-grotesk-cyrillic-ext-wght-normal-D_UHSL_T.woff2",
+      "assets/hanken-grotesk-vietnamese-wght-normal-CHiFlh_0.woff2",
+      "assets/hanken-grotesk-latin-ext-wght-normal-Dg-wlmqe.woff2",
+      "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2"
+    ]
+  },
+  "resources/scss/app.scss": {
+    "file": "assets/app-DPcKmiX2.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/scss/app.scss",
+    "isEntry": true
+  },
+  "resources/scss/preview.scss": {
+    "file": "assets/preview-BWiv9n7Z.css",
+    "name": "preview",
+    "names": [
+      "preview.css"
+    ],
+    "src": "resources/scss/preview.scss",
+    "isEntry": true
+  }
+}
