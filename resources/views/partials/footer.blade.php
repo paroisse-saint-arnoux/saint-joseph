@@ -6,7 +6,7 @@
     <div class="wrap">
         <div class="foot-top">
             <div class="foot-brand">
-                <img class="fl" src="{{ asset('images/logo-saint-joseph.png') }}" alt="Église Saint Joseph — Bâtisseurs du Seigneur" loading="lazy">
+                <img class="fl" src="{{ asset('images/logo-saint-joseph-blanc.svg') }}" alt="Église Saint Joseph — Bâtisseurs du Seigneur" loading="lazy">
                 <p>{{ $site['about'] ?? '' }}</p>
                 <p class="foot-addr">{{ $site['address'] ?? '' }}</p>
             </div>
@@ -39,7 +39,7 @@
         </div>
         <div class="foot-bot">
             <span>© {{ date('Y') }} Paroisse Saint-Arnoux · Association Diocésaine de Nice — Le Rouret (06) · <a href="{{ route('legal') }}">Mentions légales</a> · <a href="{{ route('privacy') }}">Confidentialité</a></span>
-            <span class="dio">Sous l'égide du <img src="{{ asset('images/diocese-de-nice.png') }}" alt="Diocèse de Nice" loading="lazy"></span>
+            <span class="dio">Sous l'égide du <img src="{{ asset('images/diocese-de-nice.svg') }}" alt="Diocèse de Nice" loading="lazy"></span>
         </div>
         <div class="tagline">Pour aujourd'hui, pour demain, pour la Mission.<br><span>Foi · Transmission · Fraternité · Espérance</span></div>
     </div>

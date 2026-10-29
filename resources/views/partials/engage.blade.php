@@ -30,7 +30,7 @@
                 <input type="hidden" name="_t" value="{{ \App\Support\SpamGuard::timestamp() }}">
                 <button type="submit" class="cta-navy">Je m'inscris</button>
                 <p class="form-feedback @if (session('newsletter')) {{ session('newsletter.ok') ? 'ok' : 'error' }} @endif" role="status" aria-live="polite">{{ session('newsletter.message') }}</p>
-                <p class="note">Vos données servent uniquement à vous envoyer des nouvelles du projet. Désinscription en un clic. <a href="{{ route('privacy') }}">Confidentialité</a></p>
+                <p class="note">Vos données servent uniquement à vous envoyer des nouvelles du projet. Vous pourrez vous désinscrire à tout moment. <a href="{{ route('privacy') }}">Confidentialité</a></p>
             </form>
         </div>
 
@@ -39,10 +39,6 @@
             <h2>{{ $site['don_title'] ?? 'Chaque pierre compte.' }}</h2>
             <p>{{ $site['don_text'] ?? '' }}</p>
             <a class="cta-primary" href="{{ $donUrl }}" target="_blank" rel="noopener">Faire un don &rarr;</a>
-            <div class="qr">
-                <img src="{{ asset('images/qr-code-don.png') }}" alt="QR code vers la page de don" width="72" height="72" loading="lazy">
-                <span>Scannez pour<br>faire un don</span>
-            </div>
         </aside>
     </div>
 </section>

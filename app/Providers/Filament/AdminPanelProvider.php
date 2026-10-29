@@ -9,6 +9,8 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
+use Filament\Pages\Page;
+use Filament\View\PanelsRenderHook;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -25,6 +27,11 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // Tous les formulaires : boutons Enregistrer / Annuler à droite, barre fixée en bas de l'écran dès qu'il
+        // y a des modifications non enregistrées (voir resources/views/filament/scripts.blade.php).
+        Page::stickyFormActions();
+        Page::alignFormActionsEnd();
+
         return $panel
             ->default()
             ->id('admin')
@@ -64,6 +71,9 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            // Avertit si l'on quitte une page avec des modifications non enregistrées.
+            ->unsavedChangesAlerts()
+            ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.scripts'))
             ->authMiddleware([
                 Authenticate::class,
                 KeepAdminLoggedIn::class,

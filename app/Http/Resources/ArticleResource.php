@@ -26,8 +26,10 @@ class ArticleResource extends JsonResource
             'status' => $this->status->value,
             'published_at' => $this->published_at?->toAtomString(),
             'is_pinned' => $this->is_pinned,
+            'show_cover' => $this->show_cover,
             'url' => $this->url(),
             'preview_url' => $this->previewUrl(),
+            'admin_url' => $this->adminUrl(),
             'updated_at' => $this->updated_at?->toAtomString(),
         ];
     }

@@ -3,5 +3,7 @@
 # racine du sous-domaine = dossier public/ dans cPanel, ce fichier est alors ignoré.)
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # Validation des certificats SSL (AutoSSL de cPanel) : ne pas rediriger.
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

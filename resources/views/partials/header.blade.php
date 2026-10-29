@@ -2,7 +2,7 @@
 <header class="site-header" id="header">
     <div class="wrap nav-bar">
         <a href="{{ route('home') }}" class="brand">
-            <img src="{{ asset('images/logo-saint-joseph.png') }}" alt="Église Saint Joseph — Bâtisseurs du Seigneur" width="80" height="80">
+            <img src="{{ asset('images/logo-saint-joseph-blanc.svg') }}" alt="Église Saint Joseph — Bâtisseurs du Seigneur" width="80" height="80">
             <span class="txt"><b>Saint Joseph</b><span>Paroisse Saint-Arnoux · Le Rouret</span></span>
         </a>
         <nav class="menu" id="menu" aria-label="Menu principal">

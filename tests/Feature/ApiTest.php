@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\Sanctum;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class ApiTest extends TestCase
@@ -21,7 +21,7 @@ class ApiTest extends TestCase
 
     public function test_crud_on_articles(): void
     {
-        Sanctum::actingAs($user = User::factory()->create());
+        Passport::actingAs($user = User::factory()->create());
 
         $slug = $this->postJson('/api/articles', [
             'title' => 'Article HTML', 'category' => 'equipe', 'format' => 'html', 'body' => '<p>Bonjour</p>',
@@ -44,7 +44,7 @@ class ApiTest extends TestCase
     public function test_media_upload_converts_to_webp(): void
     {
         Storage::fake('public');
-        Sanctum::actingAs(User::factory()->create());
+        Passport::actingAs(User::factory()->create());
 
         $path = $this->post('/api/media', ['file' => UploadedFile::fake()->image('photo.jpg', 2400, 1600)], ['Accept' => 'application/json'])
             ->assertCreated()

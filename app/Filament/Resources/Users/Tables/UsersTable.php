@@ -44,7 +44,7 @@ class UsersTable
                         ->modalDescription('Le jeton permet à un outil (ex. Claude Code) de lire et d\'écrire des articles au nom de cet utilisateur. Il ne sera affiché qu\'une seule fois.')
                         ->requiresConfirmation()
                         ->action(function (User $record) {
-                            $token = $record->createToken('api-'.now()->format('Y-m-d'), ['articles'])->plainTextToken;
+                            $token = $record->createToken('api-'.now()->format('Y-m-d'))->accessToken;
                             Notification::make()
                                 ->title('Jeton API créé')
                                 ->body("Copiez-le maintenant, il ne sera plus affiché :\n\n".$token)
@@ -53,12 +53,13 @@ class UsersTable
                                 ->send();
                         }),
                     Action::make('revokeTokens')
-                        ->label('Révoquer les jetons API')
+                        ->label('Révoquer les jetons et les connexions Claude')
+                        ->modalDescription('Les jetons API et les connexions à Claude de cet utilisateur cesseront de fonctionner.')
                         ->icon('heroicon-o-no-symbol')
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(function (User $record) {
-                            $record->tokens()->delete();
+                            $record->tokens()->update(['revoked' => true]);
                             Notification::make()->title('Jetons révoqués')->success()->send();
                         }),
                     DeleteAction::make(),

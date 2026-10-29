@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\ArticleFormat;
-use App\Enums\ArticleStatus;
-use App\Enums\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
+use App\Support\ArticleData;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 /**
  * API de lecture/écriture des articles (utilisée par Claude Code pour les articles HTML).
- * Authentification : jeton Sanctum créé dans l'admin (Utilisateurs > Créer un jeton API).
+ * Authentification : jeton API (Passport) créé dans l'admin (Utilisateurs > Créer un jeton API).
  */
 class ArticleController extends Controller
 {
@@ -56,23 +53,6 @@ class ArticleController extends Controller
 
     private function validated(Request $request, ?Article $article = null): array
     {
-        $required = $article ? 'sometimes' : 'required';
-
-        return $request->validate([
-            'title' => [$required, 'string', 'max:190'],
-            'slug' => ['sometimes', 'nullable', 'string', 'max:190', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('articles')->ignore($article)],
-            'category' => [$required, Rule::enum(Category::class)],
-            'excerpt' => ['sometimes', 'nullable', 'string', 'max:400'],
-            'format' => ['sometimes', Rule::enum(ArticleFormat::class)],
-            'body' => ['sometimes', 'nullable', 'string'],
-            'og_image' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'og_image_alt' => ['sometimes', 'nullable', 'string', 'max:190'],
-            'gallery' => ['sometimes', 'nullable', 'array'],
-            'gallery.*.path' => ['required', 'string', 'max:255'],
-            'gallery.*.alt' => ['required', 'string', 'max:190'],
-            'status' => ['sometimes', Rule::enum(ArticleStatus::class)],
-            'published_at' => ['sometimes', 'nullable', 'date'],
-            'is_pinned' => ['sometimes', 'boolean'],
-        ]);
+        return $request->validate(ArticleData::rules($article));
     }
 }

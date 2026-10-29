@@ -6,6 +6,8 @@ use App\Enums\ArticleFormat;
 use App\Enums\ArticleStatus;
 use App\Enums\Category;
 use App\Support\Images;
+use App\Support\Library;
+use App\Support\LibraryUsages;
 use App\Support\Markdown;
 use Database\Factories\ArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,7 +19,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'title', 'slug', 'category', 'excerpt', 'format', 'body', 'og_image', 'og_image_alt',
-    'gallery', 'status', 'published_at', 'is_pinned',
+    'gallery', 'status', 'published_at', 'is_pinned', 'show_cover',
 ])]
 class Article extends Model
 {
@@ -28,6 +30,7 @@ class Article extends Model
         'format' => 'markdown',
         'status' => 'draft',
         'is_pinned' => false,
+        'show_cover' => true,
     ];
 
     protected function casts(): array
@@ -39,6 +42,7 @@ class Article extends Model
             'gallery' => 'array',
             'published_at' => 'datetime',
             'is_pinned' => 'boolean',
+            'show_cover' => 'boolean',
         ];
     }
 
@@ -50,7 +54,15 @@ class Article extends Model
             $article->author_id ??= auth()->id();
         });
 
+        // Index des images de la bibliothèque utilisées par l'article.
+        static::saved(fn (Article $article) => LibraryUsages::syncArticle($article));
+
         static::saving(function (Article $article) {
+            // Images du texte avec une largeur ({width=…}) : fichier redimensionné en conséquence.
+            if ($article->isDirty('body') && $article->format === ArticleFormat::Markdown && filled($article->body)) {
+                $article->body = Library::resizeBodyImages($article->body);
+            }
+
             if ($article->status === ArticleStatus::Published && ! $article->published_at) {
                 $article->published_at = now();
             }
@@ -100,6 +112,31 @@ class Article extends Model
     public function previewUrl(): string
     {
         return route('articles.show', [$this->category, $this->slug, 'apercu' => $this->preview_token]);
+    }
+
+    /** Page d'édition dans l'admin. */
+    public function adminUrl(): string
+    {
+        return url('/admin/articles/'.$this->getKey().'/modifier');
+    }
+
+    /**
+     * Retrouve un article à partir de ce qu'un utilisateur peut coller : slug, adresse publique
+     * (/le-projet/{categorie}/{slug}), adresse d'aperçu ou adresse d'édition dans l'admin.
+     */
+    public static function findByReference(string $reference): ?static
+    {
+        $reference = trim($reference);
+        $path = trim((string) parse_url($reference, PHP_URL_PATH), '/');
+
+        if (preg_match('#^admin/articles/(\d+)#', $path, $m)) {
+            return static::find($m[1]);
+        }
+        if (preg_match('#^le-projet/[^/]+/([^/]+)$#', $path, $m)) {
+            return static::firstWhere('slug', $m[1]);
+        }
+
+        return static::firstWhere('slug', $reference) ?? (ctype_digit($reference) ? static::find($reference) : null);
     }
 
     public function bodyHtml(): string

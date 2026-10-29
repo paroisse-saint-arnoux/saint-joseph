@@ -21,13 +21,18 @@ class MagicLink
 
     public static function send(User $user, bool $invitation = false): void
     {
-        $token = Str::random(48);
         $expires = $invitation ? now()->addDays(self::INVITATION_DAYS) : now()->addMinutes(self::MINUTES);
+
+        Mail::to($user->email)->send(new MagicLinkMail($user, self::url($user, $expires), $invitation));
+    }
+
+    /** Crée un lien à usage unique valable jusqu'à $expires (sans l'envoyer). */
+    public static function url(User $user, \DateTimeInterface $expires): string
+    {
+        $token = Str::random(48);
         Cache::put(self::cacheKey($token), $user->id, $expires);
 
-        $url = URL::temporarySignedRoute('magic-link.show', $expires, ['token' => $token]);
-
-        Mail::to($user->email)->send(new MagicLinkMail($user, $url, $invitation));
+        return URL::temporarySignedRoute('magic-link.show', $expires, ['token' => $token]);
     }
 
     public static function isValid(string $token): bool

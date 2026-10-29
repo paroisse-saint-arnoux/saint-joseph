@@ -20,7 +20,7 @@ class ManageSite extends SettingsPage
 
     protected static ?string $slug = 'reglages';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected array $settingKeys = ['site', 'legal'];
 

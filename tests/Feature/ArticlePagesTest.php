@@ -88,6 +88,17 @@ class ArticlePagesTest extends TestCase
         $this->get($article->url())->assertSee('youtube-nocookie.com/embed/dQw4w9WgXcQ', false);
     }
 
+    public function test_cover_can_be_hidden_at_the_top_of_the_article(): void
+    {
+        $article = Article::factory()->create(['og_image' => 'articles/couverture.webp', 'og_image_alt' => 'Le parvis']);
+        $this->get($article->url())->assertSee('article-cover', false);
+
+        $article->update(['show_cover' => false]);
+        $this->get($article->url())
+            ->assertDontSee('article-cover', false)
+            ->assertSee('<meta property="og:image" content="'.url('/storage/articles/couverture.webp').'">', false);
+    }
+
     public function test_home_page_renders_without_settings(): void
     {
         $this->get('/')->assertOk();

@@ -30,6 +30,9 @@ git checkout -q -f -B "$BRANCH" "origin/$BRANCH"
 "$COMPOSER" install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress
 "$PHP" artisan migrate --force
 [ -L public/storage ] || "$PHP" artisan storage:link
+# Clés OAuth (connecteur Claude, jetons API) : générées une fois, hors git.
+[ -f storage/oauth-private.key ] || "$PHP" artisan passport:keys
+"$PHP" artisan bibliotheque:nettoyer
 "$PHP" artisan optimize:clear
 "$PHP" artisan optimize
 "$PHP" artisan filament:optimize

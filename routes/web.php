@@ -3,6 +3,8 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LibraryArchiveController;
+use App\Http\Controllers\LibrarySearchController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
@@ -23,6 +25,12 @@ Route::get('/mentions-legales', [PageController::class, 'legal'])->name('legal')
 Route::get('/confidentialite', [PageController::class, 'privacy'])->name('privacy');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+
+// Admin : bibliothèque d'images (hors /admin, où Filament capte /admin/bibliotheque/{id}).
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/bibliotheque/archive', LibraryArchiveController::class)->name('library.archive');
+    Route::get('/bibliotheque/recherche', LibrarySearchController::class)->name('library.search');
+});
 
 Route::middleware('signed')->group(function () {
     Route::get('/connexion/{token}', [MagicLinkController::class, 'show'])->name('magic-link.show');

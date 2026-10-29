@@ -42,7 +42,7 @@
 @endsection
 
 @section('content')
-    <section @class(['page-hero', 'has-cover' => $article->ogImageUrl()])>
+    <section @class(['page-hero', 'has-cover' => $article->show_cover && $article->ogImageUrl()])>
         <div @class(['article-wrap', 'wide' => $article->format === ArticleFormat::Html])>
             <span class="eyebrow"><a href="{{ route('articles.category', $article->category) }}">{{ $article->category->getLabel() }}</a></span>
             <h1>{{ $article->title }}</h1>
@@ -54,7 +54,7 @@
 
     <article class="article">
         <div @class(['article-wrap', 'wide' => $article->format === ArticleFormat::Html])>
-            @if ($article->ogImageUrl())
+            @if ($article->show_cover && $article->ogImageUrl())
                 <figure class="article-cover"><img src="{{ $article->ogImageUrl() }}" alt="{{ $article->og_image_alt ?? '' }}"></figure>
             @endif
 

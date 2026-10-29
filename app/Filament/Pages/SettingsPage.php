@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
@@ -13,6 +14,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
 use Filament\Support\Components\Attributes\Exposed;
 use Filament\Support\Components\Attributes\Unexposed;
+use Filament\Support\Enums\Alignment;
 
 /**
  * Page d'édition d'un ou plusieurs blocs de la table settings.
@@ -20,6 +22,9 @@ use Filament\Support\Components\Attributes\Unexposed;
  */
 abstract class SettingsPage extends Page
 {
+    // Empreinte des données enregistrées : alerte en cas de départ sans enregistrer, barre fixe si modifié.
+    use HasUnsavedDataChangesAlert;
+
     /** @var array<int, string> clés de la table settings éditées par la page */
     protected array $settingKeys = [];
 
@@ -31,7 +36,14 @@ abstract class SettingsPage extends Page
     #[Unexposed]
     public function mount(): void
     {
+        $this->fillFromSettings();
+    }
+
+    /** Remplit le formulaire depuis la base et mémorise l'empreinte des données (modifications non enregistrées). */
+    protected function fillFromSettings(): void
+    {
         $this->form->fill(collect($this->settingKeys)->mapWithKeys(fn (string $key) => [$key => Setting::get($key, [])])->all());
+        $this->rememberData();
     }
 
     #[Unexposed]
@@ -49,8 +61,10 @@ abstract class SettingsPage extends Page
                 ->livewireSubmitHandler('save')
                 ->footer([
                     Actions::make([
-                        Action::make('save')->label('Enregistrer')->submit('save')->keyBindings(['mod+s']),
-                    ])->sticky(),
+                        Action::make('save')->label('Sauvegarder les modifications')->submit('save')->keyBindings(['mod+s']),
+                        // Revenir au contenu enregistré (abandonne les modifications en cours).
+                        Action::make('cancel')->label('Annuler')->color('gray')->action(fn () => $this->fillFromSettings()),
+                    ])->sticky()->alignment(Alignment::End),
                 ]),
         ]);
     }
@@ -63,6 +77,8 @@ abstract class SettingsPage extends Page
         foreach ($this->settingKeys as $key) {
             Setting::put($key, array_replace(Setting::get($key, []), $state[$key] ?? []));
         }
+
+        $this->fillFromSettings();
 
         Notification::make()->title('Modifications enregistrées')->success()->send();
     }

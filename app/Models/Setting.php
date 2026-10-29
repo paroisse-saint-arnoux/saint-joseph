@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LibraryUsages;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -25,6 +26,16 @@ class Setting extends Model
     protected function casts(): array
     {
         return ['value' => 'array'];
+    }
+
+    protected static function booted(): void
+    {
+        // Index des images de la bibliothèque utilisées par la page d'accueil.
+        static::saved(function (Setting $setting) {
+            if ($setting->key === 'home') {
+                LibraryUsages::syncHome($setting->value ?? []);
+            }
+        });
     }
 
     /** Lecture en notation pointée : Setting::get('home.collecte.raised'). */

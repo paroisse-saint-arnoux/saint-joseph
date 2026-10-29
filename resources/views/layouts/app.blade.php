@@ -36,6 +36,7 @@
     <meta name="twitter:image" content="{{ $pageImage }}">
     @stack('head')
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
     @include('partials.matomo')
 </head>
@@ -48,7 +49,9 @@
         @yield('content')
     </main>
 
-    @include('partials.engage')
+    @unless (! empty($bare))
+        @include('partials.engage')
+    @endunless
     @include('partials.footer')
     @stack('scripts')
 </body>
