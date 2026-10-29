@@ -119,4 +119,5 @@ Matomo auto-hébergé https://matomo.saint-arnoux.fr/, site **ID 3**, `disableCo
 - Attributs PHP Laravel 13 (`#[Fillable]`, `#[Hidden]`) sur les modèles.
 - Styles : variables de charte dans `resources/scss/_variables.scss` (navy `#00204E`, or `#C5A24B`, parchemin `#F6F1E6`), un partial par zone. Les styles du corps d'article sont dans `_prose.scss`, réutilisés par l'aperçu admin (`preview.scss`, isolé sous `.sj-preview`, sans Bootstrap).
 - Réglages éditables : `Setting::get('home.collecte.raised')` / `Setting::put('home', [...])`. Pour un nouveau bloc éditable, ajouter le champ dans `ManageHome`/`ManageSite` **et** une valeur par défaut via migration.
+- Blade : **ne pas utiliser `@js(...)` dans un attribut de composant** (`<x-filament::button x-on:click="…@js(…)…">`) : la directive n'y est pas interprétée et le JavaScript est cassé. Utiliser `{{ … }}`, ou mettre la logique dans un `x-data` sur une balise HTML ordinaire.
 - Tests : `tests/Feature` (SQLite mémoire). Les lancer avant chaque commit.

@@ -43,10 +43,27 @@
                 <p>Remplissez les deux cases :</p>
                 <p>Nom : <strong>Site Saint Joseph</strong></p>
                 <div>Adresse (URL) :</div>
-                <div class="cc-copy fi-not-prose" x-data="{ copied: false }">
-                    <span class="cc-url">{{ $mcpUrl }}</span>
+                {{-- Copie de l'adresse ; repli par sélection du texte si le navigateur refuse l'accès au presse-papiers. --}}
+                <div class="cc-copy fi-not-prose" x-data="{
+                    copied: false,
+                    async copy() {
+                        const text = this.$refs.url.textContent.trim();
+                        try {
+                            await navigator.clipboard.writeText(text);
+                        } catch (e) {
+                            const range = document.createRange();
+                            range.selectNodeContents(this.$refs.url);
+                            getSelection().removeAllRanges();
+                            getSelection().addRange(range);
+                            document.execCommand('copy');
+                        }
+                        this.copied = true;
+                        setTimeout(() => this.copied = false, 2000);
+                    },
+                }">
+                    <span class="cc-url" x-ref="url">{{ $mcpUrl }}</span>
                     <x-filament::button size="sm" color="gray" icon="heroicon-o-clipboard-document"
-                        x-on:click="navigator.clipboard.writeText(@js($mcpUrl)); copied = true; setTimeout(() => copied = false, 2000)">
+                        x-on:click="copy()">
                         <span x-text="copied ? 'Copié !' : 'Copier'">Copier</span>
                     </x-filament::button>
                 </div>
