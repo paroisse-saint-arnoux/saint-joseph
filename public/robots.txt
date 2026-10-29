@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin
+Disallow: /connexion
+Disallow: /api
+
+Sitemap: https://saint-joseph.saint-arnoux.fr/sitemap.xml

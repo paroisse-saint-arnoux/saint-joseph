@@ -1,0 +1,44 @@
+// Bandeau « Newsletter + Don » présent sur toutes les pages
+.engage { background: $parchment; padding: 96px 0; border-top: 1px solid $parchment-2; }
+.engage-grid {
+  display: grid; grid-template-columns: 1.2fr .8fr; gap: 28px; align-items: stretch;
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+.newsletter-card {
+  background: $paper; border: 1px solid $parchment-2; border-radius: 18px; padding: 38px clamp(22px, 4vw, 42px);
+  h2 { font-size: clamp(1.8rem, 3.4vw, 2.3rem); color: $navy; margin: 16px 0 10px; }
+  > p { color: $ink-soft; margin-bottom: 22px; }
+}
+.don-card {
+  position: relative; overflow: hidden; background: radial-gradient(120% 100% at 70% 0%, #103a78, $navy 55%, $navy-900);
+  color: $cream; border-radius: 18px; padding: 38px clamp(22px, 4vw, 38px); display: flex; flex-direction: column; gap: 16px;
+  h2 { font-size: clamp(1.8rem, 3.4vw, 2.3rem); color: $cream; margin: 6px 0 0; }
+  p { color: $cream-dim; margin: 0; }
+  .cta-primary { align-self: flex-start; }
+  .qr { background: rgba(255, 255, 255, .95); margin-top: auto; }
+  .eyebrow { color: $gold-soft; }
+}
+
+.form-site {
+  label { font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; color: $ink-soft; font-weight: 600; margin-bottom: 6px; }
+  .form-control { background: #fff; font-size: .95rem; }
+  button[type=submit] { margin-top: 18px; }
+  .note { font-size: .74rem; color: $ink-soft; margin-top: 14px; opacity: .85; a { text-decoration: underline; } }
+}
+.form-feedback { margin-top: 14px; font-size: .9rem; font-weight: 500; &.ok { color: $sage; } &.error { color: #a33; } }
+
+// Pot de miel anti-spam : invisible pour les humains
+.hp-field { position: absolute !important; left: -10000px !important; width: 1px; height: 1px; overflow: hidden; }
+
+.contact-page { background: $parchment; padding: 60px 0 100px; }
+.contact-grid {
+  display: grid; grid-template-columns: .8fr 1.2fr; gap: 50px;
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+  aside {
+    h2 { font-size: 1.6rem; color: $navy; margin: 14px 0 12px; }
+    p { color: $ink-soft; }
+    a { color: $navy; text-decoration: underline; text-decoration-color: $gold; }
+  }
+}
+.contact-card { background: $paper; border: 1px solid $parchment-2; border-radius: 18px; padding: 36px clamp(22px, 4vw, 40px); }
+.alert-success-site { background: rgba($sage, .12); border: 1px solid rgba($sage, .4); color: darken($sage, 15%); border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; }

@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Filament\Resources\Articles\Tables;
+
+use App\Enums\ArticleStatus;
+use App\Enums\Category;
+use App\Models\Article;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+
+class ArticlesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->defaultSort(fn ($query) => $query->orderByDesc('is_pinned')->orderByRaw('published_at IS NULL DESC')->orderByDesc('published_at'))
+            ->columns([
+                ImageColumn::make('og_image')->label('')->disk('public')->square()->imageSize(48),
+                TextColumn::make('title')->label('Titre')->searchable()->sortable()->wrap()
+                    ->description(fn (Article $record) => '/le-projet/'.$record->category->value.'/'.$record->slug),
+                TextColumn::make('category')->label('Catégorie')->badge()->color('gray')->sortable(),
+                TextColumn::make('status')->label('Statut')->badge()->sortable(),
+                IconColumn::make('is_pinned')->label('Épinglé')->boolean()->trueIcon('heroicon-s-star')->falseIcon('')->trueColor('warning'),
+                TextColumn::make('published_at')->label('Publication')->dateTime('d/m/Y')->sortable()->placeholder('—'),
+                TextColumn::make('updated_at')->label('Modifié')->since()->sortable()->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                SelectFilter::make('status')->label('Statut')->options(ArticleStatus::class),
+                SelectFilter::make('category')->label('Catégorie')->options(Category::class),
+            ])
+            ->recordActions([
+                Action::make('view')
+                    ->label('Voir')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
+                    ->url(fn (Article $record) => $record->isPubliclyVisible() ? $record->url() : $record->previewUrl())
+                    ->openUrlInNewTab(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

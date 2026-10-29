@@ -1,0 +1,68 @@
+// Classes utilisées par l'article « Équipe » (HTML généré).
+.moa {
+  display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: center; background: $navy; color: $cream;
+  border-radius: 16px; padding: 38px; margin-bottom: 40px;
+  .photo { width: 128px; height: 128px; border-radius: 50%; object-fit: cover; border: 2px solid $gold; flex: none; }
+  .role { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: $gold; font-weight: 600; }
+  h3 { font-size: 1.9rem; margin: 6px 0 14px; color: $cream; }
+  blockquote { font-family: $font-display; font-style: italic; font-size: 1.15rem; color: $gold-soft; border-left: 2px solid $gold; padding-left: 18px; }
+  .moa-bio { margin: 16px 0 0; color: $cream-dim; font-size: .98rem; line-height: 1.65; max-width: 60ch; }
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr; text-align: center;
+    .photo { margin: 0 auto; }
+    blockquote { text-align: left; }
+  }
+}
+.comp-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 14px 0 30px;
+  @media (max-width: 900px) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 460px) { grid-template-columns: 1fr; }
+}
+.comp {
+  display: flex; align-items: center; gap: 11px; padding: 15px 16px; background: $paper; border: 1px solid $parchment-2;
+  border-radius: 11px; font-size: .9rem; font-weight: 500; color: $navy;
+  &::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: $gold; flex: none; }
+}
+.benev {
+  display: flex; align-items: center; gap: 18px; background: $navy; color: $cream; border-radius: 14px; padding: 24px 30px;
+  .big { font-family: $font-display; font-size: 2.6rem; color: $gold-soft; line-height: 1; }
+  p { font-size: .95rem; color: $cream-dim; margin: 0; }
+  b { color: $cream; }
+}
+.team-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin: 24px 0 0;
+  @media (max-width: 980px) { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 620px) { grid-template-columns: repeat(2, 1fr); }
+}
+.member {
+  text-align: center; cursor: pointer; background: none; border: 0; padding: 0; font: inherit;
+  img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 1px solid $parchment-2; display: block; transition: .35s $ease; }
+  &:hover img { border-color: $gold; transform: translateY(-4px); box-shadow: 0 14px 30px rgba($navy, .12); }
+  &:focus-visible { outline: 2px solid $gold; outline-offset: 3px; border-radius: 12px; }
+  .nm { display: block; margin-top: 9px; font-family: $font-display; font-size: .92rem; color: $navy; line-height: 1.2; }
+  .more { display: block; font-size: .7rem; color: $gold; opacity: 0; transition: .3s; margin-top: 2px; }
+  &:hover .more, &:focus-visible .more { opacity: 1; }
+  .member-role, .member-bio { display: none; }
+}
+.team-verse { margin: 28px 0 0; text-align: center; font-family: $font-display; font-style: italic; font-size: 1.05rem; color: $ink-soft; }
+
+// Fiche membre (modale Bootstrap créée en JS)
+.member-modal {
+  .modal-content { border: 0; box-shadow: 0 30px 80px rgba($navy-900, .4); }
+  .mcard-top {
+    display: flex; gap: 20px; align-items: center; padding: 26px 26px 0;
+    img { width: 120px; height: 120px; flex: none; object-fit: cover; border-radius: 14px; border: 1px solid $parchment-2; }
+    h3 { font-size: 1.5rem; color: $navy; margin: 4px 0 0; }
+    .mrole { font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; color: $gold; }
+    @media (max-width: 520px) { flex-direction: column; text-align: center; }
+  }
+  .mcard-bio { padding: 18px 26px 26px; color: $ink-soft; font-size: .98rem; line-height: 1.6; white-space: pre-line; }
+  .btn-close { position: absolute; top: 14px; right: 14px; z-index: 2; }
+}
+
+// Dans un article HTML, ces blocs prennent l'espace vertical habituel.
+.prose {
+  .moa, .benev, .team-grid, .comp-grid { margin-top: 1.6em; }
+  .moa h3, .moa blockquote, .moa p { margin-top: 0; }
+  .moa blockquote { color: $gold-soft; }
+}

@@ -1,0 +1,32 @@
+footer.site-footer {
+  background: $navy-900; color: $cream-dim; padding: 64px 0 32px;
+  a { color: $cream-dim; &:hover { color: $gold-soft; } }
+}
+.foot-top {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.1fr; gap: 40px; padding-bottom: 40px; border-bottom: 1px solid rgba($cream, .12);
+  h4 { color: $cream; font-size: 1rem; margin-bottom: 14px; font-weight: 500; }
+  nav a, .foot-col a { display: block; font-size: .87rem; padding: 5px 0; transition: .2s; }
+  @media (max-width: 900px) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+.foot-brand {
+  img.fl { height: 140px; margin-bottom: 10px; }
+  p { font-size: .86rem; max-width: 330px; font-weight: 300; }
+  @media (max-width: 900px) { grid-column: 1 / -1; }
+}
+.foot-addr { font-size: .85rem; margin-top: 8px; line-height: 1.5; }
+.foot-social {
+  display: flex; gap: 10px; margin-top: 4px;
+  a {
+    width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba($cream, .2); display: grid !important; place-items: center; padding: 0 !important;
+    svg { width: 18px; height: 18px; fill: $cream-dim; transition: .2s; }
+    &:hover { border-color: $gold; svg { fill: $gold-soft; } }
+  }
+}
+.foot-bot {
+  display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 18px; padding-top: 24px; font-size: .77rem; opacity: .75;
+  a { color: $gold-soft; &:hover { text-decoration: underline; } }
+  .dio { display: flex; align-items: center; gap: 12px; img { height: 78px; } }
+  @media (max-width: 900px) { flex-direction: column; align-items: flex-start; }
+}
+.tagline { text-align: center; letter-spacing: .22em; text-transform: uppercase; color: $gold; font-size: .74rem; padding: 30px 0 0; span { color: $cream-dim; } }

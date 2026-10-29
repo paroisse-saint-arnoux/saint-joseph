@@ -1,0 +1,46 @@
+// Charte graphique du site (reprise de l'ancien one-pager).
+$navy: #00204E;
+$navy-900: #001433;
+$navy-700: #0a2f66;
+$gold: #C5A24B;
+$gold-soft: #E2C97F;
+$parchment: #F6F1E6;
+$parchment-2: #EDE5D3;
+$paper: #fbf8f0;
+$ink: #1f1d18;
+$ink-soft: #4a463c;
+$cream: #F3EEE2;
+$cream-dim: #cdd3df;
+$sage: #6E7A5A;
+
+$font-display: 'Fraunces Variable', Georgia, serif;
+$font-body: 'Hanken Grotesk Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$maxw: 1180px;
+$ease: cubic-bezier(.22, .61, .36, 1);
+
+// Surcharges Bootstrap
+$primary: $navy;
+$secondary: $gold;
+$body-bg: $parchment;
+$body-color: $ink;
+$font-family-base: $font-body;
+$line-height-base: 1.6;
+$headings-font-family: $font-display;
+$headings-font-weight: 400;
+$headings-line-height: 1.08;
+$headings-margin-bottom: 0;
+$link-color: $navy;
+$link-decoration: none;
+$link-hover-decoration: none;
+$border-radius: 10px;
+$input-border-color: $parchment-2;
+$input-focus-border-color: $gold;
+$input-focus-box-shadow: 0 0 0 .2rem rgba($gold, .2);
+$input-padding-y: .8rem;
+$input-padding-x: 1rem;
+$modal-content-bg: $parchment;
+$modal-content-border-radius: 18px;
+$modal-backdrop-bg: $navy-900;
+$modal-backdrop-opacity: .6;
+$carousel-indicator-active-bg: $gold-soft;
+$enable-smooth-scroll: true;

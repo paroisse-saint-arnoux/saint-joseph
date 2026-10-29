@@ -1,0 +1,68 @@
+:root {
+  --navy: #{$navy}; --navy-900: #{$navy-900}; --navy-700: #{$navy-700};
+  --gold: #{$gold}; --gold-soft: #{$gold-soft};
+  --parchment: #{$parchment}; --parchment-2: #{$parchment-2};
+  --ink: #{$ink}; --ink-soft: #{$ink-soft}; --cream: #{$cream}; --cream-dim: #{$cream-dim};
+}
+
+html { scroll-behavior: smooth; }
+html, body { overflow-x: hidden; }
+body {
+  -webkit-font-smoothing: antialiased;
+
+  // Grain de papier discret, comme sur l'ancien site.
+  &::after {
+    content: ""; position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: .04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+h1, h2, h3, h4 { letter-spacing: -.01em; }
+section[id] { scroll-margin-top: 86px; }
+img { max-width: 100%; }
+
+.wrap { max-width: $maxw; margin: 0 auto; padding: 0 28px; }
+@media (max-width: 560px) { .wrap { padding: 0 18px; } }
+
+.section { padding: 112px 0; }
+@media (max-width: 760px) { .section { padding: 76px 0; } }
+
+.eyebrow {
+  font-family: $font-body; font-size: .72rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase;
+  color: $gold; display: inline-flex; align-items: center; gap: .7em;
+  &::before { content: ""; width: 34px; height: 1px; background: $gold; }
+}
+
+.section-head {
+  max-width: 700px; margin-bottom: 54px;
+  h2 { font-size: clamp(2rem, 4vw, 3.05rem); margin: 18px 0; color: $navy; }
+  p { color: $ink-soft; font-size: 1.05rem; }
+}
+
+// Boutons
+.cta-primary, .cta-ghost, .cta-navy {
+  display: inline-block; padding: 16px 34px; border-radius: 44px; font-weight: 600; border: 0;
+  transition: .3s $ease; text-align: center;
+}
+.cta-primary {
+  background: $gold; color: $navy-900;
+  &:hover { background: $gold-soft; color: $navy-900; transform: translateY(-3px); box-shadow: 0 14px 34px rgba($gold, .4); }
+}
+.cta-ghost {
+  border: 1px solid rgba($cream, .4); color: $cream; font-weight: 500;
+  &:hover { border-color: $gold; color: $gold-soft; }
+}
+.cta-navy {
+  background: $navy; color: $cream;
+  &:hover { background: $navy-700; color: $cream; transform: translateY(-2px); }
+}
+.btn-gold { @extend .cta-primary; }
+
+// Apparition au défilement
+.reveal { opacity: 0; transform: translateY(34px); transition: opacity .9s $ease, transform .9s $ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+.visually-hidden-focusable:focus { position: fixed; top: 8px; left: 8px; z-index: 3000; background: $gold; color: $navy-900; padding: 8px 14px; border-radius: 8px; }

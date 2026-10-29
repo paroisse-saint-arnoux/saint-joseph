@@ -1,0 +1,57 @@
+header.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; transition: all .45s $ease; padding: 18px 0;
+
+  &.scrolled, .page-inner & {
+    background: rgba(0, 20, 51, .94); backdrop-filter: blur(12px); padding: 10px 0;
+    box-shadow: 0 1px 0 rgba($gold, .25);
+    .brand img { height: 60px; }
+  }
+}
+
+.nav-bar { display: flex; align-items: center; justify-content: space-between; }
+
+.brand {
+  display: flex; align-items: center; gap: 13px; color: $cream;
+  &:hover { color: $cream; }
+  img { height: 80px; width: auto; transition: .4s $ease; }
+  .txt b { font-family: $font-display; font-size: 1.12rem; font-weight: 500; letter-spacing: .02em; display: block; line-height: 1.1; }
+  .txt span { display: block; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: $cream-dim; font-weight: 500; }
+}
+
+.menu {
+  display: flex; align-items: center; gap: 30px;
+  a {
+    color: $cream; font-size: .85rem; font-weight: 500; opacity: .82; transition: .25s; position: relative;
+    &:hover, &.active { opacity: 1; color: $cream; }
+    &::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 1px; background: $gold; transition: .3s $ease; }
+    &:hover::after, &.active::after { width: 100%; }
+  }
+}
+
+.btn-don {
+  background: $gold; color: $navy-900 !important; padding: 10px 21px; border-radius: 40px; font-weight: 600; font-size: .83rem;
+  opacity: 1 !important; transition: .3s $ease;
+  &::after { display: none; }
+  &:hover { background: $gold-soft; transform: translateY(-2px); box-shadow: 0 8px 22px rgba($gold, .35); }
+}
+
+.burger {
+  display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 6px;
+  span { width: 26px; height: 2px; background: $cream; transition: .3s; }
+}
+
+@media (max-width: 900px) {
+  .menu {
+    position: fixed; inset: 0 0 0 auto; width: 80%; max-width: 340px; background: $navy-900; flex-direction: column;
+    justify-content: center; gap: 28px; transform: translateX(100%); transition: .4s $ease; padding: 40px;
+    a { font-size: 1.05rem; }
+    &.open { transform: none; }
+  }
+  .burger { display: flex; position: relative; z-index: 1002; }
+  .brand {
+    max-width: calc(100% - 64px); overflow: hidden;
+    img { height: 54px !important; }
+    .txt b { font-size: 1rem; }
+    .txt span { font-size: .55rem; }
+  }
+}
