@@ -6,12 +6,15 @@
         <div class="wrap">
             <div class="simple-card">
                 @if ($valid)
-                    <h1>Connexion à l'administration</h1>
-                    <p>Cliquez sur le bouton pour terminer votre connexion.</p>
-                    <form method="post" action="{{ $action }}">
+                    <h1>Connexion en cours…</h1>
+                    <p>Vous allez être redirigé vers l'administration.</p>
+                    {{-- Envoi automatique en JS : l'utilisateur arrive directement dans l'admin, tandis que
+                         les antivirus des messageries (qui ouvrent les liens sans exécuter le JS) ne consomment pas le lien. --}}
+                    <form method="post" action="{{ $action }}" id="magic-link-form">
                         @csrf
-                        <button type="submit" class="cta-primary mt-3">Me connecter</button>
+                        <noscript><button type="submit" class="cta-primary mt-3">Me connecter</button></noscript>
                     </form>
+                    <script>document.getElementById('magic-link-form').submit();</script>
                 @else
                     <h1>Lien expiré</h1>
                     <p>Ce lien de connexion n'est plus valable : il a déjà servi ou a plus de {{ \App\Support\MagicLink::MINUTES }} minutes.</p>

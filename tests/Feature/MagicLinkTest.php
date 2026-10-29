@@ -32,8 +32,8 @@ class MagicLinkTest extends TestCase
         $user = User::factory()->create();
         $url = $this->sendAndGetUrl($user);
 
-        // L'ouverture du lien (ex. antivirus de la messagerie) ne connecte pas.
-        $this->get($url)->assertOk()->assertSee('Me connecter');
+        // La page s'envoie seule en JS ; une simple ouverture sans JS (antivirus de messagerie) ne connecte pas.
+        $this->get($url)->assertOk()->assertSee("getElementById('magic-link-form').submit()", false);
         $this->assertGuest();
 
         $this->post($url)->assertRedirect();

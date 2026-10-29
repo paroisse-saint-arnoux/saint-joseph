@@ -52,7 +52,7 @@ Supprimés de l'ancien site : architecture IA, valeurs/mission, parrains, simula
 - Classes CSS disponibles pour les articles HTML : `.moa`, `.comp-grid/.comp`, `.benev`, `.team-grid/.member` (avec `.member-role`/`.member-bio` cachés → modale au clic), `.team-verse`, plus tout Bootstrap (grid, `.ratio`…).
 
 ### Admin & accès
-- Connexion **par lien magique uniquement** (pas de mot de passe) : `App\Filament\Pages\Auth\Login` + `App\Support\MagicLink`. Lien à usage unique, 30 min, signé ; le lien mène à une page de confirmation (bouton POST) pour que les antivirus des messageries ne le consomment pas.
+- Connexion **par lien magique uniquement** (pas de mot de passe) : `App\Filament\Pages\Auth\Login` + `App\Support\MagicLink`. Lien à usage unique, 30 min, signé ; le lien mène à une page qui s'auto-soumet en JS (POST) puis redirige vers l'admin : l'utilisateur arrive directement connecté, et les antivirus des messageries (qui ouvrent les liens sans exécuter le JS) ne consomment pas le lien. Bouton de secours dans `<noscript>`.
 - Liste blanche = table `users` (champ `is_active`). Rôles : **admin** (gère les utilisateurs) / **editor** (contenu). Les éditeurs publient directement.
 - Premier admin créé par migration à partir de `ADMIN_EMAIL`.
 
