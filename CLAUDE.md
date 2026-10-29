@@ -13,6 +13,7 @@ Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jou
 - Front : Blade + **SCSS + Bootstrap 5.3** (import sélectif, pas de Tailwind), Vite, JS vanilla en modules.
 - Polices Fraunces / Hanken Grotesk auto-hébergées (`@fontsource-variable`, pas de Google Fonts).
 - Images : `intervention/image` (GD) — tout upload est redimensionné (1920 px max) et converti en **WebP** (`App\Support\Images`).
+- Traductions françaises de Laravel : fichiers versionnés dans `lang/` (`fr.json`, `lang/fr/*.php`). Le paquet `laravel-lang/common` qui les a générés a été **retiré** (il dépend de paquets `dragon-code/*` abandonnés, d'où des avertissements de Composer au déploiement). Pour les mettre à jour : `composer require --dev laravel-lang/common`, `php artisan lang:update`, puis `composer remove --dev laravel-lang/common`. Filament a ses propres traductions.
 - Markdown : `league/commonmark` GFM, HTML brut autorisé (éditeurs de confiance), iframes autorisées ; un lien YouTube seul sur sa ligne devient une vidéo intégrée (`App\Support\Markdown`).
 
 ## Développement (Docker)
