@@ -1,7 +1,9 @@
-# CLAUDE.md — Site Saint Joseph (projet SJO2)
+# CLAUDE.md — Site Saint Joseph
 
 Site du projet de centre paroissial et d'église Saint Joseph (Paroisse Saint-Arnoux, Le Rouret).
 Production : https://saint-joseph.saint-arnoux.fr/ — hébergement mutualisé **O2Switch** (LAMP, PHP 8.5, MySQL, accès SSH depuis les IP autorisées dans cPanel, déploiement par `git` côté serveur).
+
+**« SJO2 » est un code interne : il ne doit jamais apparaître sur le site** (textes, meta, données structurées, images, emails). Le nom public est « Église Saint Joseph » / « Centre paroissial et église Saint Joseph », Paroisse Saint-Arnoux, Le Rouret.
 
 Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jour** à chaque nouvelle décision.
 
@@ -48,12 +50,15 @@ Supprimés de l'ancien site : architecture IA, valeurs/mission, parrains, simula
 - Champs : titre, slug, intro (excerpt), image de partage (OG) + alt, corps, galerie (carrousel, alt obligatoire), statut, date de publication modifiable (date future = programmé), épinglé.
 - **Deux formats** : `markdown` (édité dans l'admin, onglets Rédaction/Aperçu) et `html` (mis en page, généré par IA, ex. article Équipe ; éditeur de code HTML dans l'admin, écrit surtout via l'API).
 - **Brouillons** : absents des listes et du sitemap, `noindex`, accessibles seulement via `?apercu={preview_token}` (ou si connecté à l'admin).
-- Pas d'auteur affiché, pas de temps de lecture. Articles liés = même catégorie.
+- Auteur (`author_id`, rempli automatiquement à la création, y compris via l'API) : **affiché uniquement dans l'admin**. Sur le site : pas d'auteur, pas de temps de lecture. Articles liés = même catégorie.
 - Classes CSS disponibles pour les articles HTML : `.moa`, `.comp-grid/.comp`, `.benev`, `.team-grid/.member` (avec `.member-role`/`.member-bio` cachés → modale au clic), `.team-verse`, plus tout Bootstrap (grid, `.ratio`…).
 
 ### Admin & accès
 - Connexion **par lien magique uniquement** (pas de mot de passe) : `App\Filament\Pages\Auth\Login` + `App\Support\MagicLink`. Lien à usage unique, 30 min, signé ; le lien mène à une page qui s'auto-soumet en JS (POST) puis redirige vers l'admin : l'utilisateur arrive directement connecté, et les antivirus des messageries (qui ouvrent les liens sans exécuter le JS) ne consomment pas le lien. Bouton de secours dans `<noscript>`.
+- **Connexion sans expiration** : cookie « se souvenir de moi » de 400 jours (plafond des navigateurs), renouvelé à chaque visite de l'admin (`App\Http\Middleware\KeepAdminLoggedIn`). Se déconnecter invalide le cookie sur tous les appareils.
+- Liste des articles : clic sur la ligne = édition ; la page publique s'ouvre seulement via « Voir » (l'action ne doit pas s'appeler `view`, sinon Filament en fait l'action du clic). Colonnes Auteur et « Modifié le ».
 - Liste blanche = table `users` (champ `is_active`). Rôles : **admin** (gère les utilisateurs) / **editor** (contenu). Les éditeurs publient directement.
+- **Création d'un utilisateur** (actif) dans l'admin → email d'accueil automatique avec un lien de connexion valable **7 jours** (`MagicLink::send($user, invitation: true)`), au lieu de 30 min pour un lien demandé depuis la page de connexion.
 - Premier admin créé par migration à partir de `ADMIN_EMAIL`.
 
 ### API (pour Claude Code)

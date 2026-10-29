@@ -1,4 +1,4 @@
-# Site Saint Joseph — Projet SJO2 (Le Rouret)
+# Site Saint Joseph (Le Rouret)
 
 Site du projet de centre paroissial et d'église Saint Joseph, porté par la Paroisse Saint-Arnoux
 (Association Diocésaine de Nice). Production : https://saint-joseph.saint-arnoux.fr/

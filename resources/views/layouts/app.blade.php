@@ -2,7 +2,7 @@
     $siteName = config('app.name');
     $pageTitle = isset($title) ? $title.' · '.$siteName : $siteName.' — Paroisse Saint-Arnoux · Le Rouret';
     $pageDescription = Str::limit(strip_tags($description ?? ($site['description'] ?? '')), 300);
-    $pageImage = $image ?? asset('images/og-default.jpg');
+    $pageImage = $image ?? asset('images/og-saint-joseph.jpg');
     $canonical = $canonical ?? url()->current();
 @endphp
 <!DOCTYPE html>

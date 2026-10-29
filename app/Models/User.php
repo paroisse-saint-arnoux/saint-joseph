@@ -20,6 +20,12 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    // Valeurs par défaut de la base, aussi sur un modèle tout juste créé.
+    protected $attributes = [
+        'role' => 'editor',
+        'is_active' => true,
+    ];
+
     protected function casts(): array
     {
         return [

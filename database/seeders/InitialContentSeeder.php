@@ -129,8 +129,8 @@ class InitialContentSeeder extends Seeder
     private function site(): array
     {
         return [
-            'description' => "Projet SJO2 : la Paroisse Saint-Arnoux bâtit l'église Saint Joseph et son centre paroissial au Rouret (Alpes-Maritimes). Découvrez le projet et soutenez la construction par un don.",
-            'about' => 'Projet SJO2 — centre paroissial et église porté par la Paroisse Saint-Arnoux, Association Diocésaine de Nice, au Rouret (06).',
+            'description' => "La Paroisse Saint-Arnoux bâtit l'église Saint Joseph et son centre paroissial au Rouret (Alpes-Maritimes). Découvrez le projet et soutenez la construction par un don.",
+            'about' => 'Centre paroissial et église Saint Joseph, portés par la Paroisse Saint-Arnoux, Association Diocésaine de Nice, au Rouret (06).',
             'address' => '30 Allée du Pré des Roures · 06650 Le Rouret',
             'don_url' => 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/',
             'facebook_url' => 'https://www.facebook.com/saint.joseph.le.rouret',

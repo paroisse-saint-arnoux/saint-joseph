@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
+use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Mail\MagicLinkMail;
 use App\Models\User;
 use App\Support\MagicLink;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class MagicLinkTest extends TestCase
@@ -59,5 +62,30 @@ class MagicLinkTest extends TestCase
 
         $this->post($url);
         $this->assertGuest();
+    }
+
+    public function test_admin_visit_renews_remember_cookie_for_400_days(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/admin');
+
+        $cookie = collect($response->headers->getCookies())
+            ->first(fn ($c) => str_starts_with($c->getName(), 'remember_web_'));
+        $this->assertNotNull($cookie);
+        $this->assertGreaterThan(now()->addDays(399)->timestamp, $cookie->getExpiresTime());
+    }
+
+    public function test_new_user_receives_an_invitation_link(): void
+    {
+        Mail::fake();
+        $this->actingAs(User::factory()->create(['role' => Role::Admin]));
+
+        Livewire::test(CreateUser::class)
+            ->fillForm(['name' => 'Marie', 'email' => 'marie@example.org', 'role' => 'editor', 'is_active' => true])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        Mail::assertSent(MagicLinkMail::class, fn (MagicLinkMail $mail) => $mail->hasTo('marie@example.org') && $mail->invitation);
     }
 }

@@ -17,7 +17,7 @@
                     <script>document.getElementById('magic-link-form').submit();</script>
                 @else
                     <h1>Lien expiré</h1>
-                    <p>Ce lien de connexion n'est plus valable : il a déjà servi ou a plus de {{ \App\Support\MagicLink::MINUTES }} minutes.</p>
+                    <p>Ce lien de connexion n'est plus valable : il a déjà servi ou il a expiré.</p>
                     <a class="cta-primary mt-3" href="{{ filament()->getLoginUrl() }}">Recevoir un nouveau lien</a>
                 @endif
             </div>

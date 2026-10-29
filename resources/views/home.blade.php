@@ -18,9 +18,9 @@
             '@context' => 'https://schema.org',
             '@type' => 'Church',
             'name' => 'Église Saint Joseph',
-            'alternateName' => 'Projet SJO2 — Paroisse Saint-Arnoux',
+            'alternateName' => 'Centre paroissial et église Saint Joseph — Paroisse Saint-Arnoux',
             'url' => route('home'),
-            'image' => asset('images/og-default.jpg'),
+            'image' => asset('images/og-saint-joseph.jpg'),
             'address' => ['@type' => 'PostalAddress', 'addressLocality' => 'Le Rouret', 'postalCode' => '06650', 'addressRegion' => 'Alpes-Maritimes', 'addressCountry' => 'FR'],
             'parentOrganization' => ['@type' => 'Organization', 'name' => 'Association Diocésaine de Nice', 'url' => 'https://nice.catholique.fr/'],
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}

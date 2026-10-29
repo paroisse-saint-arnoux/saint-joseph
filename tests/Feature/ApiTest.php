@@ -21,7 +21,7 @@ class ApiTest extends TestCase
 
     public function test_crud_on_articles(): void
     {
-        Sanctum::actingAs(User::factory()->create());
+        Sanctum::actingAs($user = User::factory()->create());
 
         $slug = $this->postJson('/api/articles', [
             'title' => 'Article HTML', 'category' => 'equipe', 'format' => 'html', 'body' => '<p>Bonjour</p>',
@@ -33,6 +33,7 @@ class ApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.status', 'published');
         $this->assertNotNull(Article::firstWhere('slug', $slug)->published_at);
+        $this->assertSame($user->id, Article::firstWhere('slug', $slug)->author_id);
 
         $this->postJson('/api/articles', ['title' => 'x', 'category' => 'inconnue'])->assertUnprocessable();
 

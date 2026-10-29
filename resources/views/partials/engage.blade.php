@@ -41,7 +41,7 @@
             <a class="cta-primary" href="{{ $donUrl }}" target="_blank" rel="noopener">Faire un don &rarr;</a>
             <div class="qr">
                 <img src="{{ asset('images/qr-code-don.png') }}" alt="QR code vers la page de don" width="72" height="72" loading="lazy">
-                <span>Scannez pour faire un don<br>Objet : <b>SJO2</b></span>
+                <span>Scannez pour<br>faire un don</span>
             </div>
         </aside>
     </div>
