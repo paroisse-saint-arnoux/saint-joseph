@@ -53,10 +53,4 @@ class ApiTest extends TestCase
         Storage::disk('public')->assertExists($path);
         $this->assertSame(1920, getimagesizefromstring(Storage::disk('public')->get($path))[0]);
     }
-
-    public function test_deploy_hook_requires_token(): void
-    {
-        $this->postJson('/api/deploy')->assertForbidden();
-        $this->postJson('/api/deploy', [], ['Authorization' => 'Bearer mauvais'])->assertForbidden();
-    }
 }

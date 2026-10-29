@@ -1,13 +1,8 @@
-# Déploiement sur O2Switch : build (Composer + Vite), envoi FTP, puis appel du hook
-# /api/deploy qui lance les migrations et reconstruit les caches (pas d'accès SSH).
-#
-# Secrets GitHub à définir (Settings > Secrets and variables > Actions) :
-#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
-#   DEPLOY_URL (ex. https://saint-joseph.saint-arnoux.fr), DEPLOY_TOKEN (= DEPLOY_TOKEN du .env serveur)
-# Facultatif (onglet « Variables ») : FTP_SERVER_DIR, dossier de destination relatif au
-# dossier d'arrivée du compte FTP (par défaut ./). Ne pas en faire un secret : sa valeur
-# serait masquée partout dans les logs.
-name: Déploiement
+# Publication : à chaque push sur main, tests puis mise à jour de la branche `production`
+# (= main + front compilé dans public/build, ignoré sur main).
+# Le serveur O2Switch récupère ensuite cette branche avec ./deploy.sh (à la main ou en cron) :
+# GitHub n'a aucun accès au serveur, aucun secret n'est nécessaire.
+name: Publication
 
 on:
   push:
@@ -15,12 +10,14 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy
+  group: publish
   cancel-in-progress: false
 
 jobs:
   tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
@@ -36,19 +33,13 @@ jobs:
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
 
-  deploy:
+  production:
     needs: tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
-
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-          extensions: gd, intl, zip, exif, bcmath
-
-      - name: Dépendances PHP (production)
-        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
       - uses: actions/setup-node@v5
         with:
@@ -58,37 +49,13 @@ jobs:
       - name: Compilation SCSS / JS
         run: npm ci && npm run build
 
-      - name: Envoi FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          # Chemin relatif au dossier d'arrivée du compte FTP (comme le site de la paroisse).
-          server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
-          protocol: ftps
-          # Seuls les fichiers modifiés sont envoyés. Les images ajoutées depuis l'admin
-          # (storage/app/public) ne sont jamais supprimées : elles ne viennent pas du dépôt.
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            node_modules/**
-            tests/**
-            legacy/**
-            docker/**
-            docker-compose.yml
-            .env
-            .env.*
-            phpunit.xml
-            storage/logs/**
-            storage/framework/cache/data/**
-            storage/framework/sessions/**
-            storage/framework/views/**
-            bootstrap/cache/*.php
-
-      - name: Migrations et caches
+      # Un seul commit au-dessus de main, poussé en force : le serveur fait un
+      # `git checkout -f -B production origin/production` (cf. deploy.sh).
+      - name: Branche production (main + public/build)
         run: |
-          curl --fail-with-body -sS -X POST \
-            -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \
-            "${{ secrets.DEPLOY_URL }}/api/deploy"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B production
+          git add -f public/build
+          git commit -q -m "Production : main ${GITHUB_SHA::7} + front compilé"
+          git push -f origin production

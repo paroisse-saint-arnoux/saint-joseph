@@ -44,11 +44,12 @@ et `ADMIN_EMAIL=votre@email` (premier administrateur).
    sous-domaine `saint-joseph.saint-arnoux.fr` vers le dossier `…/public` du site.
 2. **Brevo** : régénérer la clé API, créer une clé SMTP, authentifier le domaine `saint-arnoux.fr` (SPF/DKIM).
 3. **Cloudflare Turnstile** (facultatif) : créer un widget et récupérer les deux clés.
-4. Déposer par FTP un fichier `.env` à la racine du site, à partir de `.env.example`
-   (`APP_KEY` générée avec `php artisan key:generate --show`, base de données, SMTP Brevo,
-   `BREVO_API_KEY`, `DEPLOY_TOKEN` = `openssl rand -hex 32`, `ADMIN_EMAIL`).
-5. **GitHub** > Settings > Secrets and variables > Actions : `FTP_SERVER`, `FTP_USERNAME`,
-   `FTP_PASSWORD`, `FTP_SERVER_DIR`, `DEPLOY_URL` (https://saint-joseph.saint-arnoux.fr), `DEPLOY_TOKEN`.
-6. Pousser sur `main` : l'action GitHub teste, compile, envoie par FTP puis lance les migrations.
+4. **Serveur (SSH)** : cloner le dépôt dans le dossier du site, puis créer le `.env` à partir de
+   `.env.example` (`APP_KEY` générée avec `php artisan key:generate --show`, base de données,
+   SMTP Brevo, `BREVO_API_KEY`, `ADMIN_EMAIL`).
+5. Pousser sur `main` : l'action GitHub teste, compile le front et met à jour la branche `production`.
+6. Sur le serveur : `./deploy.sh` (bascule sur `production`, Composer, migrations, caches).
+   Pour automatiser : cron cPanel toutes les 5 minutes,
+   `cd ~/DOSSIER_DU_SITE && ./deploy.sh >> storage/logs/deploy.log 2>&1` (ne fait rien s'il n'y a pas de nouveauté).
 
-Ensuite, chaque push sur `main` déploie automatiquement.
+Ensuite, chaque push sur `main` est mis en ligne au prochain `./deploy.sh` (ou passage du cron).

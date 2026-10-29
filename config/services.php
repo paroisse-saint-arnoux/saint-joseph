@@ -54,10 +54,6 @@ return [
         'email' => env('CONTACT_EMAIL', 'information.saint-joseph@saint-arnoux.fr'),
     ],
 
-    'deploy' => [
-        'token' => env('DEPLOY_TOKEN'),
-    ],
-
     'admin_email' => env('ADMIN_EMAIL'),
 
 ];

@@ -1,7 +1,7 @@
 # CLAUDE.md — Site Saint Joseph (projet SJO2)
 
 Site du projet de centre paroissial et d'église Saint Joseph (Paroisse Saint-Arnoux, Le Rouret).
-Production : https://saint-joseph.saint-arnoux.fr/ — hébergement mutualisé **O2Switch** (LAMP, PHP 8.5, MySQL, **pas d'accès SSH**, déploiement par FTP).
+Production : https://saint-joseph.saint-arnoux.fr/ — hébergement mutualisé **O2Switch** (LAMP, PHP 8.5, MySQL, accès SSH depuis les IP autorisées dans cPanel, déploiement par `git` côté serveur).
 
 Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jour** à chaque nouvelle décision.
 
@@ -73,12 +73,14 @@ Les articles créés via l'API sont en **brouillon** par défaut ; renvoyer `pre
 ### Statistiques
 Matomo auto-hébergé https://matomo.saint-arnoux.fr/, site **ID 3**, `disableCookies` → pas de bandeau cookies. Chargé uniquement si `APP_ENV=production`.
 
-## Déploiement (O2Switch, sans SSH)
-- GitHub Action `.github/workflows/deploy.yml` sur push `main` : tests → `composer install --no-dev` → `npm run build` → **FTP** (FTP-Deploy-Action, envoi différentiel) → `POST /api/deploy` (Bearer `DEPLOY_TOKEN`) qui lance `migrate --force`, `storage:link`, `optimize`, `filament:optimize`.
-- **Toute évolution de schéma ou de contenu initial passe par une migration** (elles tournent automatiquement au déploiement). Le contenu de départ est posé par la migration `seed_initial_content` → `Database\Seeders\InitialContentSeeder` (idempotent, ignoré en tests).
+## Déploiement (O2Switch)
+- **Décision du 29/10/2026** : le serveur récupère le code avec git (pas de FTP, GitHub n'a aucun accès au serveur ; le SSH O2Switch est limité aux IP autorisées, incompatible avec les runners GitHub). Le FTP fichier par fichier était beaucoup trop lent (> 3 h pour ~18 000 fichiers).
+- GitHub Action `.github/workflows/deploy.yml` sur push `main` : tests → `npm run build` → branche **`production`** = main + `public/build` (ignoré sur main), un commit poussé en force. Aucun secret GitHub nécessaire.
+- Sur le serveur (npm absent, Composer présent), dans le dossier du site cloné depuis GitHub (dépôt public) : **`./deploy.sh`** → `git fetch` + `git checkout -f -B production origin/production`, `composer install --no-dev`, `migrate --force`, `storage:link`, `optimize`, `filament:optimize`, avec page de maintenance pendant l'opération. Ne fait rien si déjà à jour (`--force` pour tout relancer) → utilisable en cron cPanel. Variables `PHP=` / `COMPOSER=` si les binaires par défaut ne sont pas les bons.
+- **Toute évolution de schéma ou de contenu initial passe par une migration** (elles tournent à chaque déploiement). Le contenu de départ est posé par la migration `seed_initial_content` → `Database\Seeders\InitialContentSeeder` (idempotent, ignoré en tests).
 - Racine du sous-domaine à faire pointer sur `public/` dans cPanel (sinon `.htaccess` racine redirige vers `public/`).
 - Pas de worker : `QUEUE_CONNECTION=sync`, `CACHE_STORE=file`, sessions en base.
-- Secrets : jamais dans git. Clé Brevo, SMTP, `DEPLOY_TOKEN` uniquement dans le `.env` du serveur et les secrets GitHub. **La clé Brevo a circulé en clair : la régénérer avant la mise en production.**
+- Secrets : jamais dans git. Clé Brevo, SMTP uniquement dans le `.env` du serveur. **La clé Brevo a circulé en clair : la régénérer avant la mise en production.**
 
 ## Conventions de code
 - Code et commentaires en français pour ce qui est métier ; noms de classes/méthodes en anglais (Laravel).
