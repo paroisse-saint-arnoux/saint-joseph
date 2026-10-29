@@ -1,7 +1,7 @@
 # CLAUDE.md — Site Saint Joseph (projet SJO2)
 
 Site du projet de centre paroissial et d'église Saint Joseph (Paroisse Saint-Arnoux, Le Rouret).
-Production : https://saint-joseph.saint-arnoux.fr/ — hébergement mutualisé **O2Switch** (LAMP, PHP 8.5, MariaDB, **pas d'accès SSH**, déploiement par FTP).
+Production : https://saint-joseph.saint-arnoux.fr/ — hébergement mutualisé **O2Switch** (LAMP, PHP 8.5, MySQL, **pas d'accès SSH**, déploiement par FTP).
 
 Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jour** à chaque nouvelle décision.
 
@@ -16,7 +16,7 @@ Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jou
 ## Développement (Docker)
 
 ```bash
-docker compose up -d                       # app (PHP 8.5/Apache) :8080, MariaDB :3307, Mailpit :8025, DbGate :3000
+docker compose up -d                       # app (PHP 8.5/Apache) :8080, MySQL :3307, Mailpit :8025, DbGate :3000
 docker compose exec -u www-data app php artisan migrate
 docker compose exec -u www-data app php artisan test
 npm install && npm run dev                 # ou : docker compose --profile front up node
@@ -25,7 +25,7 @@ npm run build                              # build de production dans public/bui
 
 - La machine hôte n'a pas toutes les extensions PHP : **lancer PHP/Composer/artisan dans le conteneur** (`-u www-data`, `-e HOME=/tmp` pour Composer).
 - Emails en local : Mailpit http://localhost:8025 (liens magiques, formulaire de contact).
-- Base de données en local : DbGate http://localhost:3000 (connexion « SJO2 (MariaDB locale) » préconfigurée).
+- Base de données en local : DbGate http://localhost:3000 (connexion « SJO2 (MySQL locale) » préconfigurée).
 - Admin local : http://localhost:8080/admin — saisir l'email `ADMIN_EMAIL` du `.env`, le lien arrive dans Mailpit.
 - `legacy/` = ancien one-pager statique, gardé comme référence de style/contenu. Non déployé. Pourra être supprimé.
 

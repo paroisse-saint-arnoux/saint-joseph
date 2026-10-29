@@ -3,7 +3,7 @@
 Site du projet de centre paroissial et d'église Saint Joseph, porté par la Paroisse Saint-Arnoux
 (Association Diocésaine de Nice). Production : https://saint-joseph.saint-arnoux.fr/
 
-Laravel 13 · Filament 5 (administration) · SCSS + Bootstrap · MariaDB · hébergé sur O2Switch.
+Laravel 13 · Filament 5 (administration) · SCSS + Bootstrap · MySQL · hébergé sur O2Switch.
 Les choix techniques et fonctionnels sont détaillés dans [CLAUDE.md](CLAUDE.md).
 
 ## Mettre à jour le contenu (sans programmation)
@@ -40,7 +40,7 @@ et `ADMIN_EMAIL=votre@email` (premier administrateur).
 
 ## Mise en production (première fois)
 
-1. **cPanel O2Switch** : créer la base MariaDB et son utilisateur ; faire pointer la racine du
+1. **cPanel O2Switch** : créer la base MySQL et son utilisateur ; faire pointer la racine du
    sous-domaine `saint-joseph.saint-arnoux.fr` vers le dossier `…/public` du site.
 2. **Brevo** : régénérer la clé API, créer une clé SMTP, authentifier le domaine `saint-arnoux.fr` (SPF/DKIM).
 3. **Cloudflare Turnstile** (facultatif) : créer un widget et récupérer les deux clés.

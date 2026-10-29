@@ -16,17 +16,17 @@ services:
       - mailpit
 
   db:
-    # O2Switch utilise MariaDB.
-    image: mariadb:11.4
+    # O2Switch fournit MySQL.
+    image: mysql:8.4
     environment:
-      MARIADB_DATABASE: sjo2
-      MARIADB_USER: sjo2
-      MARIADB_PASSWORD: sjo2
-      MARIADB_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sjo2
+      MYSQL_USER: sjo2
+      MYSQL_PASSWORD: sjo2
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+      - mysqldata:/var/lib/mysql
 
   mailpit:
     image: axllent/mailpit
@@ -40,13 +40,13 @@ services:
       - "3000:3000"
     environment:
       CONNECTIONS: sjo2
-      LABEL_sjo2: SJO2 (MariaDB locale)
+      LABEL_sjo2: SJO2 (MySQL locale)
       SERVER_sjo2: db
       PORT_sjo2: 3306
       USER_sjo2: sjo2
       PASSWORD_sjo2: sjo2
       DATABASE_sjo2: sjo2
-      ENGINE_sjo2: mariadb@dbgate-plugin-mysql
+      ENGINE_sjo2: mysql@dbgate-plugin-mysql
     volumes:
       - dbgate:/root/.dbgate
     depends_on:
@@ -63,5 +63,5 @@ services:
     profiles: ["front"]
 
 volumes:
-  dbdata:
+  mysqldata:
   dbgate:
