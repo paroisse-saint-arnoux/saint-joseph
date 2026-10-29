@@ -30,7 +30,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci && npm run build
-      - run: cp .env.example .env && php artisan key:generate
+      - run: cp .env.example .env && php artisan key:generate && php artisan passport:keys
       - run: php artisan test
 
   production:
