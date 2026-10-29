@@ -2,8 +2,11 @@
 # /api/deploy qui lance les migrations et reconstruit les caches (pas d'accès SSH).
 #
 # Secrets GitHub à définir (Settings > Secrets and variables > Actions) :
-#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR (ex. /saint-joseph.saint-arnoux.fr/)
+#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
 #   DEPLOY_URL (ex. https://saint-joseph.saint-arnoux.fr), DEPLOY_TOKEN (= DEPLOY_TOKEN du .env serveur)
+# Facultatif (onglet « Variables ») : FTP_SERVER_DIR, dossier de destination relatif au
+# dossier d'arrivée du compte FTP (par défaut ./). Ne pas en faire un secret : sa valeur
+# serait masquée partout dans les logs.
 name: Déploiement
 
 on:
@@ -61,7 +64,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          # Chemin relatif au dossier d'arrivée du compte FTP (comme le site de la paroisse).
+          server-dir: ${{ vars.FTP_SERVER_DIR || './' }}
           protocol: ftps
           # Seuls les fichiers modifiés sont envoyés. Les images ajoutées depuis l'admin
           # (storage/app/public) ne sont jamais supprimées : elles ne viennent pas du dépôt.
