@@ -48,9 +48,10 @@
             <h1>La Croix du Pape<br>au Rouret<em> ?</em></h1>
             <div class="rule"></div>
             <div class="lead">
-                <p>Le 25 septembre 2026, 80 000 jeunes ont prié devant elle au Stade de France, avec le pape Léon XIV. Aujourd'hui, cette Croix cherche le lieu où elle sera dressée pour les générations qui viennent. Trente lieux de France sont candidats. Le choix se fait par vote public.</p>
-                <p><b>Un seul la planterait avant les murs de son église : le nôtre.</b> Sur le terrain où le diocèse de Nice bâtit l'église Saint Joseph, elle serait le premier signe visible du chantier et le lieu de prière de la communauté pendant toute la construction, avant de prendre sa place définitive sur le parvis.</p>
-                <p>Elle ne rejoindrait pas un patrimoine. Elle en fonderait un.</p>
+                <p>Le 25 septembre 2026, 80 000 jeunes ont prié devant elle au Stade de France, avec le pape Léon XIV. Aujourd'hui, cette Croix cherche le lieu où elle sera dressée pour les générations qui viennent. Le choix se fait par vote parmi 30 candidats en France.</p>
+                <p><b>Un seul projet la planterait avant de construire les murs de son église&nbsp;: le nôtre&nbsp;!</b></p>
+                <p>Sur le terrain où nous bâtissons l'église Saint Joseph, elle serait le premier signe visible du chantier et le lieu de prière de la communauté pendant toute la construction, avant de prendre sa place définitive sur le parvis.</p>
+                <p>Votez maintenant et partagez massivement cette page afin que notre candidature soit retenue&nbsp;!</p>
             </div>
             <div class="dates">
                 <div><b>9 nov.</b>ouverture du vote</div>

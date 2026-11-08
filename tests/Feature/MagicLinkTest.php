@@ -76,6 +76,28 @@ class MagicLinkTest extends TestCase
         $this->assertGreaterThan(now()->addDays(399)->timestamp, $cookie->getExpiresTime());
     }
 
+    public function test_remember_cookie_logs_back_in_after_the_session_expired(): void
+    {
+        // Compte sans mot de passe (lien magique) : le cookie doit suffire quand la session a expiré.
+        $user = User::factory()->create(['password' => null]);
+        $this->post($this->sendAndGetUrl($user));
+        $this->assertAuthenticatedAs($user);
+
+        $cookie = collect($this->get('/admin')->headers->getCookies())
+            ->first(fn ($c) => str_starts_with($c->getName(), 'remember_web_'));
+        $this->assertNotNull($cookie);
+
+        // Nouvelle session (navigateur rouvert après expiration) avec seulement le cookie « se souvenir de moi ».
+        $this->app['auth']->forgetGuards();
+        $this->flushSession();
+        $this->withUnencryptedCookie($cookie->getName(), $cookie->getValue())->get('/admin')->assertOk();
+        $this->assertAuthenticatedAs($user);
+
+        // Le mot de passe vide ne permet jamais de se connecter.
+        $this->app['auth']->forgetGuards();
+        $this->assertFalse(auth()->validate(['email' => $user->email, 'password' => '']));
+    }
+
     public function test_new_user_receives_an_invitation_link(): void
     {
         Mail::fake();

@@ -42,6 +42,18 @@ class User extends Authenticatable implements FilamentUser, OAuthenticatable
     }
 
     /**
+     * Connexion par lien magique uniquement : les comptes n'ont pas de mot de passe (null). Or Laravel refuse
+     * le cookie « se souvenir de moi » d'un utilisateur dont le mot de passe n'est pas une chaîne : à chaque
+     * expiration de la session, on était déconnecté de l'admin. Une chaîne vide rétablit le cookie (signé avec
+     * `?? ''` par Laravel, donc les cookies déjà posés restent valables) et ne permet aucune connexion par
+     * mot de passe (Hash::check refuse toujours un hash vide).
+     */
+    public function getAuthPassword(): string
+    {
+        return (string) $this->password;
+    }
+
+    /**
      * Enregistre une date d'activité (last_seen_at, last_mcp_at) au plus toutes les 5 minutes,
      * sans toucher à updated_at.
      */
