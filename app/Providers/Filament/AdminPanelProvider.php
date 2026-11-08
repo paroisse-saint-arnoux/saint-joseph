@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\KeepAdminLoggedIn;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -11,7 +12,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Page;
 use Filament\View\PanelsRenderHook;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -44,10 +44,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->darkMode(false)
             ->sidebarCollapsibleOnDesktop()
+            // Ordre du menu : Stats, Contenu, Consultation, Administration.
+            ->navigationGroups(['Stats', 'Contenu', 'Consultation', 'Administration'])
             ->navigationItems([
                 NavigationItem::make('Voir le site')
                     ->url('/', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->group('Contenu')
                     ->sort(100),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

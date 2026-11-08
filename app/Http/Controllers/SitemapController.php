@@ -19,6 +19,7 @@ class SitemapController extends Controller
                 ->map(fn (Category $c) => ['loc' => route('articles.category', $c), 'lastmod' => $articles->where('category', $c)->max('updated_at')]),
             ...$articles->map(fn (Article $a) => ['loc' => $a->url(), 'lastmod' => $a->updated_at]),
             ['loc' => route('contact'), 'lastmod' => null],
+            ['loc' => route('croix'), 'lastmod' => null],
         ]);
 
         return response()->view('sitemap', ['urls' => $urls])->header('Content-Type', 'application/xml');

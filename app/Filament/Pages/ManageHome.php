@@ -23,7 +23,9 @@ class ManageHome extends SettingsPage
 
     protected static ?string $slug = 'page-accueil';
 
-    protected static ?int $navigationSort = 3;
+    protected static string|\UnitEnum|null $navigationGroup = 'Contenu';
+
+    protected static ?int $navigationSort = 1;
 
     protected array $settingKeys = ['home'];
 

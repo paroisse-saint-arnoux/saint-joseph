@@ -35,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(2000)->by('ip|'.$request->ip()),
         ]);
 
+        // Page /croix : partagée par WhatsApp, souvent ouverte depuis le même réseau (paroisse, lycée).
+        RateLimiter::for('croix-signup', fn (Request $request) => [
+            Limit::perMinutes(10, 200)->by('croix-ip|'.$request->ip()),
+            Limit::perMinutes(10, 5)->by('croix-email|'.mb_strtolower(trim((string) $request->input('email')))),
+        ]);
+
         // Connecteur Claude (OAuth) : page « Autoriser Claude » aux couleurs du site.
         Passport::authorizationView('mcp.authorize');
         // Jeton d'accès court, renouvelé automatiquement par Claude ; reconnexion nécessaire après un an sans usage.

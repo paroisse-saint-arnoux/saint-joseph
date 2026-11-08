@@ -14,13 +14,15 @@ class ManageSite extends SettingsPage
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
-    protected static ?string $navigationLabel = 'Réglages du site';
+    protected static ?string $navigationLabel = 'Autres textes du site';
 
-    protected static ?string $title = 'Réglages du site';
+    protected static ?string $title = 'Autres textes du site';
 
     protected static ?string $slug = 'reglages';
 
-    protected static ?int $navigationSort = 4;
+    protected static string|\UnitEnum|null $navigationGroup = 'Contenu';
+
+    protected static ?int $navigationSort = 3;
 
     protected array $settingKeys = ['site', 'legal'];
 

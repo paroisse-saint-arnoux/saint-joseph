@@ -1,3 +1,4 @@
+@use('App\Support\Croix')
 @use('App\Support\Images')
 @use('App\Support\Markdown')
 @use('App\Support\Text')
@@ -10,7 +11,14 @@
     $statusLabels = ['done' => 'Réalisé', 'now' => 'En cours', 'todo' => 'À venir'];
 @endphp
 
-@extends('layouts.app', ['bodyClass' => 'page-home'])
+@extends('layouts.app', ['bodyClass' => 'page-home'.(Croix::showHomeBanner() ? ' has-top-banner' : '')])
+
+@section('before-header')
+    @if (Croix::showHomeBanner())
+        {{-- Concours S.O.S Calvaires, pendant le vote (dates : Admin > Croix du Pape). --}}
+        <a class="top-banner" href="{{ route('croix') }}">La Croix du Pape au Rouret ? <b>Votez&nbsp;→</b></a>
+    @endif
+@endsection
 
 @push('head')
     <script type="application/ld+json">

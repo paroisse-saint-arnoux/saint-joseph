@@ -1,0 +1,176 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\Role;
+use App\Filament\Pages\ManageBrevo;
+use App\Filament\Pages\ManageCroix;
+use App\Filament\Widgets\Campaigns;
+use App\Models\CroixSignup;
+use App\Models\CroixVisitor;
+use App\Models\User;
+use App\Support\Croix;
+use App\Support\SpamGuard;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
+use Livewire\Livewire;
+use Tests\TestCase;
+
+class CroixTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private const BEFORE = '2026-11-08 18:00';
+
+    private const OPEN = '2026-11-10 09:00';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['services.brevo.key' => 'brevo-key', 'services.brevo.croix_list_id' => 7]);
+    }
+
+    private function signup(array $data = [])
+    {
+        $this->travel(-10)->seconds();
+        $t = SpamGuard::timestamp();
+        $this->travel(10)->seconds();
+
+        return $this->post('/croix', $data + [
+            'first_name' => 'Marie', 'last_name' => 'Martin', 'email' => 'Marie@Example.com', 'phone' => '06 12 34 56 78',
+            'consent_email' => '1', 'consent_sms' => '1', 'source' => 'affiche', '_t' => $t,
+        ]);
+    }
+
+    public function test_before_the_vote_the_page_collects_contacts_and_sends_them_to_brevo(): void
+    {
+        $this->travelTo(Carbon::parse(self::BEFORE));
+        Http::fake(['api.brevo.com/*' => Http::response(['id' => 1], 201)]);
+
+        $this->get('/croix?utm_source=affiche&utm_medium=print&utm_campaign=croix')->assertOk()
+            ->assertSee('Recevez le lien de vote')
+            ->assertDontSee('Je vote maintenant')
+            ->assertDontSee('SJO2')
+            ->assertDontSee('Saint-Joseph II');
+        $this->assertDatabaseHas('croix_visitors', ['source' => 'affiche', 'visits' => 1]);
+
+        $this->signup()->assertRedirect('/croix');
+        $this->followingRedirects()->get('/croix')->assertOk();
+
+        $signup = CroixSignup::sole();
+        $this->assertSame('marie@example.com', $signup->email);
+        $this->assertSame('+33612345678', $signup->phone);
+        $this->assertNotNull($signup->brevo_synced_at);
+        $this->assertNotNull(CroixVisitor::whereNotNull('signed_up_at')->first());
+
+        Http::assertSent(fn (Request $r) => $r->url() === 'https://api.brevo.com/v3/contacts'
+            && $r['email'] === 'marie@example.com'
+            && $r['listIds'] === [7]
+            && $r['attributes'] === ['PRENOM' => 'Marie', 'NOM' => 'Martin', 'SMS' => '+33612345678']
+            && $r->header('api-key') === ['brevo-key']);
+    }
+
+    public function test_a_mobile_number_requires_the_sms_consent(): void
+    {
+        $this->travelTo(Carbon::parse(self::BEFORE));
+        Http::fake();
+
+        $this->signup(['consent_sms' => null])->assertSessionHasErrors('consent_sms');
+        $this->signup(['consent_email' => null])->assertSessionHasErrors('consent_email');
+        $this->assertSame(0, CroixSignup::count());
+
+        $this->signup(['phone' => '', 'consent_sms' => null])->assertSessionHasNoErrors();
+        Http::assertSent(fn (Request $r) => ! isset($r['attributes']['SMS']));
+    }
+
+    public function test_brevo_rejecting_the_phone_number_retries_without_it(): void
+    {
+        $this->travelTo(Carbon::parse(self::BEFORE));
+        Http::fakeSequence('api.brevo.com/*')
+            ->push(['code' => 'duplicate_parameter', 'message' => 'SMS is already associated with another Contact'], 400)
+            ->push(['id' => 1], 201);
+
+        $this->signup()->assertRedirect('/croix');
+
+        $this->assertNotNull(CroixSignup::sole()->brevo_synced_at);
+        Http::assertSentCount(2);
+    }
+
+    public function test_bots_and_link_previews_are_not_counted(): void
+    {
+        $this->withHeader('User-Agent', 'WhatsApp/2.23.20 A')->get('/croix')->assertOk();
+        $this->withHeader('User-Agent', 'Googlebot/2.1')->get('/croix')->assertOk();
+
+        $this->assertSame(0, CroixVisitor::count());
+    }
+
+    public function test_during_the_vote_the_form_redirects_to_the_vote_site_and_clicks_are_counted(): void
+    {
+        $this->travelTo(Carbon::parse(self::OPEN));
+        Http::fake(['api.brevo.com/*' => Http::response(['id' => 1], 201)]);
+
+        $this->get('/croix')->assertOk()->assertSee('Je vote maintenant')->assertSee(route('croix.vote'));
+
+        $this->signup()->assertRedirect(route('croix.vote'));
+        $this->get('/croix/vote?utm_source=brevo')->assertRedirect('https://vote.soscalvaires.org/');
+
+        $funnel = Croix::funnel()['total'];
+        $this->assertSame(1, $funnel['visitors']);
+        $this->assertSame(1, $funnel['signups']);
+        $this->assertSame(1, $funnel['votes']); // le lien direct, sans cookie, compte un nouveau navigateur
+        $this->assertSame(1, $funnel['direct_votes']);
+    }
+
+    public function test_home_banner_is_shown_only_during_the_vote(): void
+    {
+        $this->travelTo(Carbon::parse(self::BEFORE));
+        $this->get('/')->assertOk()->assertDontSee('top-banner');
+
+        $this->travelTo(Carbon::parse(self::OPEN));
+        $this->get('/')->assertOk()->assertSee('La Croix du Pape au Rouret ?')->assertSee('href="'.route('croix').'"', false);
+
+        $this->travelTo(Carbon::parse('2026-12-01 08:00'));
+        $this->get('/')->assertOk()->assertDontSee('top-banner');
+        $this->get('/croix')->assertOk()->assertSee('Le vote est clos');
+    }
+
+    public function test_admin_pages_show_contest_and_brevo_statistics(): void
+    {
+        $this->travelTo(Carbon::parse(self::OPEN));
+        $this->actingAs(User::factory()->create(['role' => Role::Admin]));
+        CroixVisitor::create(['token' => 'a', 'source' => 'messe', 'visits' => 3, 'visited_at' => now(), 'signed_up_at' => now()]);
+        CroixSignup::create(['email' => 'jean@example.com', 'first_name' => 'Jean', 'source' => 'messe']);
+        config(['services.matomo' => ['url' => 'https://matomo.test/', 'site_id' => 3, 'token' => 'secret']]);
+
+        Http::fake([
+            'api.brevo.com/v3/contacts/lists*' => Http::response(['lists' => [
+                ['id' => 2, 'name' => 'Newsletter', 'uniqueSubscribers' => 120, 'totalBlacklisted' => 3],
+                ['id' => 7, 'name' => 'Croix du Pape', 'uniqueSubscribers' => 40, 'totalBlacklisted' => 0],
+            ], 'count' => 2]),
+            'api.brevo.com/v3/contacts*' => Http::response(['contacts' => [
+                ['email' => 'a@example.com', 'createdAt' => now()->subDays(2)->toIso8601String(), 'listIds' => [7]],
+                ['email' => 'b@example.com', 'createdAt' => now()->subDays(20)->toIso8601String(), 'listIds' => [2, 7]],
+            ], 'count' => 2]),
+            'api.brevo.com/v3/emailCampaigns*' => Http::response(['campaigns' => [[
+                'id' => 12, 'name' => 'Lettre de novembre', 'subject' => 'Des nouvelles du chantier', 'sentDate' => now()->subDays(3)->toIso8601String(),
+                'statistics' => ['globalStats' => ['sent' => 100, 'delivered' => 98, 'uniqueViews' => 45, 'uniqueClicks' => 12, 'unsubscriptions' => 1]],
+            ]]]),
+            'api.brevo.com/v3/smtp/statistics/reports*' => Http::response(['reports' => [
+                ['date' => now()->toDateString(), 'requests' => 9, 'delivered' => 9, 'uniqueOpens' => 4],
+            ]]),
+            'matomo.test/*' => Http::response([['label' => 'lettre de novembre', 'nb_visits' => 31, 'nb_actions' => 70]]),
+        ]);
+
+        $this->get('/admin/croix')->assertOk()->assertSee('Le vote est ouvert')->assertSee('messe')->assertDontSee('Liens à diffuser')->assertSee('jean@example.com');
+        $this->get('/admin/brevo')->assertOk()
+            ->assertSee('Croix du Pape')->assertSee('+2')     // 2 nouveaux contacts en 30 jours dans la liste 7
+            ->assertSee('Lettre de novembre')->assertSee('45,9 %'); // 45 ouvertures / 98 délivrés
+
+        Livewire::test(Campaigns::class)->assertSee('lettre de novembre')->assertSee('31')->assertSee('98 délivrés');
+        Livewire::test(ManageCroix::class)->callAction('settings', ['opens_at' => '2026-11-09 08:00', 'closes_at' => '2026-11-30 23:59', 'vote_url' => 'https://vote.soscalvaires.org/', 'home_banner' => false]);
+        $this->assertFalse(Croix::showHomeBanner());
+        Livewire::test(ManageBrevo::class)->callAction('refresh')->assertOk();
+    }
+}

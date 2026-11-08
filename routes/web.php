@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CroixController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LibraryArchiveController;
 use App\Http\Controllers\LibrarySearchController;
@@ -34,6 +35,11 @@ Route::prefix('consultation')->name('consultation.')->controller(ConsultationCon
     Route::get('/projet/{project}', 'show')->name('project');
     Route::post('/projet/{project}', 'save')->middleware('throttle:consultation-save')->name('save');
 });
+
+// Concours S.O.S Calvaires « Que va devenir la Croix du Pape ? ».
+Route::get('/croix', [CroixController::class, 'show'])->name('croix');
+Route::post('/croix', [CroixController::class, 'store'])->middleware('throttle:croix-signup')->name('croix.store');
+Route::get('/croix/vote', [CroixController::class, 'vote'])->name('croix.vote');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 

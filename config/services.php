@@ -40,6 +40,8 @@ return [
         'list_id' => (int) env('BREVO_LIST_ID', 2),
         // Liste « Consultation paroisse » : personnes ayant répondu à la consultation sur les projets d'architecture.
         'consultation_list_id' => (int) env('BREVO_CONSULTATION_LIST_ID', 6),
+        // Liste « Croix du Pape » : personnes inscrites sur /croix pour recevoir le lien de vote du concours S.O.S Calvaires.
+        'croix_list_id' => (int) env('BREVO_CROIX_LIST_ID', 7),
     ],
 
     'turnstile' => [

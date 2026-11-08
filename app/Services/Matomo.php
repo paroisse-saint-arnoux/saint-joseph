@@ -57,6 +57,34 @@ class Matomo
         ])->all();
     }
 
+    /**
+     * Campagnes (liens marqués utm_campaign / mtm_campaign, dont les emails Brevo) sur les $days derniers jours,
+     * avec leurs mots-clés (utm_term / mtm_kwd : ex. la source d'un lien vers /croix).
+     *
+     * @return array<int, array{label: string, visits: int, actions: int, bounce: ?string, keywords: array<string, int>}>
+     */
+    public function campaigns(int $days = 30, int $limit = 10): array
+    {
+        $data = $this->call('Referrers.getCampaigns', [
+            'period' => 'range',
+            'date' => Carbon::today()->subDays($days - 1)->toDateString().','.Carbon::today()->toDateString(),
+            'expanded' => 1,
+            'filter_limit' => $limit,
+            'filter_sort_column' => 'nb_visits',
+        ]);
+
+        return collect($data)->map(fn ($row) => [
+            'label' => trim((string) ($row['label'] ?? '')),
+            'visits' => (int) ($row['nb_visits'] ?? 0),
+            'actions' => (int) ($row['nb_actions'] ?? 0),
+            'bounce' => $row['bounce_rate'] ?? null,
+            'keywords' => collect($row['subtable'] ?? [])
+                ->filter(fn ($k) => filled($k['label'] ?? null) && ($k['label'] ?? '') !== '-')
+                ->mapWithKeys(fn ($k) => [(string) $k['label'] => (int) ($k['nb_visits'] ?? 0)])
+                ->all(),
+        ])->all();
+    }
+
     private function call(string $method, array $params): array
     {
         if (! $this->isConfigured()) {

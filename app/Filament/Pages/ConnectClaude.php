@@ -24,7 +24,9 @@ class ConnectClaude extends Page
 
     protected static ?string $slug = 'connecter-claude';
 
-    protected static ?int $navigationSort = 5;
+    protected static string|\UnitEnum|null $navigationGroup = 'Administration';
+
+    protected static ?int $navigationSort = 20;
 
     protected string $view = 'filament.pages.connect-claude';
 

@@ -39,7 +39,9 @@ class LibraryImageResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static ?int $navigationSort = 2;
+    protected static string|\UnitEnum|null $navigationGroup = 'Contenu';
+
+    protected static ?int $navigationSort = 4;
 
     public static function getBreadcrumb(): string
     {
