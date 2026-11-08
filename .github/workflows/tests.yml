@@ -1,0 +1,36 @@
+# Contrôle à chaque push : tests, et front compilé (public/build, versionné) à jour.
+# La mise en ligne se fait à la main sur le serveur avec ./deploy.sh (git pull de main) : GitHub n'a aucun accès au serveur.
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: gd, intl, zip, exif, bcmath, pdo_sqlite
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci && npm run build
+      # Le serveur n'a pas npm : public/build doit être recompilé et commité avec les changements SCSS/JS.
+      - name: Front compilé à jour
+        run: |
+          if [ -n "$(git status --porcelain public/build)" ]; then
+            git status --short public/build
+            echo "::error::public/build n'est pas à jour : lancer « npm run build » et commiter public/build."
+            exit 1
+          fi
+      - run: cp .env.example .env && php artisan key:generate && php artisan passport:keys
+      - run: php artisan test

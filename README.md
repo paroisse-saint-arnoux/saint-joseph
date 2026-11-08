@@ -47,9 +47,14 @@ et `ADMIN_EMAIL=votre@email` (premier administrateur).
 4. **Serveur (SSH)** : cloner le dépôt dans le dossier du site, puis créer le `.env` à partir de
    `.env.example` (`APP_KEY` générée avec `php artisan key:generate --show`, base de données,
    SMTP Brevo, `BREVO_API_KEY`, `ADMIN_EMAIL`).
-5. Pousser sur `main` : l'action GitHub teste, compile le front et met à jour la branche `production`.
-6. Sur le serveur : `./deploy.sh` (bascule sur `production`, Composer, migrations, caches).
-   Pour automatiser : cron cPanel toutes les 5 minutes,
-   `cd ~/DOSSIER_DU_SITE && ./deploy.sh >> storage/logs/deploy.log 2>&1` (ne fait rien s'il n'y a pas de nouveauté).
+5. Sur le serveur : `./deploy.sh` (git pull de `main`, Composer, migrations, caches).
+   Si la commande `php` n'est pas en version 8.5 : `PHP=/opt/alt/php85/usr/bin/php ./deploy.sh`.
 
-Ensuite, chaque push sur `main` est mis en ligne au prochain `./deploy.sh` (ou passage du cron).
+## Mettre à jour le site
+
+1. **En local** : après une modification SCSS ou JS, lancer `npm run build` et commiter `public/build` avec le reste
+   (le serveur n'a pas npm). L'action GitHub **Tests** échoue si `public/build` n'est pas à jour, ou si un test échoue.
+2. Fusionner dans **`main`** et pousser, en attendant que l'action soit au vert.
+3. **Sur le serveur**, en SSH : `cd ~/DOSSIER_DU_SITE && ./deploy.sh`.
+   Page de maintenance de quelques secondes, puis `git pull --ff-only origin main`, `composer install --no-dev`,
+   `migrate --force`, lien `storage`, clés OAuth (une fois), nettoyage de la bibliothèque, caches.
