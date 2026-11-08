@@ -2,11 +2,13 @@
 
 namespace App\Support;
 
-use App\Models\CroixSignup;
 use App\Models\CroixVisitor;
 use App\Models\Setting;
 use App\Services\Brevo;
 use Illuminate\Http\Request;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +28,9 @@ use Illuminate\Support\Str;
 class Croix
 {
     public const COOKIE = 'croix';
+
+    /** Pays essayés, dans l'ordre, pour un numéro écrit sans indicatif. */
+    private const PHONE_REGIONS = ['FR', 'GP', 'MQ', 'GF', 'RE', 'YT', 'PM', 'BL', 'MF'];
 
     /** Robots et aperçus de liens (WhatsApp, Facebook…) : pas comptés comme visiteurs. */
     private const BOTS = '/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|discord|skype|curl|wget|python|headless|lighthouse|monitor/i';
@@ -126,71 +131,59 @@ class Croix
     }
 
     /**
-     * Enregistre les coordonnées (une ligne par email, mise à jour si la personne revient)
-     * et les envoie à Brevo après l'envoi de la réponse.
+     * Envoie les coordonnées à Brevo (liste du concours), sans rien en garder sur le site : seul le visiteur
+     * anonyme est marqué « a laissé ses coordonnées » pour les statistiques. Appel immédiat, pour pouvoir
+     * prévenir la personne si Brevo ne répond pas.
      */
-    public static function signup(Request $request, array $data): CroixSignup
-    {
-        $visitor = self::visitor($request);
-        $email = mb_strtolower(trim($data['email']));
-        $signup = CroixSignup::firstOrNew(['email' => $email]);
-
-        $signup->fill(array_filter([
-            'first_name' => self::clean($data['first_name'] ?? null),
-            'last_name' => self::clean($data['last_name'] ?? null),
-            'phone' => self::normalizePhone($data['phone'] ?? null),
-        ]) + [
-            'visitor_id' => $signup->visitor_id ?? $visitor?->id,
-            'consent_sms' => $signup->consent_sms || ! empty($data['consent_sms']),
-            'source' => $signup->source ?? $visitor?->source ?? self::source($request),
-        ]);
-        $dirty = $signup->isDirty(['first_name', 'last_name', 'phone']);
-        $signup->save();
-
-        if ($visitor && ! $visitor->signed_up_at) {
-            $visitor->forceFill(['signed_up_at' => now()])->save();
-        }
-
-        if ($dirty || ! $signup->brevo_synced_at) {
-            dispatch(fn () => self::syncToBrevo($signup))->afterResponse();
-        }
-
-        return $signup;
-    }
-
-    /** Ajoute le contact à la liste Brevo du concours. Si Brevo refuse le numéro (invalide, déjà pris), on réessaie sans. */
-    public static function syncToBrevo(CroixSignup $signup): bool
+    public static function signup(Request $request, array $data): bool
     {
         $brevo = app(Brevo::class);
+        $email = mb_strtolower(trim($data['email']));
         $list = (int) config('services.brevo.croix_list_id');
-        $attributes = array_filter(['PRENOM' => $signup->first_name, 'NOM' => $signup->last_name]);
+        $attributes = array_filter(['PRENOM' => self::clean($data['first_name'] ?? null), 'NOM' => self::clean($data['last_name'] ?? null)]);
+        $phone = ! empty($data['consent_sms']) ? self::normalizePhone($data['phone'] ?? null) : null;
 
-        $ok = $signup->phone && $signup->consent_sms
-            ? $brevo->addContact($signup->email, $list, $attributes + ['SMS' => $signup->phone])
-                || $brevo->addContact($signup->email, $list, $attributes)
-            : $brevo->addContact($signup->email, $list, $attributes);
+        // Si Brevo refuse le numéro (déjà associé à un autre contact…), on inscrit quand même l'adresse, sans le numéro.
+        $ok = $phone
+            ? $brevo->addContact($email, $list, $attributes + ['SMS' => $phone]) || $brevo->addContact($email, $list, $attributes)
+            : $brevo->addContact($email, $list, $attributes);
 
-        if ($ok) {
-            $signup->forceFill(['brevo_synced_at' => now()])->save();
+        $visitor = self::visitor($request);
+        if ($ok && $visitor && ! $visitor->signed_up_at) {
+            $visitor->forceFill(['signed_up_at' => now()])->save();
         }
 
         return $ok;
     }
 
-    /** Numéro au format international attendu par Brevo : 06 12 34 56 78 → +33612345678. */
+    /**
+     * Numéro au format international E.164 attendu par Brevo, la France par défaut :
+     * 06 12 34 56 78, 6.12.34.56.78, +33 (0)6 12 34 56 78, 0033 6… → +33612345678 ; +32 470 12 34 56 → +32470123456.
+     * Null si le champ est vide ou si le numéro n'existe pas (libphonenumber, métadonnées de Google).
+     */
     public static function normalizePhone(?string $phone): ?string
     {
-        $digits = preg_replace('/[^\d+]/', '', (string) $phone);
-        if ($digits === '') {
+        $phone = trim((string) $phone);
+        if ($phone === '') {
             return null;
         }
 
-        return match (true) {
-            str_starts_with($digits, '+') => '+'.ltrim($digits, '+'),
-            str_starts_with($digits, '00') => '+'.substr($digits, 2),
-            str_starts_with($digits, '0') && strlen($digits) === 10 => '+33'.substr($digits, 1),
-            default => $digits,
-        };
+        $util = PhoneNumberUtil::getInstance();
+        // France d'abord, puis l'outre-mer (0690… Guadeloupe, 0696… Martinique, 0694… Guyane, 0692… Réunion, 0639… Mayotte),
+        // dont les numéros s'écrivent aussi avec un 0 mais ont leur propre indicatif. Un numéro écrit avec + ou 00 garde le sien.
+        foreach (self::PHONE_REGIONS as $region) {
+            try {
+                // « (0) » après l'indicatif, souvent recopié : +33 (0)6…
+                $number = $util->parse(str_replace('(0)', '', $phone), $region);
+            } catch (NumberParseException) {
+                return null;
+            }
+            if ($util->isValidNumber($number)) {
+                return $util->format($number, PhoneNumberFormat::E164);
+            }
+        }
+
+        return null;
     }
 
     private static function clean(?string $value): ?string
@@ -216,7 +209,7 @@ class Croix
         $total = collect(['visitors', 'signups', 'votes', 'direct_votes', 'pageviews'])->mapWithKeys(fn ($k) => [$k => $sources->sum($k)])->all();
 
         return [
-            'total' => $total + ['contacts' => CroixSignup::count(), 'unsynced' => CroixSignup::whereNull('brevo_synced_at')->count()],
+            'total' => $total,
             'sources' => $sources->all(),
         ];
     }

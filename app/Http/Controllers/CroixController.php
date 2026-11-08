@@ -25,13 +25,16 @@ class CroixController extends Controller
             'first_name' => ['nullable', 'string', 'max:80'],
             'last_name' => ['nullable', 'string', 'max:80'],
             'email' => ['required', 'email', 'max:190'],
-            'phone' => ['nullable', 'string', 'max:30', 'regex:/^[\d\s.+()-]{8,}$/'],
+            'phone' => ['nullable', 'string', 'max:30', function ($attribute, $value, $fail) {
+                if (! Croix::normalizePhone($value)) {
+                    $fail('Ce numéro de mobile ne semble pas valide (exemple : 06 12 34 56 78, ou +32 470 12 34 56 pour un numéro étranger).');
+                }
+            }],
             'consent_email' => ['accepted'],
             'consent_sms' => [filled($request->input('phone')) ? 'accepted' : 'nullable'],
         ], [
             'email.required' => 'Merci d\'indiquer votre adresse e-mail.',
             'email.email' => 'Cette adresse e-mail ne semble pas complète (exemple : prenom.nom@gmail.com).',
-            'phone.regex' => 'Ce numéro de mobile ne semble pas complet (exemple : 06 12 34 56 78).',
             'consent_email.accepted' => 'Merci de cocher la case pour recevoir le lien de vote par e-mail.',
             'consent_sms.accepted' => 'Cochez la case pour recevoir le SMS, ou laissez le numéro de mobile vide.',
         ]);
@@ -40,11 +43,16 @@ class CroixController extends Controller
             return back()->withInput()->withErrors(['email' => 'Merci de réessayer dans quelques secondes.']);
         }
 
-        Croix::signup($request, $data);
+        $ok = Croix::signup($request, $data);
 
-        // Pendant le vote : direct vers le site de vote (en passant par /croix/vote, qui compte le clic).
+        // Pendant le vote : direct vers le site de vote (en passant par /croix/vote, qui compte le clic),
+        // même si Brevo n'a pas répondu : voter passe avant tout (l'échec est consigné dans le journal).
         if (Croix::state() === 'open') {
             return redirect()->route('croix.vote');
+        }
+
+        if (! $ok) {
+            return back()->withInput()->withErrors(['email' => 'L\'inscription n\'a pas pu aboutir. Merci de réessayer dans quelques minutes.']);
         }
 
         return redirect()->route('croix')->with('croix_saved', true);

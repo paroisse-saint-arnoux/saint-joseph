@@ -3,7 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\Pages\CroixDailyChart;
-use App\Models\CroixSignup;
+use App\Services\Brevo;
 use App\Models\Setting;
 use App\Support\Croix;
 use Filament\Actions\Action;
@@ -39,7 +39,9 @@ class ManageCroix extends Page
             'opensAt' => Croix::opensAt(),
             'closesAt' => Croix::closesAt(),
             'funnel' => Croix::funnel(),
-            'signups' => CroixSignup::latest()->limit(100)->get(),
+            // Les coordonnées ne sont gardées que dans Brevo : nombre de contacts de la liste du concours.
+            'brevoContacts' => collect(app(Brevo::class)->lists())->firstWhere('id', (int) config('services.brevo.croix_list_id'))['subscribers'] ?? null,
+            'brevoList' => (int) config('services.brevo.croix_list_id'),
         ];
     }
 
@@ -50,23 +52,17 @@ class ManageCroix extends Page
 
     protected function getHeaderActions(): array
     {
-        $unsynced = CroixSignup::whereNull('brevo_synced_at')->count();
-
         return [
             Action::make('openPage')
                 ->label('Ouvrir la page')
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->url(route('croix'), shouldOpenInNewTab: true),
-            Action::make('sync')
-                ->label('Renvoyer vers Brevo ('.$unsynced.')')
-                ->icon('heroicon-o-arrow-path')
-                ->color('warning')
-                ->visible($unsynced > 0)
-                ->action(function () {
-                    $ok = CroixSignup::whereNull('brevo_synced_at')->get()->filter(fn ($s) => Croix::syncToBrevo($s))->count();
-                    Notification::make()->title($ok.' contact(s) envoyé(s) à Brevo')->{$ok ? 'success' : 'danger'}()->send();
-                }),
+            Action::make('openBrevo')
+                ->label('Contacts dans Brevo')
+                ->icon('heroicon-o-users')
+                ->color('gray')
+                ->url('https://app.brevo.com/', shouldOpenInNewTab: true),
             Action::make('settings')
                 ->label('Dates et réglages')
                 ->icon('heroicon-o-cog-6-tooth')

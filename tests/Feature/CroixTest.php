@@ -6,7 +6,6 @@ use App\Enums\Role;
 use App\Filament\Pages\ManageBrevo;
 use App\Filament\Pages\ManageCroix;
 use App\Filament\Widgets\Campaigns;
-use App\Models\CroixSignup;
 use App\Models\CroixVisitor;
 use App\Models\User;
 use App\Support\Croix;
@@ -15,6 +14,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -59,10 +59,8 @@ class CroixTest extends TestCase
         $this->signup()->assertRedirect('/croix');
         $this->followingRedirects()->get('/croix')->assertOk();
 
-        $signup = CroixSignup::sole();
-        $this->assertSame('marie@example.com', $signup->email);
-        $this->assertSame('+33612345678', $signup->phone);
-        $this->assertNotNull($signup->brevo_synced_at);
+        // Rien n'est gardé sur le site : seul le visiteur anonyme est marqué.
+        $this->assertFalse(Schema::hasTable('croix_signups'));
         $this->assertNotNull(CroixVisitor::whereNotNull('signed_up_at')->first());
 
         Http::assertSent(fn (Request $r) => $r->url() === 'https://api.brevo.com/v3/contacts'
@@ -79,10 +77,28 @@ class CroixTest extends TestCase
 
         $this->signup(['consent_sms' => null])->assertSessionHasErrors('consent_sms');
         $this->signup(['consent_email' => null])->assertSessionHasErrors('consent_email');
-        $this->assertSame(0, CroixSignup::count());
+        Http::assertNothingSent();
 
         $this->signup(['phone' => '', 'consent_sms' => null])->assertSessionHasNoErrors();
         Http::assertSent(fn (Request $r) => ! isset($r['attributes']['SMS']));
+    }
+
+    public function test_phone_numbers_are_sent_to_brevo_in_international_format(): void
+    {
+        $this->assertSame('+33612345678', Croix::normalizePhone('6.12.34.56.78'));
+        $this->assertSame('+33612345678', Croix::normalizePhone('+33 (0)6 12 34 56 78'));
+        $this->assertSame('+33612345678', Croix::normalizePhone('0033 6 12 34 56 78'));
+        $this->assertSame('+590690123456', Croix::normalizePhone('0690 12 34 56')); // Guadeloupe
+        $this->assertSame('+32470123456', Croix::normalizePhone('+32 470 12 34 56'));
+        $this->assertNull(Croix::normalizePhone('06 12 34'));
+        $this->assertNull(Croix::normalizePhone(''));
+
+        $this->travelTo(Carbon::parse(self::BEFORE));
+        Http::fake(['api.brevo.com/*' => Http::response(['id' => 1], 201)]);
+
+        $this->signup(['phone' => '06 12 34'])->assertSessionHasErrors('phone');
+        $this->signup(['phone' => '6 12 34 56 78'])->assertSessionHasNoErrors();
+        Http::assertSent(fn (Request $r) => ($r['attributes']['SMS'] ?? null) === '+33612345678');
     }
 
     public function test_brevo_rejecting_the_phone_number_retries_without_it(): void
@@ -94,8 +110,18 @@ class CroixTest extends TestCase
 
         $this->signup()->assertRedirect('/croix');
 
-        $this->assertNotNull(CroixSignup::sole()->brevo_synced_at);
         Http::assertSentCount(2);
+        Http::assertSent(fn (Request $r) => ! isset($r['attributes']['SMS']));
+        $this->assertNotNull(CroixVisitor::whereNotNull('signed_up_at')->first());
+    }
+
+    public function test_before_the_vote_a_brevo_failure_is_shown_to_the_visitor(): void
+    {
+        $this->travelTo(Carbon::parse(self::BEFORE));
+        Http::fake(['api.brevo.com/*' => Http::response(['message' => 'Erreur'], 500)]);
+
+        $this->signup(['phone' => ''])->assertSessionHasErrors('email');
+        $this->assertNull(CroixVisitor::whereNotNull('signed_up_at')->first());
     }
 
     public function test_bots_and_link_previews_are_not_counted(): void
@@ -141,7 +167,6 @@ class CroixTest extends TestCase
         $this->travelTo(Carbon::parse(self::OPEN));
         $this->actingAs(User::factory()->create(['role' => Role::Admin]));
         CroixVisitor::create(['token' => 'a', 'source' => 'messe', 'visits' => 3, 'visited_at' => now(), 'signed_up_at' => now()]);
-        CroixSignup::create(['email' => 'jean@example.com', 'first_name' => 'Jean', 'source' => 'messe']);
         config(['services.matomo' => ['url' => 'https://matomo.test/', 'site_id' => 3, 'token' => 'secret']]);
 
         Http::fake([
@@ -163,7 +188,7 @@ class CroixTest extends TestCase
             'matomo.test/*' => Http::response([['label' => 'lettre de novembre', 'nb_visits' => 31, 'nb_actions' => 70]]),
         ]);
 
-        $this->get('/admin/croix')->assertOk()->assertSee('Le vote est ouvert')->assertSee('messe')->assertDontSee('Liens à diffuser')->assertSee('jean@example.com');
+        $this->get('/admin/croix')->assertOk()->assertSee('Le vote est ouvert')->assertSee('messe')->assertDontSee('Liens à diffuser')->assertSee('contacts dans la liste Brevo');
         $this->get('/admin/brevo')->assertOk()
             ->assertSee('Croix du Pape')->assertSee('+2')     // 2 nouveaux contacts en 30 jours dans la liste 7
             ->assertSee('Lettre de novembre')->assertSee('45,9 %'); // 45 ouvertures / 98 délivrés

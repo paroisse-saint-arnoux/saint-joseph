@@ -38,7 +38,7 @@
         <div class="cx-tile"><b>{{ $t['visitors'] }}</b><span>personnes ont ouvert la page</span><small>{{ $t['pageviews'] }} affichages au total</small></div>
         <div class="cx-tile"><b>{{ $t['signups'] }}</b><span>ont laissé leurs coordonnées</span><small>{{ $pct($t['signups'], $t['visitors']) }} des visiteurs</small></div>
         <div class="cx-tile"><b>{{ $t['votes'] }}</b><span>ont cliqué vers le vote</span><small>{{ $pct($t['votes'] - $t['direct_votes'], $t['visitors']) }} des visiteurs · {{ $t['direct_votes'] }} par le lien direct</small></div>
-        <div class="cx-tile"><b>{{ $t['contacts'] }}</b><span>contacts dans la liste Brevo</span><small>{{ $t['unsynced'] ? $t['unsynced'].' pas encore envoyé(s) à Brevo' : 'tous envoyés à Brevo' }}</small></div>
+        <div class="cx-tile"><b>{{ $brevoContacts ?? '—' }}</b><span>contacts dans la liste Brevo n° {{ $brevoList }}</span><small>{{ $brevoContacts === null ? 'Brevo ne répond pas pour le moment' : 'les coordonnées ne sont gardées que dans Brevo' }}</small></div>
     </div>
 
     <x-filament::section>
@@ -65,29 +65,4 @@
         </div>
     </x-filament::section>
 
-    <x-filament::section>
-        <x-slot name="heading">Dernières inscriptions</x-slot>
-        <div class="cx-wrap">
-            <table class="cx-table">
-                <thead><tr><th>Nom</th><th>E-mail</th><th>Mobile</th><th>Source</th><th>Date</th><th>Brevo</th></tr></thead>
-                <tbody>
-                    @forelse ($signups as $s)
-                        <tr>
-                            <td>{{ $s->fullName() ?: '—' }}</td>
-                            <td>{{ $s->email }}</td>
-                            <td>{{ $s->phone ?? '—' }}</td>
-                            <td>{{ $sourceLabel($s->source) }}</td>
-                            <td class="cx-muted" style="white-space: nowrap">{{ $s->created_at->translatedFormat('j M, H:i') }}</td>
-                            <td>{{ $s->brevo_synced_at ? '✓' : 'en attente' }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="6" class="cx-muted">Aucune inscription pour l'instant.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if ($signups->count() === 100)
-            <p class="cx-muted">Seules les 100 dernières sont affichées : la liste complète est dans Brevo (liste {{ config('services.brevo.croix_list_id') }}).</p>
-        @endif
-    </x-filament::section>
 </x-filament-panels::page>
