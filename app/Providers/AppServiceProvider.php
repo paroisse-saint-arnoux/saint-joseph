@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
@@ -20,6 +23,17 @@ class AppServiceProvider extends ServiceProvider
         View::composer(['layouts.app', 'partials.*'], function ($view) {
             $view->with('site', Setting::get('site', []));
         });
+
+        // Consultation : à l'exposition, tout le monde partage souvent la même adresse IP (Wi-Fi, 4G) :
+        // limites larges par IP, serrées par email (identification) ou par téléphone (session, enregistrement continu).
+        RateLimiter::for('consultation-identify', fn (Request $request) => [
+            Limit::perMinutes(10, 300)->by('ip|'.$request->ip()),
+            Limit::perMinutes(10, 10)->by('email|'.mb_strtolower(trim((string) $request->input('email')))),
+        ]);
+        RateLimiter::for('consultation-save', fn (Request $request) => [
+            Limit::perMinute(120)->by('session|'.$request->session()->getId()),
+            Limit::perMinute(2000)->by('ip|'.$request->ip()),
+        ]);
 
         // Connecteur Claude (OAuth) : page « Autoriser Claude » aux couleurs du site.
         Passport::authorizationView('mcp.authorize');

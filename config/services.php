@@ -38,6 +38,8 @@ return [
     'brevo' => [
         'key' => env('BREVO_API_KEY'),
         'list_id' => (int) env('BREVO_LIST_ID', 2),
+        // Liste « Consultation paroisse » : personnes ayant répondu à la consultation sur les projets d'architecture.
+        'consultation_list_id' => (int) env('BREVO_CONSULTATION_LIST_ID', 6),
     ],
 
     'turnstile' => [

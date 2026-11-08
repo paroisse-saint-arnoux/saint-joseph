@@ -48,6 +48,12 @@ class Setting extends Model
         return $rest === null ? (self::$cache[$key] ?: $default) : Arr::get(self::$cache[$key], $rest, $default);
     }
 
+    /** Vide le cache mémoire (tests : la base est recréée entre deux tests, pas le processus). */
+    public static function flushCache(): void
+    {
+        self::$cache = [];
+    }
+
     public static function put(string $key, array $value): void
     {
         static::updateOrCreate(['key' => $key], ['value' => $value]);

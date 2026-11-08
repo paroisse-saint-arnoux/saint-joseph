@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LibraryArchiveController;
@@ -18,11 +19,21 @@ Route::get('/le-projet/{category}', [ArticleController::class, 'index'])->name('
 Route::get('/le-projet/{category}/{slug}', [ArticleController::class, 'show'])->name('articles.show');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
-Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,10')->name('contact.send');
-Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('throttle:10,10')->name('newsletter');
+Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,10,contact')->name('contact.send');
+Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('throttle:10,10,newsletter')->name('newsletter');
 
 Route::get('/mentions-legales', [PageController::class, 'legal'])->name('legal');
 Route::get('/confidentialite', [PageController::class, 'privacy'])->name('privacy');
+
+// Consultation sur les projets d'architecture (QR code dans l'exposition des maquettes).
+Route::prefix('consultation')->name('consultation.')->controller(ConsultationController::class)->group(function () {
+    Route::get('/', 'start')->name('start');
+    Route::post('/', 'identify')->middleware('throttle:consultation-identify')->name('identify');
+    Route::get('/merci', 'thanks')->name('thanks');
+    Route::post('/changer', 'forget')->name('forget');
+    Route::get('/projet/{project}', 'show')->name('project');
+    Route::post('/projet/{project}', 'save')->middleware('throttle:consultation-save')->name('save');
+});
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
@@ -34,5 +45,5 @@ Route::middleware(['auth', 'active'])->group(function () {
 
 Route::middleware('signed')->group(function () {
     Route::get('/connexion/{token}', [MagicLinkController::class, 'show'])->name('magic-link.show');
-    Route::post('/connexion/{token}', [MagicLinkController::class, 'login'])->middleware('throttle:10,1')->name('magic-link.login');
+    Route::post('/connexion/{token}', [MagicLinkController::class, 'login'])->middleware('throttle:10,1,magic-link')->name('magic-link.login');
 });
