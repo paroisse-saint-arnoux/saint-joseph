@@ -9,11 +9,9 @@ use App\Support\ConsultationStats;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Support\Components\Attributes\Exposed;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Str;
 
-/** Suivi de la consultation sur les projets d'architecture : statistiques, commentaires, QR codes, export Excel. */
+/** Suivi de la consultation sur les projets d'architecture : statistiques, commentaires, export Excel (les QR codes sont sous la liste des projets). */
 class ManageConsultation extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
@@ -41,8 +39,6 @@ class ManageConsultation extends Page
             'rows' => ConsultationStats::projects(),
             'comments' => ConsultationStats::comments(100, $this->commentProject),
             'projects' => ConsultationProject::ordered()->get(),
-            'startUrl' => route('consultation.start'),
-            'qr' => fn (string $url) => ConsultationStats::qrCode($url),
         ];
     }
 
@@ -73,16 +69,5 @@ class ManageConsultation extends Page
                     Notification::make()->title($open ? 'Consultation close' : 'Consultation rouverte')->success()->send();
                 }),
         ];
-    }
-
-    /** QR code en PNG haute définition, à imprimer (général ou d'un projet). */
-    #[Exposed]
-    public function downloadQr(?int $projectId = null)
-    {
-        $project = $projectId ? ConsultationProject::findOrFail($projectId) : null;
-        $url = $project ? route('consultation.project', $project) : route('consultation.start');
-        $name = 'qr-consultation'.($project ? '-'.$project->position.'-'.Str::slug($project->name) : '').'.png';
-
-        return response()->streamDownload(fn () => print (ConsultationStats::qrCode($url, 'png')), $name, ['Content-Type' => 'image/png']);
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\Role;
 use App\Filament\Pages\ManageConsultation;
+use App\Filament\Resources\ConsultationProjects\Pages\ListConsultationProjects;
 use App\Models\ConsultationParticipant;
 use App\Models\ConsultationProject;
 use App\Models\ConsultationVote;
@@ -208,15 +209,14 @@ class ConsultationTest extends TestCase
         $this->assertSame('Avis de a@example.com', $sheets['Réponses'][1][9]);
     }
 
-    public function test_admin_can_close_the_consultation_and_download_qr_codes(): void
+    public function test_admin_can_close_the_consultation_and_download_posters(): void
     {
         $this->actingAs(User::factory()->create(['role' => Role::Editor]));
 
         Livewire::test(ManageConsultation::class)->callAction('toggle');
         $this->assertFalse(Consultation::isOpen());
 
-        $project = ConsultationProject::ordered()->first();
-        Livewire::test(ManageConsultation::class)->call('downloadQr', $project->id)
-            ->assertFileDownloaded('qr-consultation-1-'.\Illuminate\Support\Str::slug($project->name).'.png');
+        Livewire::test(ListConsultationProjects::class)->callAction('posters')
+            ->assertFileDownloaded('affichettes-consultation.pdf');
     }
 }

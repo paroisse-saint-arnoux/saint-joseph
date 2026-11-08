@@ -35,9 +35,9 @@ class ConsultationProjectResource extends Resource
 
     protected static ?string $pluralModelLabel = 'projets de la consultation';
 
-    protected static ?string $navigationLabel = 'Projets';
+    protected static ?string $navigationLabel = 'Admin de la consultation';
 
-    protected static ?string $breadcrumb = 'Projets';
+    protected static ?string $breadcrumb = 'Admin de la consultation';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Consultation';
 

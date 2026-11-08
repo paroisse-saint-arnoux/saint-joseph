@@ -23,10 +23,6 @@
         .sc-comment { padding: 12px 0; border-top: 1px solid #f1f1f1; }
         .sc-comment p { white-space: pre-line; margin: 4px 0 0; }
         .sc-muted { color: #6b7280; font-size: .85rem; }
-        .sc-qr { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
-        .sc-qr-item { text-align: center; border: 1px solid #eee; border-radius: 12px; padding: 12px; background: #fff; }
-        .sc-qr-code svg { width: 140px; height: 140px; margin: 0 auto 8px; display: block; }
-        .sc-qr-item a.sc-url { display: block; font-size: .72rem; color: #6b7280; word-break: break-all; margin: 4px 0 8px; }
         .sc-closed { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 14px; }
     </style>
 
@@ -124,28 +120,5 @@
         @if ($comments->count() === 100)
             <p class="sc-muted">Seuls les 100 derniers sont affichés : l'export Excel les contient tous.</p>
         @endif
-    </x-filament::section>
-
-    <x-filament::section>
-        <x-slot name="heading">QR codes à imprimer</x-slot>
-        <x-slot name="description">Le QR code général ouvre la consultation sur le premier projet sans avis. Celui d'un projet, posé à côté de sa maquette, ouvre directement sa page (après l'email, la première fois).</x-slot>
-
-        <div class="sc-qr">
-            <div class="sc-qr-item">
-                <div class="sc-qr-code">{!! $qr($startUrl) !!}</div>
-                <strong>Consultation</strong>
-                <a class="sc-url" href="{{ $startUrl }}" target="_blank">{{ $startUrl }}</a>
-                <x-filament::button size="sm" color="gray" icon="heroicon-o-arrow-down-tray" wire:click="downloadQr">PNG</x-filament::button>
-            </div>
-            @foreach ($projects as $p)
-                @php $url = route('consultation.project', $p); @endphp
-                <div class="sc-qr-item">
-                    <div class="sc-qr-code">{!! $qr($url) !!}</div>
-                    <strong>{{ $p->position }}. {{ $p->name }}</strong>
-                    <a class="sc-url" href="{{ $url }}" target="_blank">{{ $url }}</a>
-                    <x-filament::button size="sm" color="gray" icon="heroicon-o-arrow-down-tray" wire:click="downloadQr({{ $p->id }})">PNG</x-filament::button>
-                </div>
-            @endforeach
-        </div>
     </x-filament::section>
 </x-filament-panels::page>
