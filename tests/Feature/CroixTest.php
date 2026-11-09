@@ -13,6 +13,7 @@ use App\Support\SpamGuard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
@@ -185,7 +186,13 @@ class CroixTest extends TestCase
             'api.brevo.com/v3/smtp/statistics/reports*' => Http::response(['reports' => [
                 ['date' => now()->toDateString(), 'requests' => 9, 'delivered' => 9, 'uniqueOpens' => 4],
             ]]),
-            'matomo.test/*' => Http::response([['label' => 'lettre de novembre', 'nb_visits' => 31, 'nb_actions' => 70]]),
+            'matomo.test/*' => fn (Request $r) => match ($r['method']) {
+                'Referrers.getCampaigns' => Http::response([['label' => 'lettre de novembre', 'nb_visits' => 31, 'nb_actions' => 70]]),
+                'MarketingCampaignsReporting.getSourceMedium' => Http::response([
+                    ['label' => 'brevo - email', 'nb_visits' => 25, 'subtable' => [['label' => 'lettre de novembre', 'nb_visits' => 25]]],
+                    ['label' => 'whatsapp - partage', 'nb_visits' => 6, 'subtable' => [['label' => 'Lettre de novembre', 'nb_visits' => 6]]],
+                ]),
+            },
         ]);
 
         $this->get('/admin/croix')->assertOk()->assertSee('Le vote est ouvert')->assertSee('messe')->assertDontSee('Liens à diffuser')->assertSee('contacts dans la liste Brevo');
@@ -193,9 +200,27 @@ class CroixTest extends TestCase
             ->assertSee('Croix du Pape')->assertSee('+2')     // 2 nouveaux contacts en 30 jours dans la liste 7
             ->assertSee('Lettre de novembre')->assertSee('45,9 %'); // 45 ouvertures / 98 délivrés
 
-        Livewire::test(Campaigns::class)->assertSee('lettre de novembre')->assertSee('31')->assertSee('98 délivrés');
+        Livewire::test(Campaigns::class)->assertSee('lettre de novembre')->assertSee('31')->assertSee('98 délivrés')
+            ->assertSee('Sources : brevo (25) · whatsapp (6)')->assertDontSee('Marketing Campaigns Reporting');
         Livewire::test(ManageCroix::class)->callAction('settings', ['opens_at' => '2026-11-09 08:00', 'closes_at' => '2026-11-30 23:59', 'vote_url' => 'https://vote.soscalvaires.org/', 'home_banner' => false]);
         $this->assertFalse(Croix::showHomeBanner());
         Livewire::test(ManageBrevo::class)->callAction('refresh')->assertOk();
+    }
+
+    public function test_campaign_sources_need_the_matomo_extension(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => Role::Admin]));
+        config(['services.matomo' => ['url' => 'https://matomo.test/', 'site_id' => 3, 'token' => 'secret'], 'services.brevo.key' => null]);
+        Http::fake(fn (Request $r) => match ($r['method']) {
+            'Referrers.getCampaigns' => Http::response([['label' => 'croix', 'nb_visits' => 24, 'nb_actions' => 40, 'subtable' => [['label' => 'com.google.android.gm', 'nb_visits' => 17]]]]),
+            default => Http::response(['result' => 'error', 'message' => 'The plugin MarketingCampaignsReporting was not found.']),
+        });
+        Exceptions::fake();
+
+        Livewire::test(Campaigns::class)->assertSee('croix')->assertSee('Marketing Campaigns Reporting')->assertDontSee('com.google.android.gm');
+        Livewire::test(Campaigns::class);
+
+        Exceptions::assertNothingReported();
+        Http::assertSentCount(2); // une fois chacun : campagnes en cache, extension absente retenue
     }
 }

@@ -59,36 +59,66 @@ class Matomo
 
     /**
      * Campagnes (liens marqués utm_campaign / mtm_campaign, dont les emails Brevo) sur les $days derniers jours,
-     * avec leurs mots-clés (utm_term / mtm_kwd : ex. la source d'un lien vers /croix).
+     * avec leurs sources (utm_source). Les sources demandent l'extension Matomo « Marketing Campaigns Reporting » :
+     * sans elle, Matomo ne garde que le nom de la campagne (et, à la place du mot-clé absent, le site d'origine).
      *
-     * @return array<int, array{label: string, visits: int, actions: int, bounce: ?string, keywords: array<string, int>}>
+     * @return array{campaigns: array<int, array{label: string, visits: int, actions: int, sources: array<string, int>}>, sources_available: bool}
      */
     public function campaigns(int $days = 30, int $limit = 10): array
     {
+        $range = Carbon::today()->subDays($days - 1)->toDateString().','.Carbon::today()->toDateString();
         $data = $this->call('Referrers.getCampaigns', [
-            'period' => 'range',
-            'date' => Carbon::today()->subDays($days - 1)->toDateString().','.Carbon::today()->toDateString(),
-            'expanded' => 1,
-            'filter_limit' => $limit,
-            'filter_sort_column' => 'nb_visits',
+            'period' => 'range', 'date' => $range, 'filter_limit' => $limit, 'filter_sort_column' => 'nb_visits',
         ]);
+        $sources = $this->campaignSources($range);
 
-        return collect($data)->map(fn ($row) => [
-            'label' => trim((string) ($row['label'] ?? '')),
-            'visits' => (int) ($row['nb_visits'] ?? 0),
-            'actions' => (int) ($row['nb_actions'] ?? 0),
-            'bounce' => $row['bounce_rate'] ?? null,
-            'keywords' => collect($row['subtable'] ?? [])
-                ->filter(fn ($k) => filled($k['label'] ?? null) && ($k['label'] ?? '') !== '-')
-                ->mapWithKeys(fn ($k) => [(string) $k['label'] => (int) ($k['nb_visits'] ?? 0)])
-                ->all(),
-        ])->all();
+        return [
+            'campaigns' => collect($data)->map(fn ($row) => [
+                'label' => $label = trim((string) ($row['label'] ?? '')),
+                'visits' => (int) ($row['nb_visits'] ?? 0),
+                'actions' => (int) ($row['nb_actions'] ?? 0),
+                'sources' => $sources[mb_strtolower($label)] ?? [],
+            ])->all(),
+            'sources_available' => $sources !== null,
+        ];
     }
 
-    private function call(string $method, array $params): array
+    /**
+     * Visites par campagne et par source : [nom de campagne en minuscules => [utm_source => visites]].
+     * Null si l'extension Marketing Campaigns Reporting n'est pas installée.
+     */
+    private function campaignSources(string $range): ?array
+    {
+        $data = $this->call('MarketingCampaignsReporting.getSourceMedium', [
+            'period' => 'range', 'date' => $range, 'expanded' => 1, 'filter_limit' => -1,
+        ], optional: true);
+        if ($data === null) {
+            return null;
+        }
+
+        // Lignes « source - support », sous-tableau : les campagnes.
+        $result = [];
+        foreach ($data as $row) {
+            $source = trim(explode(' - ', (string) ($row['label'] ?? ''))[0]) ?: '(sans source)';
+            foreach ($row['subtable'] ?? [] as $campaign) {
+                $name = mb_strtolower(trim((string) ($campaign['label'] ?? '')));
+                $result[$name][$source] = ($result[$name][$source] ?? 0) + (int) ($campaign['nb_visits'] ?? 0);
+            }
+        }
+
+        return array_map(fn ($s) => collect($s)->sortDesc()->all(), $result);
+    }
+
+    /** @param  bool  $optional  méthode d'une extension Matomo peut-être absente : null (sans erreur signalée) si elle manque */
+    private function call(string $method, array $params, bool $optional = false): ?array
     {
         if (! $this->isConfigured()) {
-            return [];
+            return $optional ? null : [];
+        }
+
+        $missingKey = 'matomo:missing:'.explode('.', $method)[0];
+        if ($optional && Cache::has($missingKey)) {
+            return null;
         }
 
         $key = 'matomo:'.md5($method.json_encode($params));
@@ -106,11 +136,18 @@ class Matomo
         ]);
 
         $data = $response->json();
+        if ($optional && str_contains((string) ($data['message'] ?? ''), 'was not found')) {
+            // Extension non installée : on ne redemande pas avant quelques heures.
+            Cache::put($missingKey, true, now()->addHours(6));
+
+            return null;
+        }
+
         if (! $response->successful() || ! is_array($data) || ($data['result'] ?? null) === 'error') {
             // Pas de mise en cache : on réessaiera au prochain affichage.
             report(new \RuntimeException('Matomo : '.($data['message'] ?? 'réponse invalide ('.$response->status().')')));
 
-            return [];
+            return $optional ? null : [];
         }
 
         Cache::put($key, $data, now()->addMinutes(self::CACHE_MINUTES));

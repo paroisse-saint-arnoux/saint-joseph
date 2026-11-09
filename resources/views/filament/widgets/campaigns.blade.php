@@ -6,6 +6,9 @@
         @elseif (empty($campaigns))
             <p style="color:#6b7280; font-size:.875rem;">Aucune visite venue d'une campagne sur la période.</p>
         @else
+            @unless ($sourcesAvailable)
+                <p style="color:#6b7280; font-size:.8rem; margin-bottom:8px;">Pour voir les sources (utm_source) de chaque campagne, installer l'extension gratuite « Marketing Campaigns Reporting » dans Matomo.</p>
+            @endunless
             <div style="overflow-x:auto;">
                 <table style="width:100%; border-collapse:collapse; font-size:.875rem;">
                     <thead>
@@ -21,8 +24,8 @@
                             <tr style="border-top:1px solid #f1f1f1;">
                                 <td style="padding:8px;">
                                     <strong>{{ $c['label'] }}</strong>
-                                    @if ($c['keywords'])
-                                        <div style="color:#6b7280; font-size:.8rem;">{{ collect($c['keywords'])->map(fn ($v, $k) => $k.' ('.$v.')')->join(' · ') }}</div>
+                                    @if ($c['sources'])
+                                        <div style="color:#6b7280; font-size:.8rem;">Sources : {{ collect($c['sources'])->map(fn ($v, $k) => $k.' ('.$v.')')->join(' · ') }}</div>
                                     @endif
                                 </td>
                                 <td style="padding:8px; text-align:right; font-variant-numeric:tabular-nums;"><strong>{{ $n($c['visits']) }}</strong></td>

@@ -22,13 +22,14 @@ class Campaigns extends Widget
     protected function getViewData(): array
     {
         $matomo = app(Matomo::class);
-        $campaigns = $matomo->campaigns(30, 10);
+        ['campaigns' => $campaigns, 'sources_available' => $sourcesAvailable] = $matomo->campaigns(30, 10);
 
         $brevo = collect(app(Brevo::class)->isConfigured() ? app(Brevo::class)->campaigns(50) : [])
             ->keyBy(fn ($c) => Str::slug($c['name']));
 
         return [
             'configured' => $matomo->isConfigured(),
+            'sourcesAvailable' => $sourcesAvailable,
             'campaigns' => array_map(fn ($c) => $c + ['brevo' => $brevo->get(Str::slug($c['label']))], $campaigns),
         ];
     }
