@@ -26,9 +26,9 @@
     <div @class(['cx-state', $state])>
         @if ($state === 'before')
             <strong>Avant l'ouverture du vote.</strong> La page propose de laisser ses coordonnées pour recevoir le lien.
-            Le {{ $opensAt->translatedFormat('l j F à H\hi') }}, elle passera d'elle-même en mode vote (bouton « Je vote maintenant », formulaire qui renvoie vers le site de vote, bandeau sur l'accueil).
+            Le {{ $opensAt->translatedFormat('l j F à H\hi') }}, elle passera d'elle-même en mode vote (formulaire qui renvoie vers le site de vote, lien « Aller sur la page de vote sans m'inscrire », bandeau sur l'accueil).
         @elseif ($state === 'open')
-            <strong>Le vote est ouvert</strong> jusqu'au {{ $closesAt->translatedFormat('l j F à H\hi') }} : bouton « Je vote maintenant », le formulaire renvoie vers le site de vote{{ Croix::showHomeBanner() ? ', bandeau sur l\'accueil' : '' }}.
+            <strong>Le vote est ouvert</strong> jusqu'au {{ $closesAt->translatedFormat('l j F à H\hi') }} : le formulaire renvoie vers le site de vote, lien « Aller sur la page de vote sans m'inscrire »{{ Croix::showHomeBanner() ? ', bandeau sur l\'accueil' : '' }}.
         @else
             <strong>Le vote est clos</strong> depuis le {{ $closesAt->translatedFormat('j F à H\hi') }}. La page propose de laisser ses coordonnées pour recevoir le résultat.
         @endif
@@ -38,7 +38,7 @@
         <div class="cx-tile"><b>{{ $t['visitors'] }}</b><span>personnes ont ouvert la page</span><small>{{ $t['pageviews'] }} affichages au total</small></div>
         <div class="cx-tile"><b>{{ $t['signups'] }}</b><span>ont laissé leurs coordonnées</span><small>{{ $pct($t['signups'], $t['visitors']) }} des visiteurs</small></div>
         <div class="cx-tile"><b>{{ $t['votes'] }}</b><span>ont cliqué vers le vote</span><small>{{ $pct($t['votes'] - $t['direct_votes'], $t['visitors']) }} des visiteurs · {{ $t['direct_votes'] }} par le lien direct</small></div>
-        <div class="cx-tile"><b>{{ $brevoContacts ?? '—' }}</b><span>contacts dans la liste Brevo n° {{ $brevoList }}</span><small>{{ $brevoContacts === null ? 'Brevo ne répond pas pour le moment' : 'les coordonnées ne sont gardées que dans Brevo' }}</small></div>
+        <div class="cx-tile"><b>{{ $brevoContacts ?? '—' }}</b><span>contacts dans la liste Brevo n° {{ $brevoList }}</span></div>
     </div>
 
     <x-filament::section>

@@ -1,11 +1,14 @@
 {{-- Concours S.O.S Calvaires « Que va devenir la Croix du Pape ? » — page autonome, sans le menu du site.
-     $state : before (formulaire seul) · open (bouton « Je vote maintenant », formulaire → site de vote) · closed. --}}
+     $state : before (formulaire seul) · open (formulaire → site de vote, lien « Aller sur la page de vote sans m'inscrire ») · closed. --}}
 @php
-    $title = 'La Croix du Pape au Rouret ? Votez';
+    $title = 'La Croix du Pape en Provence ? Votez';
     $description = 'Dressée devant 80 000 jeunes au Stade de France, la Croix du Pape cherche son lieu. Votez pour qu\'elle soit plantée sur le terrain de la future église Saint Joseph, au Rouret.';
     $ogDescription = 'Ici, on construit une église. Un seul lieu en France planterait la Croix avant les murs : le nôtre. Votez du 9 au 30 novembre.';
     $saved = session('croix_saved');
     $error = fn (string $field) => $errors->first($field);
+    // Compte à rebours : jusqu'à l'ouverture du vote, puis jusqu'à sa clôture (calculé ici, mis à jour chaque seconde par croix.js).
+    $countdownTo = match ($state) { 'before' => \App\Support\Croix::opensAt(), 'open' => \App\Support\Croix::closesAt(), default => null };
+    $left = $countdownTo ? max(0, now()->diffInSeconds($countdownTo, false)) : 0;
 @endphp
 <!DOCTYPE html>
 <html lang="fr">
@@ -20,24 +23,24 @@
     <link rel="apple-touch-icon" href="{{ asset('images/logo-saint-joseph.png') }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Église Saint Joseph — Le Rouret">
-    <meta property="og:title" content="La Croix du Pape au Rouret ? Votez.">
+    <meta property="og:title" content="La Croix du Pape en Provence ? Votez.">
     <meta property="og:description" content="{{ $ogDescription }}">
     <meta property="og:url" content="{{ route('croix') }}">
     <meta property="og:locale" content="fr_FR">
-    <meta property="og:image" content="{{ asset('images/og-croix-du-pape.jpg') }}">
+    <meta property="og:image" content="{{ asset('images/og-croix-du-pape-provence.jpg') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="La Croix du Pape au Rouret ? Votez du 9 au 30 novembre — le terrain de la future église Saint Joseph">
+    <meta property="og:image:alt" content="La Croix du Pape en Provence ? La croix plantée au milieu des oliviers, sur le terrain de la future église Saint Joseph">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="La Croix du Pape au Rouret ? Votez.">
+    <meta name="twitter:title" content="La Croix du Pape en Provence ? Votez.">
     <meta name="twitter:description" content="{{ $ogDescription }}">
-    <meta name="twitter:image" content="{{ asset('images/og-croix-du-pape.jpg') }}">
+    <meta name="twitter:image" content="{{ asset('images/og-croix-du-pape-provence.jpg') }}">
     @vite(['resources/scss/croix.scss', 'resources/js/croix.js'])
     @include('partials.matomo')
 </head>
 <body class="croix">
 
-<section class="hero" style="background-image: url('{{ asset('images/croix-terrain.webp') }}')">
+<section class="hero" style="background-image: url('{{ asset('images/croix-du-pape-hero.webp') }}')">
     <a class="kicker" href="{{ route('home') }}">Paroisse Saint-Arnoux · Le Rouret<span> · Appel à projets S.O.S Calvaires</span></a>
     <div class="in"><div class="sign">Ici, on construit une église !</div></div>
 </section>
@@ -45,7 +48,7 @@
 <main>
     <div class="grid">
         <div>
-            <h1>La Croix du Pape<br>au Rouret<em> ?</em></h1>
+            <h1>La Croix du Pape<br>en Provence<em> ?</em></h1>
             <div class="rule"></div>
             <div class="lead">
                 <p>Le 25 septembre 2026, 80 000 jeunes ont prié devant elle au Stade de France, avec le pape Léon XIV. Aujourd'hui, cette Croix cherche le lieu où elle sera dressée pour les générations qui viennent. Le choix se fait par vote parmi 30 candidats en France.</p>
@@ -57,16 +60,27 @@
                 <div><b>9 nov.</b>ouverture du vote</div>
                 <div><b>30 nov.</b>clôture, 23h59</div>
                 <div><b>3 déc.</b>résultat, 18h</div>
-            </div>
-            <div class="steps">
-                @if ($state === 'before')
-                    <div><span>1</span><p>Laissez votre e-mail&nbsp;: vous recevrez le lien de vote dès l'ouverture, puis le résultat.</p></div>
-                @else
-                    <div><span>1</span><p>Laissez votre e-mail&nbsp;: vous recevrez le résultat, puis les nouvelles du projet.</p></div>
+                @if ($countdownTo)
+                    <div class="countdown" data-until="{{ $countdownTo->toIso8601String() }}" role="timer">
+                        <b>{{ intdiv((int) $left, 86400) }}&nbsp;j {{ sprintf('%02d', intdiv((int) $left % 86400, 3600)) }}&nbsp;h {{ sprintf('%02d', intdiv((int) $left % 3600, 60)) }}&nbsp;min</b>{{ $state === 'before' ? 'avant l\'ouverture' : 'pour voter' }}
+                    </div>
                 @endif
-                <div><span>2</span><p>Votez sur le site de S.O.S Calvaires. Un vote par personne, une minute.</p></div>
-                <div><span>3</span><p>Faites voter trois personnes autour de vous. C'est ainsi que l'on gagne.</p></div>
             </div>
+            @if ($state !== 'closed')
+                {{-- Le site de S.O.S Calvaires refuse un second vote depuis la même adresse IP (box du foyer, Wi-Fi d'un lieu). --}}
+                <div class="tip">
+                    @if ($state === 'open')
+                        {{-- Sur ordinateur seulement (caché sur mobile) : passer au téléphone pour voter. --}}
+                        <figure class="qr">
+                            {!! \App\Support\Croix::voteQrCode() !!}
+                            <figcaption>Scannez avec votre téléphone pour voter</figcaption>
+                        </figure>
+                    @endif
+                    <h2>Bon à savoir avant de voter</h2>
+                    <p>Le site de vote n'accepte <b>qu'un vote par adresse IP</b>, c'est-à-dire par connexion internet&nbsp;: à la maison, toute la famille partage la même. Plusieurs personnes peuvent voter, chacune avec sa propre adresse e-mail, mais pas depuis la même connexion.</p>
+                    <p>Si vous voyez le message <q>Un vote a déjà été enregistré depuis cette connexion internet…</q>, <b>désactivez le Wi-Fi et votez avec votre téléphone mobile sur le réseau 4G&nbsp;!</b></p>
+                </div>
+            @endif
         </div>
 
         <aside class="card" id="formulaire">
@@ -78,8 +92,8 @@
                     <p class="why">C'est noté. Nous vous enverrons le résultat le 3 décembre, puis les nouvelles du projet Saint Joseph.</p>
                 @endif
                 <p class="why">Pour que Le Rouret l'emporte, faites passer cette page à trois personnes autour de vous&nbsp;:</p>
-                <a class="btn" href="https://wa.me/?text={{ rawurlencode('La Croix du Pape au Rouret ? Votez : '.route('croix', ['utm_source' => 'whatsapp', 'utm_medium' => 'partage', 'utm_campaign' => 'croix'])) }}" target="_blank" rel="noopener">Partager sur WhatsApp</a>
-                <a class="skip" href="mailto:?subject={{ rawurlencode('La Croix du Pape au Rouret ?') }}&body={{ rawurlencode('Votez pour que la Croix du Pape soit plantée sur le terrain de la future église Saint Joseph : '.route('croix', ['utm_source' => 'email', 'utm_medium' => 'partage', 'utm_campaign' => 'croix'])) }}">Envoyer par e-mail</a>
+                <a class="btn" href="https://wa.me/?text={{ rawurlencode('La Croix du Pape en Provence ? Votez : '.route('croix', ['utm_source' => 'whatsapp', 'utm_medium' => 'partage', 'utm_campaign' => 'croix'])) }}" target="_blank" rel="noopener">Partager sur WhatsApp</a>
+                <a class="skip" href="mailto:?subject={{ rawurlencode('La Croix du Pape en Provence ?') }}&body={{ rawurlencode('Votez pour que la Croix du Pape soit plantée sur le terrain de la future église Saint Joseph : '.route('croix', ['utm_source' => 'email', 'utm_medium' => 'partage', 'utm_campaign' => 'croix'])) }}">Envoyer par e-mail</a>
             @else
                 @if ($state === 'before')
                     <h2>Recevez le lien de vote<em>.</em></h2>
@@ -119,12 +133,11 @@
                     </div>
                     <label class="chk"><input type="checkbox" name="consent_email" value="1" required @checked(old('consent_email'))> J'accepte de recevoir par e-mail le lien de vote et les nouvelles du projet Saint Joseph (église et centre paroissial du Rouret).</label>
                     <label class="chk"><input type="checkbox" name="consent_sms" value="1" @checked(old('consent_sms'))> J'accepte de recevoir le lien de vote et le résultat par SMS.</label>
-                    <button class="btn" type="submit">{{ $state === 'closed' ? 'Recevoir le résultat' : 'Je veux voter pour Le Rouret' }}</button>
+                    <button class="btn" type="submit">{{ match ($state) { 'open' => 'M\'inscrire et aller voter', 'closed' => 'Recevoir le résultat', default => 'Je veux voter pour Le Rouret' } }}</button>
                 </form>
 
                 @if ($state === 'open')
-                    <a class="btn gold" href="{{ route('croix.vote') }}" target="_blank" rel="noopener">Je vote maintenant</a>
-                    <a class="skip" href="{{ route('croix.vote') }}" target="_blank" rel="noopener">Voter sans laisser d'adresse</a>
+                    <a class="skip" href="{{ route('croix.vote') }}" target="_blank" rel="noopener">Aller sur la page de vote sans m'inscrire</a>
                 @endif
             @endif
 

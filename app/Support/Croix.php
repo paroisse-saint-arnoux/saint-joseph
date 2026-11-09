@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
  *
  * Trois états, selon les dates du réglage « croix » :
  * - avant l'ouverture du vote : formulaire seul (« Recevez le lien de vote ») ;
- * - vote ouvert : bouton « Je vote maintenant », le formulaire renvoie vers le site de vote, bandeau sur l'accueil ;
+ * - vote ouvert : le formulaire renvoie vers le site de vote, lien « Aller sur la page de vote sans m'inscrire », bandeau sur l'accueil ;
  * - vote clos : formulaire pour recevoir le résultat.
  *
  * Suivi sans données personnelles : un cookie aléatoire par navigateur (13 mois, mesure d'audience exemptée),
@@ -120,6 +120,12 @@ class Croix
         }
 
         return $visitor;
+    }
+
+    /** QR code (SVG) du lien de vote suivi, affiché sur ordinateur pour voter depuis son téléphone (en 4G si le Wi-Fi a déjà voté). */
+    public static function voteQrCode(): string
+    {
+        return ConsultationStats::qrCode(route('croix.vote', ['utm_source' => 'qrcode', 'utm_medium' => 'page', 'utm_campaign' => 'croix']));
     }
 
     public static function recordVoteClick(Request $request): void

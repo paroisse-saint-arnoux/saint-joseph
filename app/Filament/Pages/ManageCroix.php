@@ -69,7 +69,7 @@ class ManageCroix extends Page
                 ->fillForm(fn () => Croix::settings())
                 ->schema([
                     DateTimePicker::make('opens_at')->label('Ouverture du vote')->seconds(false)->required()
-                        ->helperText('À partir de ce moment : bouton « Je vote maintenant », le formulaire renvoie vers le site de vote, bandeau sur l\'accueil.'),
+                        ->helperText('À partir de ce moment : le formulaire renvoie vers le site de vote, bandeau sur l\'accueil.'),
                     DateTimePicker::make('closes_at')->label('Clôture du vote')->seconds(false)->required()->after('opens_at'),
                     TextInput::make('vote_url')->label('Adresse du site de vote')->url()->required(),
                     Toggle::make('home_banner')->label('Bandeau « La Croix du Pape au Rouret ? Votez » sur l\'accueil pendant le vote'),

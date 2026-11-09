@@ -52,7 +52,7 @@ class CroixTest extends TestCase
 
         $this->get('/croix?utm_source=affiche&utm_medium=print&utm_campaign=croix')->assertOk()
             ->assertSee('Recevez le lien de vote')
-            ->assertDontSee('Je vote maintenant')
+            ->assertDontSee('Aller sur la page de vote sans')->assertDontSee('Scannez avec votre téléphone')
             ->assertDontSee('SJO2')
             ->assertDontSee('Saint-Joseph II');
         $this->assertDatabaseHas('croix_visitors', ['source' => 'affiche', 'visits' => 1]);
@@ -138,7 +138,7 @@ class CroixTest extends TestCase
         $this->travelTo(Carbon::parse(self::OPEN));
         Http::fake(['api.brevo.com/*' => Http::response(['id' => 1], 201)]);
 
-        $this->get('/croix')->assertOk()->assertSee('Je vote maintenant')->assertSee(route('croix.vote'));
+        $this->get('/croix')->assertOk()->assertSee('Aller sur la page de vote sans')->assertSee('Scannez avec votre téléphone')->assertSee('Bon à savoir avant de voter')->assertDontSee('Je vote maintenant')->assertSee(route('croix.vote'));
 
         $this->signup()->assertRedirect(route('croix.vote'));
         $this->get('/croix/vote?utm_source=brevo')->assertRedirect('https://vote.soscalvaires.org/');
