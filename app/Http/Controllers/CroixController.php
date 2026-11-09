@@ -59,6 +59,12 @@ class CroixController extends Controller
     }
 
     /** Lien de vote suivi : compte le clic, puis renvoie vers le site de S.O.S Calvaires. À utiliser aussi dans les emails et SMS. */
+    /** Générateur de liens avec balises UTM : public mais non référencé (noindex, hors sitemap), pas compté comme visite. */
+    public function links()
+    {
+        return response()->view('croix-links')->header('X-Robots-Tag', 'noindex, nofollow');
+    }
+
     public function vote(Request $request)
     {
         Croix::recordVoteClick($request);

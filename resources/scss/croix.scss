@@ -100,3 +100,27 @@ footer {
   .dates .countdown { margin-left: 0; }
 }
 @media (max-width: 420px) { .names { grid-template-columns: 1fr; } }
+
+// Page /croix/liens (générateur de liens UTM, non référencée).
+.croix-links {
+  [hidden] { display: none !important; }
+  main { max-width: 860px; padding-top: 48px; }
+  .lead { margin-bottom: 28px; }
+  select { width: 100%; padding: 12px 14px; border: 1px solid $border; background: #FDFBF7; font: inherit; font-size: 16px; color: $ink; border-radius: 0; }
+  .chk b { color: $navy; }
+  .l-help { font-size: 13px; color: $ink-soft; margin-top: 6px; line-height: 1.45; b { color: $navy; } }
+  .l-out {
+    display: flex; gap: 8px;
+    input { flex: 1; font-size: 14px; font-family: ui-monospace, monospace; }
+    .btn { width: auto; margin: 0; padding: 0 22px; font-size: 15px; }
+  }
+  .l-h2 { font-family: $serif; font-weight: 600; font-size: 30px; color: $navy; margin: 44px 0 12px; }
+  .l-table { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; color: $ink-soft; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid $border; }
+  td { padding: 10px; border-bottom: 1px solid $parchment-2; vertical-align: top; }
+  td:first-child { white-space: nowrap; color: $navy; font-weight: 500; }
+  code { font-size: 12px; word-break: break-all; color: $ink; }
+  .l-copy-row { margin-left: 6px; border: 1px solid $border; background: #fff; font: inherit; font-size: 12px; padding: 2px 8px; cursor: pointer; white-space: nowrap; }
+  @media (max-width: 820px) { td:first-child { white-space: normal; } }
+}

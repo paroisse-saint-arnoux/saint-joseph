@@ -223,4 +223,15 @@ class CroixTest extends TestCase
         Exceptions::assertNothingReported();
         Http::assertSentCount(2); // une fois chacun : campagnes en cache, extension absente retenue
     }
+
+    public function test_links_page_is_public_but_not_indexed(): void
+    {
+        $this->get('/croix/liens')->assertOk()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+            ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
+            ->assertSee(route('croix', ['utm_source' => 'whatsapp', 'utm_medium' => 'message', 'utm_campaign' => 'croix']));
+
+        $this->assertSame(0, CroixVisitor::count(), 'la page des liens n\'est pas une visite de /croix');
+        $this->get('/sitemap.xml')->assertDontSee('/croix/liens');
+    }
 }

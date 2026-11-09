@@ -40,6 +40,7 @@ Route::prefix('consultation')->name('consultation.')->controller(ConsultationCon
 Route::get('/croix', [CroixController::class, 'show'])->name('croix');
 Route::post('/croix', [CroixController::class, 'store'])->middleware('throttle:croix-signup')->name('croix.store');
 Route::get('/croix/vote', [CroixController::class, 'vote'])->name('croix.vote');
+Route::get('/croix/liens', [CroixController::class, 'links'])->name('croix.links'); // générateur de liens UTM, non référencé
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 

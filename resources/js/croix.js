@@ -21,3 +21,44 @@ if (countdown) {
     const timer = setInterval(tick, 1000);
     tick();
 }
+
+// Page /croix/liens : générateur de liens avec balises UTM (utm_campaign toujours « croix »).
+const generator = document.getElementById('generateur');
+if (generator) {
+    const $ = (id) => document.getElementById(id);
+    const slug = (s) => s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const update = () => {
+        const option = $('l-case').selectedOptions[0];
+        const custom = option.value === '';
+        generator.querySelector('.l-custom').hidden = !custom;
+        const url = new URL(generator.querySelector('input[name=l-target]:checked').value);
+        const source = custom ? slug($('l-source').value) : option.value;
+        const medium = custom ? slug($('l-medium').value) : option.dataset.medium;
+        const content = slug($('l-content').value);
+        if (source) url.searchParams.set('utm_source', source);
+        if (medium) url.searchParams.set('utm_medium', medium);
+        url.searchParams.set('utm_campaign', 'croix');
+        if (content) url.searchParams.set('utm_content', content);
+        $('l-url').value = url.toString();
+    };
+    const copy = async (text, button) => {
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch {
+            const field = Object.assign(document.createElement('textarea'), { value: text });
+            document.body.append(field);
+            field.select();
+            document.execCommand('copy');
+            field.remove();
+        }
+        const label = button.textContent;
+        button.textContent = 'Copié ✓';
+        setTimeout(() => { button.textContent = label; }, 1500);
+    };
+    generator.addEventListener('input', update);
+    generator.addEventListener('change', update);
+    $('l-copy').addEventListener('click', (e) => copy($('l-url').value, e.currentTarget));
+    $('l-url').addEventListener('focus', (e) => e.target.select());
+    document.querySelectorAll('.l-copy-row').forEach((b) => b.addEventListener('click', () => copy(b.dataset.url, b)));
+    update();
+}
