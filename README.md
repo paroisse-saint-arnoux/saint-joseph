@@ -5,6 +5,7 @@ Site du projet de centre paroissial et d'église Saint Joseph, porté par la Par
 
 Laravel 13 · Filament 5 (administration) · SCSS + Bootstrap · MySQL · hébergé sur O2Switch.
 Les choix techniques et fonctionnels sont détaillés dans [CLAUDE.md](CLAUDE.md).
+Le connecteur Claude (serveur MCP) est documenté dans [docs/mcp.md](docs/mcp.md).
 
 ## Mettre à jour le contenu (sans programmation)
 
