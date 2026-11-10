@@ -9,7 +9,7 @@
             <a href="{{ route('home') }}#decouvrir">Découvrir</a>
             <a href="{{ route('home') }}#collecte">Soutenir</a>
             <a href="{{ route('articles.index') }}" @class(['active' => request()->routeIs('articles.*')])>Le projet</a>
-            <a href="{{ $donUrl }}" class="btn-don" target="_blank" rel="noopener">Faire un don</a>
+            <a href="{{ $donUrl }}" class="btn-don" data-don="en-tete" target="_blank" rel="noopener">Faire un don</a>
         </nav>
         <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-controls="menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>

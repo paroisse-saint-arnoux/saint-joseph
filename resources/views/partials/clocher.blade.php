@@ -82,7 +82,7 @@
                     <div class="kpi"><div class="v">{{ number_format(max($goal - $raised, 0) / 1000000, 1, ',', ' ') }}&nbsp;M€</div><div class="l">Reste à financer</div></div>
                 </div>
                 <div class="cta-clocher">
-                    <a class="primary" href="{{ $donUrl }}" target="_blank" rel="noopener">Faire un don &rarr;</a>
+                    <a class="primary" href="{{ $donUrl }}" data-don="collecte" target="_blank" rel="noopener">Faire un don &rarr;</a>
                 </div>
                 @if (filled($collecte['quote'] ?? null))
                     <p class="clocher-msg">{{ $collecte['quote'] }}</p>

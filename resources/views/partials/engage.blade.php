@@ -38,7 +38,7 @@
             <span class="eyebrow">Faire un don</span>
             <h2>{{ $site['don_title'] ?? 'Chaque pierre compte.' }}</h2>
             <p>{{ $site['don_text'] ?? '' }}</p>
-            <a class="cta-primary" href="{{ $donUrl }}" target="_blank" rel="noopener">Faire un don &rarr;</a>
+            <a class="cta-primary" href="{{ $donUrl }}" data-don="bandeau-don" target="_blank" rel="noopener">Faire un don &rarr;</a>
         </aside>
     </div>
 </section>

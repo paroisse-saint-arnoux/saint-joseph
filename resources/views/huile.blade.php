@@ -92,7 +92,7 @@
             </div>
         @endif
         <p>Votre don est <b>déductible à 66&nbsp;%</b> de votre impôt sur le revenu&nbsp;: un don de 100&nbsp;€ ne vous coûte que 34&nbsp;€.</p>
-        <a class="btn btn-gold btn-big" href="{{ $donUrl }}" target="_blank" rel="noopener">Faire un don</a>
+        <a class="btn btn-gold btn-big" href="{{ $donUrl }}" data-don="huile" target="_blank" rel="noopener">Faire un don</a>
         <p class="small">Paiement sécurisé sur la plateforme de dons du diocèse de Nice. Un reçu fiscal vous est envoyé.</p>
     </section>
 
