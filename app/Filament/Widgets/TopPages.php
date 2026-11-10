@@ -8,7 +8,7 @@ use Filament\Widgets\Widget;
 /** Tableau de bord : pages les plus vues sur 30 jours (Matomo). */
 class TopPages extends Widget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected int|string|array $columnSpan = 'full';
 

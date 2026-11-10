@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Filament\Widgets\DonationClicks;
 use App\Filament\Widgets\LatestArticles;
 use App\Filament\Widgets\TopPages;
 use App\Filament\Widgets\VisitsChart;
@@ -50,6 +51,27 @@ class DashboardTest extends TestCase
         Livewire::test(TopPages::class)->assertSee('Accueil')->assertSee('120');
 
         Http::assertSent(fn (Request $request) => $request['token_auth'] === 'secret' && $request['idSite'] === 3);
+    }
+
+    public function test_dashboard_shows_donation_clicks_history(): void
+    {
+        Http::fake(fn (Request $request) => match ($request['period']) {
+            'day' => Http::response([
+                now()->subDay()->toDateString() => [
+                    ['label' => 'Autre', 'nb_events' => 50, 'nb_visits' => 40],
+                    ['label' => 'Don', 'nb_events' => 3, 'nb_visits' => 2],
+                ],
+                now()->toDateString() => [['label' => 'Don', 'nb_events' => 4, 'nb_visits' => 3]],
+            ]),
+            'month' => Http::response(['2026-10' => [], '2026-11' => [['label' => 'Don', 'nb_events' => 9, 'nb_visits' => 6]]]),
+        });
+
+        $this->assertSame(['clicks' => 0, 'visits' => 0], app(Matomo::class)->donationClicks('month', 2)['2026-10']);
+
+        Livewire::test(DonationClicks::class)->assertSee('7 clics sur la période, au cours de 5 visites');
+        Livewire::test(DonationClicks::class)->set('filter', '365')->assertSee('9 clics');
+
+        Http::assertSent(fn (Request $request) => $request['method'] === 'Events.getCategory' && $request['date'] === 'last30');
     }
 
     public function test_dashboard_lists_the_three_latest_articles(): void
