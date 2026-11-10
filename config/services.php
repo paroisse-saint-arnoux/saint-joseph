@@ -42,6 +42,8 @@ return [
         'consultation_list_id' => (int) env('BREVO_CONSULTATION_LIST_ID', 6),
         // Liste « Croix du Pape » : personnes inscrites sur /croix pour recevoir le lien de vote du concours S.O.S Calvaires.
         'croix_list_id' => (int) env('BREVO_CROIX_LIST_ID', 7),
+        // Liste « Huile d'olive » : contacts inscrits depuis la page /huile (QR code des étiquettes).
+        'huile_list_id' => (int) env('BREVO_HUILE_LIST_ID', 8),
     ],
 
     'turnstile' => [

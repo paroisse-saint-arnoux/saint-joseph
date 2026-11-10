@@ -5,6 +5,7 @@ use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CroixController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HuileController;
 use App\Http\Controllers\LibraryArchiveController;
 use App\Http\Controllers\LibrarySearchController;
 use App\Http\Controllers\MagicLinkController;
@@ -41,6 +42,10 @@ Route::get('/croix', [CroixController::class, 'show'])->name('croix');
 Route::post('/croix', [CroixController::class, 'store'])->middleware('throttle:croix-signup')->name('croix.store');
 Route::get('/croix/vote', [CroixController::class, 'vote'])->name('croix.vote');
 Route::get('/croix/liens', [CroixController::class, 'links'])->name('croix.links'); // générateur de liens UTM, non référencé
+
+// Opération « huile d'olive » : page ouverte par le QR code des étiquettes (non référencée).
+Route::get('/huile', [HuileController::class, 'show'])->name('huile');
+Route::post('/huile', [HuileController::class, 'store'])->middleware('throttle:huile-signup')->name('huile.store');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 

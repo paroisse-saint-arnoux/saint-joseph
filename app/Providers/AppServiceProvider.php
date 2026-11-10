@@ -41,6 +41,12 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinutes(10, 5)->by('croix-email|'.mb_strtolower(trim((string) $request->input('email')))),
         ]);
 
+        // Page /huile (QR code des bouteilles d'huile d'olive).
+        RateLimiter::for('huile-signup', fn (Request $request) => [
+            Limit::perMinutes(10, 100)->by('huile-ip|'.$request->ip()),
+            Limit::perMinutes(10, 5)->by('huile-email|'.mb_strtolower(trim((string) $request->input('email')))),
+        ]);
+
         // Connecteur Claude (OAuth) : page « Autoriser Claude » aux couleurs du site.
         Passport::authorizationView('mcp.authorize');
         // Jeton d'accès court, renouvelé automatiquement par Claude ; reconnexion nécessaire après un an sans usage.

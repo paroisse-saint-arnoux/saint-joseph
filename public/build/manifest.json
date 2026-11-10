@@ -144,6 +144,25 @@
       "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2"
     ]
   },
+  "resources/js/huile.js": {
+    "file": "assets/huile-BOoH81qA.js",
+    "name": "huile",
+    "src": "resources/js/huile.js",
+    "isEntry": true,
+    "css": [
+      "assets/opsz-B5Un8056.css",
+      "assets/hanken-grotesk-9jBPE4aV.css"
+    ],
+    "assets": [
+      "assets/fraunces-vietnamese-opsz-normal-Czevyj-6.woff2",
+      "assets/fraunces-latin-ext-opsz-normal-CJcjJNj7.woff2",
+      "assets/fraunces-latin-opsz-normal-DihXLNYH.woff2",
+      "assets/hanken-grotesk-cyrillic-ext-wght-normal-D_UHSL_T.woff2",
+      "assets/hanken-grotesk-vietnamese-wght-normal-CHiFlh_0.woff2",
+      "assets/hanken-grotesk-latin-ext-wght-normal-Dg-wlmqe.woff2",
+      "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2"
+    ]
+  },
   "resources/scss/app.scss": {
     "file": "assets/app-f7h4lC7x.css",
     "name": "app",
@@ -169,6 +188,15 @@
       "croix.css"
     ],
     "src": "resources/scss/croix.scss",
+    "isEntry": true
+  },
+  "resources/scss/huile.scss": {
+    "file": "assets/huile-h4pIN3VR.css",
+    "name": "huile",
+    "names": [
+      "huile.css"
+    ],
+    "src": "resources/scss/huile.scss",
     "isEntry": true
   },
   "resources/scss/preview.scss": {

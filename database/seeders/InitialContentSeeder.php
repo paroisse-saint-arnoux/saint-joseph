@@ -83,7 +83,7 @@ class InitialContentSeeder extends Seeder
                 'title' => 'Un projet immobilier structuré et conçu pour la mission.',
                 'intro' => 'La Paroisse Saint-Arnoux, créée par le regroupement de ses 9 communes, bâtit un centre paroissial et son église pour accueillir la forte croissance missionnaire.',
                 'stats' => [
-                    ['value' => '8736', 'unit' => 'm²', 'label' => 'Parcelle acquise'],
+                    ['value' => '8736', 'unit' => 'm²', 'label' => 'Parcelle au Rouret'],
                     ['value' => '6', 'unit' => 'M€', 'label' => 'Budget'],
                     ['value' => '400', 'unit' => 'pers.', 'label' => "Capacité d'accueil"],
                     ['value' => '70', 'unit' => '%', 'label' => 'Espaces paysagers'],
