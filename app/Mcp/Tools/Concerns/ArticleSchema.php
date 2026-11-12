@@ -15,7 +15,7 @@ trait ArticleSchema
         return [
             'title' => $schema->string()->description('Titre de l\'article.'),
             'category' => $schema->string()->enum(array_column(Category::cases(), 'value'))
-                ->description('Catégorie (une seule) : agenda, architecture, budget, construction, projet, presentation, equipe.'),
+                ->description('Catégorie (une seule) : agenda, architecture, budget, construction, projet, presentation, equipe, presse.'),
             'excerpt' => $schema->string()->description('Chapô : 1 à 2 phrases (400 caractères max), affiché dans les listes et en partage.'),
             'format' => $schema->string()->enum(array_column(ArticleFormat::cases(), 'value'))
                 ->description('markdown (par défaut, à privilégier) ou html (mise en page riche).'),

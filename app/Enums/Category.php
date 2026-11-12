@@ -17,6 +17,7 @@ enum Category: string implements HasLabel
     case Projet = 'projet';
     case Presentation = 'presentation';
     case Equipe = 'equipe';
+    case Presse = 'presse';
 
     public function getLabel(): string
     {
@@ -28,6 +29,7 @@ enum Category: string implements HasLabel
             self::Projet => 'Projet',
             self::Presentation => 'Présentation',
             self::Equipe => 'Équipe',
+            self::Presse => 'Presse',
         };
     }
 }

@@ -117,7 +117,7 @@ Crée un article, **en brouillon par défaut**. Les champs (trait `Concerns\Arti
 | Champ | Type | Description |
 |---|---|---|
 | `title` (requis) | texte | Titre |
-| `category` (requis) | `agenda`, `architecture`, `budget`, `construction`, `projet`, `presentation`, `equipe` | Une seule catégorie |
+| `category` (requis) | `agenda`, `architecture`, `budget`, `construction`, `projet`, `presentation`, `equipe`, `presse` | Une seule catégorie |
 | `excerpt` | texte | Chapô de 1 à 2 phrases (400 caractères maximum), affiché dans les listes et les partages |
 | `format` | `markdown` (par défaut) \| `html` | Format du corps |
 | `body` | texte | Corps, sans répéter le titre ni le chapô |

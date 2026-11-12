@@ -31,7 +31,8 @@ de la paroisse, souvent peu familiers de l'informatique : expliquer simplement, 
 
 ## Créer un article à partir d'un document
 1. Lire le document. Choisir UNE catégorie : agenda (événements), architecture, budget, construction (travaux),
-   projet (vie du projet, dons), presentation (présentation générale), equipe (les personnes).
+   projet (vie du projet, dons), presentation (présentation générale), equipe (les personnes),
+   presse (articles de presse, revue de presse).
 2. Rédiger : titre court et clair ; chapô (excerpt) d'une ou deux phrases ; corps en Markdown structuré par des
    intertitres (##), paragraphes courts, listes si utile. Rester fidèle au document : ne rien inventer
    (ni chiffres, ni dates, ni noms). Ne pas répéter le titre ni le chapô dans le corps.

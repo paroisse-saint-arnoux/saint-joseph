@@ -47,7 +47,7 @@ Supprimés de l'ancien site : architecture IA, valeurs/mission, parrains, simula
 
 ### Articles
 - URL : `/le-projet` (tous), `/le-projet/{categorie}` (filtre), `/le-projet/{categorie}/{slug}`. Si la catégorie change, l'ancienne URL redirige en 301.
-- **Une seule catégorie** par article, liste fixe (`App\Enums\Category`) : Agenda, Architecture, Budget, Construction, Projet, Présentation, Équipe.
+- **Une seule catégorie** par article, liste fixe (`App\Enums\Category`) : Agenda, Architecture, Budget, Construction, Projet, Présentation, Équipe, Presse.
 - Tri : épinglés d'abord, puis antichronologique (`published_at`). **Pas de recherche**, filtre par catégorie, **défilement infini** (9 par page, JSON quand requête AJAX, lien « Voir plus » sans JS).
 - Champs : titre, slug, intro (excerpt), image de partage (OG) + alt + `show_cover` (afficher ou non cette image en haut de l'article, oui par défaut ; elle sert toujours aux partages et aux cartes), corps, galerie (carrousel, alt obligatoire), statut, date de publication modifiable (date future = programmé), épinglé.
 - **Deux formats** : `markdown` (édité dans l'admin, onglets Rédaction/Aperçu) et `html` (mis en page, généré par IA, ex. article Équipe ; éditeur de code HTML dans l'admin, écrit surtout via l'API).
