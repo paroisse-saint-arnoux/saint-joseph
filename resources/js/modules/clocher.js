@@ -156,7 +156,6 @@ export function initClocher() {
             btn.classList.remove('bump');
             void btn.offsetWidth; // relance l'animation
             btn.classList.add('bump');
-            section.querySelector('.church-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
     });
     $('clocherReset')?.addEventListener('click', () => {
