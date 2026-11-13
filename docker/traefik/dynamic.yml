@@ -1,0 +1,7 @@
+# Certificat local *.dev.saint-arnoux.fr généré par mkcert (voir docker/traefik/certs/README.md).
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/dev.saint-arnoux.fr.pem
+        keyFile: /certs/dev.saint-arnoux.fr-key.pem

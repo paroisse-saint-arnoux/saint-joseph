@@ -8,9 +8,8 @@
 #   https://traefik.dev.saint-arnoux.fr             tableau de bord de Traefik
 # Les adresses en http:// fonctionnent aussi.
 #
-# Certificat : *.dev.saint-arnoux.fr chez Let's Encrypt, validé par DNS via l'API cPanel d'O2Switch
-# (CPANEL_USERNAME, CPANEL_TOKEN, CPANEL_BASE_URL, TRAEFIK_ACME_EMAIL dans le .env). Sans eux,
-# Traefik sert un certificat auto-signé (avertissement du navigateur, ou utiliser http://).
+# Certificat : *.dev.saint-arnoux.fr signé par une autorité locale mkcert, sans service extérieur
+# (docker/traefik/certs/README.md). Sans lui, Traefik sert un certificat auto-signé.
 #
 # Le réseau « traefik » a un nom fixe : un autre projet peut s'y brancher (réseau externe « traefik »
 # + labels traefik.*) pour être servi lui aussi sur *.dev.saint-arnoux.fr.
@@ -23,25 +22,17 @@ services:
       - --providers.docker.network=traefik
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      - --entrypoints.websecure.http.tls.certresolver=le
-      - --entrypoints.websecure.http.tls.domains[0].main=dev.saint-arnoux.fr
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.dev.saint-arnoux.fr
-      - --certificatesresolvers.le.acme.email=${TRAEFIK_ACME_EMAIL:-}
-      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.le.acme.dnschallenge.provider=cpanel
-      - --certificatesresolvers.le.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --entrypoints.websecure.http.tls=true
+      - --providers.file.filename=/etc/traefik/dynamic.yml
       - --api.dashboard=true
       - --log.level=INFO
-    environment:
-      CPANEL_USERNAME: ${CPANEL_USERNAME:-}
-      CPANEL_TOKEN: ${CPANEL_TOKEN:-}
-      CPANEL_BASE_URL: ${CPANEL_BASE_URL:-}
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - letsencrypt:/letsencrypt
+      - ./docker/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./docker/traefik/certs:/certs:ro
     networks: [traefik]
     labels:
       traefik.enable: "true"
@@ -135,4 +126,3 @@ networks:
 volumes:
   mysqldata:
   dbgate:
-  letsencrypt:
