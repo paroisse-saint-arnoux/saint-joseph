@@ -1,11 +1,11 @@
 # Stack de développement local. Voir CLAUDE.md pour les commandes.
 #
 # Tout passe par Traefik, sur *.dev.saint-arnoux.fr (le DNS public renvoie 127.0.0.1) :
-#   https://saint-joseph.dev.saint-arnoux.fr        site et admin
-#   https://saint-joseph-mail.dev.saint-arnoux.fr   Mailpit (emails reçus)
-#   https://saint-joseph-db.dev.saint-arnoux.fr     DbGate (base de données)
-#   https://saint-joseph-vite.dev.saint-arnoux.fr   serveur Vite (profil « front »)
-#   https://traefik.dev.saint-arnoux.fr             tableau de bord de Traefik
+#   https://saint-joseph.dev.saint-arnoux.fr     site et admin
+#   https://mailpit.dev.saint-arnoux.fr          Mailpit (emails reçus)
+#   https://dbgate.dev.saint-arnoux.fr           DbGate (base de données)
+#   https://vite.dev.saint-arnoux.fr             serveur Vite (profil « front »)
+#   https://traefik.dev.saint-arnoux.fr          tableau de bord de Traefik
 # Les adresses en http:// fonctionnent aussi.
 #
 # Certificat : *.dev.saint-arnoux.fr signé par une autorité locale mkcert, sans service extérieur
@@ -79,8 +79,8 @@ services:
     networks: [default, traefik]
     labels:
       traefik.enable: "true"
-      traefik.http.routers.saint-joseph-mail.rule: Host(`saint-joseph-mail.dev.saint-arnoux.fr`)
-      traefik.http.services.saint-joseph-mail.loadbalancer.server.port: "8025"
+      traefik.http.routers.mailpit.rule: Host(`mailpit.dev.saint-arnoux.fr`)
+      traefik.http.services.mailpit.loadbalancer.server.port: "8025"
 
   # Interface web d'exploration de la base
   dbgate:
@@ -101,14 +101,14 @@ services:
     networks: [default, traefik]
     labels:
       traefik.enable: "true"
-      traefik.http.routers.saint-joseph-db.rule: Host(`saint-joseph-db.dev.saint-arnoux.fr`)
-      traefik.http.services.saint-joseph-db.loadbalancer.server.port: "3000"
+      traefik.http.routers.dbgate.rule: Host(`dbgate.dev.saint-arnoux.fr`)
+      traefik.http.services.dbgate.loadbalancer.server.port: "3000"
 
   node:
     image: node:22-alpine
     working_dir: /app
     environment:
-      VITE_DEV_ORIGIN: ${VITE_DEV_ORIGIN:-https://saint-joseph-vite.dev.saint-arnoux.fr}
+      VITE_DEV_ORIGIN: ${VITE_DEV_ORIGIN:-https://vite.dev.saint-arnoux.fr}
     volumes:
       - .:/app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
@@ -116,8 +116,8 @@ services:
     networks: [default, traefik]
     labels:
       traefik.enable: "true"
-      traefik.http.routers.saint-joseph-vite.rule: Host(`saint-joseph-vite.dev.saint-arnoux.fr`)
-      traefik.http.services.saint-joseph-vite.loadbalancer.server.port: "5173"
+      traefik.http.routers.vite.rule: Host(`vite.dev.saint-arnoux.fr`)
+      traefik.http.services.vite.loadbalancer.server.port: "5173"
 
 networks:
   traefik:

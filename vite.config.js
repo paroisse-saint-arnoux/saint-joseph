@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
 // Serveur de développement derrière Traefik (docker compose --profile front up node) :
-// VITE_DEV_ORIGIN = https://saint-joseph-vite.dev.saint-arnoux.fr. Sinon, http://localhost:5173.
+// VITE_DEV_ORIGIN = https://vite.dev.saint-arnoux.fr. Sinon, http://localhost:5173.
 const devOrigin = process.env.VITE_DEV_ORIGIN ? new URL(process.env.VITE_DEV_ORIGIN) : null;
 
 export default defineConfig({

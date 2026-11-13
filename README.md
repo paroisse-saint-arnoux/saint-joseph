@@ -37,8 +37,8 @@ et `ADMIN_EMAIL=votre@email` (premier administrateur).
 Tout passe par Traefik sur `*.dev.saint-arnoux.fr` (ce domaine renvoie vers `127.0.0.1`) :
 
 - Site : https://saint-joseph.dev.saint-arnoux.fr — Admin : https://saint-joseph.dev.saint-arnoux.fr/admin
-- Emails reçus : https://saint-joseph-mail.dev.saint-arnoux.fr (Mailpit)
-- Base de données : https://saint-joseph-db.dev.saint-arnoux.fr (DbGate, connexion préconfigurée)
+- Emails reçus : https://mailpit.dev.saint-arnoux.fr (Mailpit)
+- Base de données : https://dbgate.dev.saint-arnoux.fr (DbGate, connexion préconfigurée)
 - Certificat https : généré en local par mkcert, voir [docker/traefik/certs/README.md](docker/traefik/certs/README.md). Sans lui, certificat auto-signé (ou utiliser http://).
 - Tests : `docker compose exec -u www-data app php artisan test`
 
