@@ -36,9 +36,8 @@
 
     <div class="cx-tiles">
         <div class="cx-tile"><b>{{ $t['visitors'] }}</b><span>personnes ont ouvert la page</span><small>{{ $t['pageviews'] }} affichages au total</small></div>
-        <div class="cx-tile"><b>{{ $t['signups'] }}</b><span>ont laissé leurs coordonnées</span><small>{{ $pct($t['signups'], $t['visitors']) }} des visiteurs</small></div>
+        <div class="cx-tile"><b>{{ $brevoContacts ?? '—' }}</b><span>ont laissé leurs coordonnées</span><small>@if ($brevoContacts !== null){{ $pct((int) $brevoContacts, $t['visitors']) }} des visiteurs · @endif contacts de la liste Brevo n° {{ $brevoList }}</small></div>
         <div class="cx-tile"><b>{{ $t['votes'] }}</b><span>ont cliqué vers le vote</span><small>{{ $pct($t['votes'] - $t['direct_votes'], $t['visitors']) }} des visiteurs · {{ $t['direct_votes'] }} par le lien direct</small></div>
-        <div class="cx-tile"><b>{{ $brevoContacts ?? '—' }}</b><span>contacts dans la liste Brevo n° {{ $brevoList }}</span></div>
     </div>
 
     <x-filament::section>

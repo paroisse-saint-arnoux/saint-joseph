@@ -195,7 +195,7 @@ class CroixTest extends TestCase
             },
         ]);
 
-        $this->get('/admin/croix')->assertOk()->assertSee('Le vote est ouvert')->assertSee('messe')->assertDontSee('Liens à diffuser')->assertSee('contacts dans la liste Brevo');
+        $this->get('/admin/croix')->assertOk()->assertSee('Le vote est ouvert')->assertSee('messe')->assertDontSee('Liens à diffuser')->assertSee('ont laissé leurs coordonnées')->assertSee('contacts de la liste Brevo');
         $this->get('/admin/brevo')->assertOk()
             ->assertSee('Croix du Pape')->assertSee('+2')     // 2 nouveaux contacts en 30 jours dans la liste 7
             ->assertSee('Lettre de novembre')->assertSee('45,9 %'); // 45 ouvertures / 98 délivrés
