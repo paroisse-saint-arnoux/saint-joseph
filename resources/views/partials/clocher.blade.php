@@ -1,4 +1,6 @@
-{{-- « Le clocher des bâtisseurs » : 1 pierre = 10 €, 1 mur = 100 pierres. Animé par resources/js/modules/clocher.js. --}}
+{{-- « Le clocher des bâtisseurs » : 1 pierre = 10 €, 1 mur = 100 pierres. Animé par resources/js/modules/clocher.js.
+     Un clic sur un niveau (1 pierre, 10 pierres…) ajoute ce don au clocher ; « Le clocher » ouvre le formulaire de mécénat. --}}
+@use('App\Support\SpamGuard')
 @php
     $raised = (float) ($collecte['raised'] ?? 0);
     $goal = max((float) ($collecte['goal'] ?? 6000000), 1);
@@ -51,6 +53,7 @@
                         <circle cx="120" cy="372" r="19" fill="#00204E" opacity=".38"/><circle cx="120" cy="372" r="19" fill="none" stroke="#b89a5a" stroke-width="1.2"/>
                         <path d="M104 590 v-44 a16 16 0 0 1 32 0 v44 Z" fill="#00204E" opacity=".5"/>
                     </g>
+                    <rect id="todayBand" x="62" y="590" width="116" height="0" fill="#E2C97F" opacity="0" clip-path="url(#riseClip)" class="today-band"/>
                     <rect x="40" y="590" width="160" height="8" rx="2" fill="#d8c9a6"/>
                     <line x1="30" y1="590" x2="210" y2="590" stroke="#E2C97F" stroke-width="1" opacity=".5"/>
                     <g stroke="#E2C97F" stroke-width="3.5" stroke-linecap="round"><line x1="120" y1="60" x2="120" y2="28"/><line x1="107" y1="42" x2="133" y2="42"/></g>
@@ -63,6 +66,12 @@
                     <div class="barline"><div class="big" id="raisedTxt">0 <small>pierres</small></div><div class="pct" id="pctTxt">0 %</div></div>
                     <div class="bar"><i id="barFill"></i></div>
                     <div class="barsub"><span><b>{{ $fmt($raised) }} €</b> collectés</span><span>Objectif : <b>{{ $fmt($goal) }} €</b></span></div>
+                </div>
+
+                {{-- Apparaît quand on a choisi un niveau ci-dessous --}}
+                <div class="clocher-give" id="clocherGive" hidden>
+                    <a href="{{ $donUrl }}" data-don="clocher-simulation" target="_blank" rel="noopener">Réaliser ce don maintenant&nbsp;! <span id="clocherGiveAmount"></span></a>
+                    <button type="button" class="clocher-reset" id="clocherReset">Recommencer</button>
                 </div>
             </div>
 
@@ -92,13 +101,49 @@
 
         <div class="levels">
             <h3>Quel bâtisseur voulez-vous être&nbsp;?</h3>
+            <p class="levels-hint">Touchez un niveau pour voir le clocher monter avec votre don.</p>
             <div class="levels-grid">
-                <div class="lvl"><b>1 pierre</b><span>10 € : vous posez une pierre du clocher.</span></div>
-                <div class="lvl"><b>10 pierres</b><span>100 € : vous montez une rangée du mur.</span></div>
-                <div class="lvl"><b>1 mur</b><span>1 000 € : 100 pierres, un mur entier s'élève.</span></div>
-                <div class="lvl"><b>5 murs</b><span>5 000 € : le clocher prend de la hauteur.</span></div>
-                <div class="lvl"><b>10 murs</b><span>10 000 € : les cloches approchent du sommet.</span></div>
-                <div class="lvl"><b>Le clocher</b><span>Ensemble : les cloches sonnent en 2030.</span></div>
+                <button type="button" class="lvl" data-stones="1"><b>1 pierre</b><span>10 € : vous posez une pierre du clocher.</span></button>
+                <button type="button" class="lvl" data-stones="10"><b>10 pierres</b><span>100 € : vous montez une rangée du mur.</span></button>
+                <button type="button" class="lvl" data-stones="100"><b>1 mur</b><span>1 000 € : 100 pierres, un mur entier s'élève.</span></button>
+                <button type="button" class="lvl" data-stones="500"><b>5 murs</b><span>5 000 € : le clocher prend de la hauteur.</span></button>
+                <button type="button" class="lvl" data-stones="1000"><b>10 murs</b><span>10 000 € : les cloches approchent du sommet.</span></button>
+                <button type="button" class="lvl" data-mecenat aria-expanded="false" aria-controls="mecenat"><b>Le clocher</b><span>Ensemble : les cloches sonnent en 2030.</span></button>
+            </div>
+
+            {{-- Mécénat : formulaire de contact envoyé en AJAX (ContactController, réponse JSON) --}}
+            <div class="mecenat" id="mecenat" hidden>
+                <h3>Vous souhaitez aider ce projet de manière substantielle&nbsp;? Contactez-nous&nbsp;!</h3>
+                <form class="form-site" method="post" action="{{ route('contact.send') }}" data-mecenat-form
+                      @if (SpamGuard::turnstileEnabled()) data-turnstile @endif>
+                    @csrf
+                    <input type="hidden" name="subject" value="Mécénat : soutien important au projet">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="m-name" class="form-label">Nom et prénom</label>
+                            <input id="m-name" name="name" type="text" class="form-control" required maxlength="120" autocomplete="name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="m-email" class="form-label">Adresse email</label>
+                            <input id="m-email" name="email" type="email" class="form-control" required maxlength="190" autocomplete="email">
+                        </div>
+                        <div class="col-12">
+                            <label for="m-message" class="form-label">Message</label>
+                            <textarea id="m-message" name="message" rows="4" class="form-control" required maxlength="5000" placeholder="Votre projet de soutien, vos coordonnées téléphoniques si vous souhaitez être rappelé…"></textarea>
+                        </div>
+                    </div>
+                    <div class="hp-field" aria-hidden="true">
+                        <label for="m-website">Ne pas remplir</label>
+                        <input id="m-website" type="text" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <input type="hidden" name="_t" value="{{ SpamGuard::timestamp() }}">
+                    @if (SpamGuard::turnstileEnabled())
+                        <div class="cf-turnstile mt-3" data-sitekey="{{ config('services.turnstile.site_key') }}" data-language="fr"></div>
+                    @endif
+                    <button type="submit" class="cta-navy">Envoyer mon message</button>
+                    <div class="form-feedback" role="status"></div>
+                    <p class="note">Vos coordonnées servent uniquement à vous répondre. <a href="{{ route('privacy') }}">Confidentialité</a></p>
+                </form>
             </div>
 
             {{-- Derniers dons de la campagne RGIVE : une ligne à la fois, qui change toutes les 5 s (resources/js/modules/donors.js). --}}

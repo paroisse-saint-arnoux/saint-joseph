@@ -75,4 +75,23 @@ class FormsTest extends TestCase
 
         Mail::assertNothingSent();
     }
+
+    public function test_patronage_form_on_the_home_page_sends_email_as_json(): void
+    {
+        Mail::fake();
+
+        $this->get('/')->assertOk()
+            ->assertSee('data-stones="1000"', false)
+            ->assertSee('Réaliser ce don maintenant')
+            ->assertSee('Vous souhaitez aider ce projet de manière substantielle');
+
+        $this->postJson('/contact', [
+            'name' => 'Jean Mécène', 'email' => 'jean@example.com', 'subject' => 'Mécénat : soutien important au projet', 'message' => 'Je souhaite aider.', '_t' => $this->oldTimestamp(),
+        ])->assertOk()->assertJson(['ok' => true]);
+
+        Mail::assertSent(ContactMail::class, fn (ContactMail $mail) => $mail->hasSubject('[Site Saint Joseph] Mécénat : soutien important au projet'));
+
+        $this->postJson('/contact', ['name' => 'Bot', 'email' => 'bot@example.com', 'message' => 'Spam', 'website' => 'x', '_t' => $this->oldTimestamp()])
+            ->assertStatus(422)->assertJson(['ok' => false]);
+    }
 }

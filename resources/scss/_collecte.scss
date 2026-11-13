@@ -79,9 +79,14 @@
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
   @media (max-width: 760px) { grid-template-columns: 1fr; }
 }
+.levels-hint { text-align: center; color: $ink-soft; font-size: .92rem; margin: -8px 0 18px; }
 .lvl {
   background: $paper; border: 1px solid $parchment-2; border-radius: 12px; padding: 18px 20px; transition: .3s $ease;
-  &:hover { border-color: $gold; transform: translateY(-3px); box-shadow: 0 12px 26px rgba($navy, .08); }
+  font: inherit; text-align: left; cursor: pointer; width: 100%;
+  &:hover, &:focus-visible { border-color: $gold; transform: translateY(-3px); box-shadow: 0 12px 26px rgba($navy, .08); }
+  &:focus-visible { outline: 2px solid $gold; outline-offset: 2px; }
+  &.bump { animation: lvl-bump .45s $ease; }
+  &.is-open { border-color: $gold; background: rgba($gold, .1); }
   b { display: block; font-family: $font-display; font-size: 1.5rem; color: $gold; margin-bottom: 6px; font-weight: 400; }
   span { font-size: .92rem; color: $ink-soft; }
 }
@@ -105,4 +110,28 @@
     b { font-weight: 600; }
   }
   @media (prefers-reduced-motion: reduce) { li { transition: none; transform: none; } }
+}
+
+@keyframes lvl-bump { 40% { transform: scale(.96); background: rgba($gold, .18); } }
+
+// Don « simulé » en cliquant sur les niveaux : bande dorée sur le clocher, briques du jour, lien vers le don
+.today-band { transition: opacity .3s; animation: today-glow 1.6s ease-in-out infinite alternate; }
+@keyframes today-glow { from { fill: #E2C97F; } to { fill: #fff3c4; } }
+.wall .brick.today { background: linear-gradient(180deg, #f3d77e, #c5a24b); box-shadow: 0 0 6px rgba(#f3d77e, .9); }
+.barline .big em { display: block; font-style: normal; font-family: $font-body; font-size: 1rem; font-weight: 600; color: $gold; margin-top: 8px; }
+.clocher-give {
+  position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba($cream, .16);
+  &[hidden] { display: none; }
+  a { background: $gold; color: $navy-900; border-radius: 44px; padding: 12px 24px; font-weight: 600; transition: .3s $ease;
+    &:hover { background: $gold-soft; color: $navy-900; transform: translateY(-2px); }
+    span { font-weight: 500; } }
+}
+.clocher-reset { background: none; border: 0; color: $cream-dim; font-size: .85rem; text-decoration: underline; cursor: pointer; &:hover { color: $cream; } }
+
+// « Le clocher » : formulaire de mécénat
+.mecenat {
+  margin-top: 18px; background: $paper; border: 1px solid $gold; border-radius: 18px; padding: 30px clamp(20px, 4vw, 38px);
+  &[hidden] { display: none; }
+  h3 { font-size: clamp(1.3rem, 2.6vw, 1.7rem); color: $navy; margin: 0 0 18px; text-align: left; }
 }
