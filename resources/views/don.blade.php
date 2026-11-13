@@ -39,7 +39,8 @@
             </aside>
 
             <div class="don-card-embed">
-                <div data-rgive-src="{{ $donUrl }}"></div>
+                {{-- ?type=regular : onglet « Don mensuel » sélectionné d'office (paramètre d'URL accepté par RGIVE) --}}
+                <div data-rgive-src="{{ $donUrl }}?type=regular"></div>
             </div>
         </div>
     </section>
