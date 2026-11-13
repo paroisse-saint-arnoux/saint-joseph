@@ -25,7 +25,9 @@ Route::post('/contact', [ContactController::class, 'send'])->middleware('throttl
 Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('throttle:10,10,newsletter')->name('newsletter');
 
 // Essai : formulaire de don RGIVE intégré dans le site.
-Route::get('/don', fn () => view('don', ['collecte' => \App\Models\Setting::get('home.collecte', [])]))->name('don');
+Route::get('/don', fn (\App\Services\Rgive $rgive) => view('don', [
+    'collecte' => ['raised' => $rgive->raised()] + \App\Models\Setting::get('home.collecte', []),
+]))->name('don');
 
 Route::get('/mentions-legales', [PageController::class, 'legal'])->name('legal');
 Route::get('/confidentialite', [PageController::class, 'privacy'])->name('privacy');
