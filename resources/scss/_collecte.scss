@@ -85,3 +85,24 @@
   b { display: block; font-family: $font-display; font-size: 1.5rem; color: $gold; margin-bottom: 6px; font-weight: 400; }
   span { font-size: .92rem; color: $ink-soft; }
 }
+
+// Derniers dons (campagne RGIVE) : une ligne à la fois, en fondu
+.donors-ticker {
+  display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 22px; padding: 14px 20px; border-radius: 12px;
+  background: rgba($gold, .1); border: 1px solid rgba($gold, .35); text-align: center;
+}
+.donors-label {
+  font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: darken($gold, 12%);
+  &::before { content: "♥"; margin-right: 8px; letter-spacing: 0; }
+}
+.donors-list {
+  display: grid; list-style: none; margin: 0; padding: 0; min-width: 0;
+  li {
+    grid-area: 1 / 1; color: $navy; font-size: 1rem;
+    opacity: 0; transform: translateY(8px); transition: opacity .5s $ease, transform .5s $ease;
+    &.is-on { opacity: 1; transform: none; }
+    b { font-weight: 600; }
+  }
+  @media (prefers-reduced-motion: reduce) { li { transition: none; transform: none; } }
+}

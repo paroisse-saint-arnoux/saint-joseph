@@ -51,6 +51,12 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    // Campagne de dons RGIVE du diocèse : adresse publique du compteur de la page de campagne
+    // (montant collecté, nombre de donateurs, derniers dons). Vide = désactivé (montant saisi dans l'admin).
+    'rgive' => [
+        'widget_url' => env('RGIVE_WIDGET_URL', 'https://don-nice.catholique.fr/api/campaign-widgets-data/7cfb9e80-9755-4e60-a6c0-0f2c82232618/'),
+    ],
+
     'matomo' => [
         'url' => env('MATOMO_URL'),
         'site_id' => env('MATOMO_SITE_ID'),

@@ -17,7 +17,7 @@
                 il le met en forme, ajoute les photos et le range dans l'admin, <strong>en brouillon</strong>.
                 Vous n'avez plus qu'à relire et publier.</p>
             <p>Vous pouvez aussi lui donner l'adresse d'une page du site et lui demander de la modifier
-                (« corrige les fautes », « ajoute un paragraphe sur… », « mets à jour le montant de la collecte »…).</p>
+                (« corrige les fautes », « ajoute un paragraphe sur… », « mets à jour l'objectif de la collecte »…).</p>
         </div>
     </x-filament::section>
 
@@ -91,7 +91,7 @@
                 Joignez votre document (bouton <strong>+</strong> > ajouter un fichier, ou glissez-le), puis écrivez votre demande. Par exemple :</p>
             <div class="cc-prompt">Fais un article pour le site Saint Joseph à partir de ce document, avec ses photos.</div>
             <div class="cc-prompt">Sur la page https://saint-joseph.saint-arnoux.fr/le-projet/budget/le-budget-du-projet, mets à jour les montants avec ceux du document joint.</div>
-            <div class="cc-prompt">Mets à jour le montant de la collecte sur la page d'accueil : 1 550 000 €.</div>
+            <div class="cc-prompt">Mets à jour l'objectif de la collecte sur la page d'accueil : 6 500 000 €.</div>
 
             <h3>Les photos</h3>
             <p>Claude prend les photos dans la <a href="{{ $libraryUrl }}"><strong>Bibliothèque d'images</strong></a> du site.

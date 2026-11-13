@@ -6,6 +6,7 @@ import 'bootstrap/js/dist/carousel';
 
 import { initHeader, initReveal, initCounters } from './modules/ui';
 import { initClocher } from './modules/clocher';
+import { initDonors } from './modules/donors';
 import { initInfiniteScroll } from './modules/infinite-scroll';
 import { initNewsletter } from './modules/newsletter';
 import { initShare } from './modules/share';
@@ -15,6 +16,7 @@ initHeader();
 initReveal();
 initCounters();
 initClocher();
+initDonors();
 initInfiniteScroll();
 initNewsletter();
 initShare();

@@ -100,6 +100,22 @@
                 <div class="lvl"><b>10 murs</b><span>10 000 € : les cloches approchent du sommet.</span></div>
                 <div class="lvl"><b>Le clocher</b><span>Ensemble : les cloches sonnent en 2030.</span></div>
             </div>
+
+            {{-- Derniers dons de la campagne RGIVE : une ligne à la fois, qui change toutes les 3 s (resources/js/modules/donors.js). --}}
+            @if (! empty($collecte['donors']))
+                <div class="donors-ticker" data-donors-ticker>
+                    <span class="donors-label">Ils viennent de bâtir</span>
+                    <ul class="donors-list" aria-label="Derniers dons">
+                        @foreach ($collecte['donors'] as $donor)
+                            @php $stones = intdiv((int) $donor['amount'], 10); @endphp
+                            <li @class(['is-on' => $loop->first])>
+                                <b>{{ $donor['name'] }}</b>@if ($donor['city']), de {{ $donor['city'] }},@endif
+                                {{ $stones >= 1 ? 'a posé '.$fmt($stones).' '.($stones > 1 ? 'pierres' : 'pierre') : 'a fait un don' }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
     </div>
 </section>

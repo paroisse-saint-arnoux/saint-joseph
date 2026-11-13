@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Services\Brevo;
+use App\Services\Rgive;
 use App\Support\SpamGuard;
 use Illuminate\Http\Request;
 
@@ -13,11 +14,11 @@ use Illuminate\Http\Request;
  */
 class HuileController extends Controller
 {
-    public function show()
+    public function show(Rgive $rgive)
     {
         return response()->view('huile', [
             'stats' => Setting::get('home.projet.stats', []), // chiffres clés de l'accueil
-            'raised' => (int) Setting::get('home.collecte.raised', 0),
+            'raised' => $rgive->raised(), // campagne RGIVE
             'goal' => (int) Setting::get('home.collecte.goal', 0),
             'heroImage' => Setting::get('home.hero.image'),
             'projectImage' => Setting::get('home.projet.images.0'),

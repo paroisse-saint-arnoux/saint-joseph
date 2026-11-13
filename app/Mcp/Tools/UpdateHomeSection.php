@@ -17,7 +17,7 @@ Modifie une section de la page d'accueil. Lire d'abord la page avec get-page (pa
 « content » ne contient que les champs à changer, avec les mêmes noms et la même forme que dans get-page ;
 une liste (facts, stats, buildings, images, steps) fournie remplace toute la liste.
 Dans les titres et textes courts, *texte* = mise en valeur (italique doré) et **texte** = gras.
-Les montants de la collecte (raised, goal) sont des nombres en euros.
+Les montants de la collecte (raised, goal) sont des nombres en euros. Le montant collecté affiché vient automatiquement de la campagne de dons RGIVE du diocèse : raised ne sert qu'en secours, inutile de le modifier.
 TXT)]
 class UpdateHomeSection extends Tool
 {
