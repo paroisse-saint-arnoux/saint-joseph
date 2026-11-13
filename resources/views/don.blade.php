@@ -1,6 +1,5 @@
-{{-- Page /don (essai) : formulaire de don RGIVE du diocèse intégré dans le site.
-     Deux intégrations proposées par RGIVE : « Embed » (formulaire dans la page, le site doit être autorisé côté RGIVE)
-     et « Capsule » (fenêtre par-dessus la page, ouverte par un lien .rgive-button ou par ?capsule=…). --}}
+{{-- Page /don (essai) : formulaire de don RGIVE du diocèse intégré dans la page (« Embed » : embed.js remplace
+     la div data-rgive-src par une iframe ; nos domaines, dev compris, sont autorisés côté RGIVE). --}}
 @php
     $donUrl = $site['don_url'] ?? 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/';
     $raised = (float) ($collecte['raised'] ?? 0);
@@ -16,7 +15,6 @@
 
 @push('head')
     <script>(function(){const sc = document.createElement("script");sc.setAttribute("src", "https://don-nice.catholique.fr/assets/embed.js");document.head.appendChild(sc);})()</script>
-    <script>(function(){const sc = document.createElement("script");sc.setAttribute("src", "https://don-nice.catholique.fr/assets/overlay.js");document.head.appendChild(sc);})()</script>
 @endpush
 
 @section('content')
@@ -38,12 +36,6 @@
                     <div class="don-gauge-sub">Objectif : {{ $fmt($goal) }} €</div>
                 </div>
                 <p>1 pierre = 10 €. Chaque don de 10 € pose une pierre du clocher.</p>
-
-                <div class="don-alt">
-                    <p>Le formulaire ne s'affiche pas&nbsp;?</p>
-                    <a href="{{ $donUrl }}" target="_blank" rel="noopener" class="rgive-button cta-navy" data-don="page-don-capsule">Ouvrir le formulaire de don</a>
-                    <a href="{{ $donUrl }}" target="_blank" rel="noopener" class="don-direct" data-don="page-don-lien">ou donner sur le site du diocèse &rarr;</a>
-                </div>
             </aside>
 
             <div class="don-card-embed">

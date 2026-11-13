@@ -1,4 +1,4 @@
-// Page /don : formulaire RGIVE intégré (Embed) + bouton Capsule
+// Page /don : formulaire RGIVE intégré (Embed)
 .don-page { background: $parchment; padding: 60px 0 100px; }
 .don-grid {
   display: grid; grid-template-columns: .75fr 1.25fr; gap: 50px; align-items: start;
@@ -6,29 +6,20 @@
 }
 .don-aside {
   position: sticky; top: 110px;
-  // Sur mobile : la jauge, puis le formulaire, puis le bloc de secours « Le formulaire ne s'affiche pas ? »
-  @media (max-width: 900px) { display: contents; }
+  @media (max-width: 900px) { position: static; }
   p { color: $ink-soft; }
 }
 .don-gauge {
   background: $paper; border: 1px solid $parchment-2; border-radius: 18px; padding: 24px; margin: 14px 0 18px;
-  @media (max-width: 900px) { margin: 0; }
   .don-gauge-line { display: flex; justify-content: space-between; align-items: baseline; color: $navy;
     b { font-family: $font-display; font-size: 1.8rem; } span { font-weight: 600; color: $gold; } }
   .don-gauge-bar { height: 10px; border-radius: 10px; background: $parchment-2; overflow: hidden; margin: 10px 0 8px;
     i { display: block; height: 100%; background: $gold; border-radius: 10px; } }
   .don-gauge-sub { font-size: .86rem; color: $ink-soft; }
 }
-.don-alt {
-  margin-top: 26px; padding-top: 22px; border-top: 1px solid $parchment-2;
-  @media (max-width: 900px) { order: 2; margin-top: 0; }
-  .cta-navy { padding: 13px 26px; }
-  .don-direct { display: block; margin-top: 12px; font-size: .9rem; color: $navy; text-decoration: underline; text-decoration-color: $gold; }
-}
 .don-card-embed {
   // Le formulaire RGIVE directement sur le fond de la page
   min-width: 0;
-  @media (max-width: 900px) { order: 1; }
   // embed.js impose width/min-width (370 px) à l'iframe : on la ramène à la largeur disponible
   iframe { width: 100% !important; min-width: 0 !important; max-width: 100%; border: 0; display: block; }
 }
