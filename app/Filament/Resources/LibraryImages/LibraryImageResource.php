@@ -41,7 +41,7 @@ class LibraryImageResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = 'Contenu';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function getBreadcrumb(): string
     {

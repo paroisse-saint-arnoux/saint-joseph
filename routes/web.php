@@ -4,6 +4,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CroixController;
+use App\Http\Controllers\DonController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HuileController;
 use App\Http\Controllers\LibraryArchiveController;
@@ -24,10 +25,8 @@ Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,10,contact')->name('contact.send');
 Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('throttle:10,10,newsletter')->name('newsletter');
 
-// Essai : formulaire de don RGIVE intégré dans le site.
-Route::get('/don', fn (\App\Services\Rgive $rgive) => view('don', [
-    'collecte' => ['raised' => $rgive->raised()] + \App\Models\Setting::get('home.collecte', []),
-]))->name('don');
+// Formulaire de don RGIVE intégré dans le site.
+Route::get('/don', DonController::class)->name('don');
 
 Route::get('/mentions-legales', [PageController::class, 'legal'])->name('legal');
 Route::get('/confidentialite', [PageController::class, 'privacy'])->name('privacy');
