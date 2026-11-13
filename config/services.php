@@ -52,7 +52,7 @@ return [
     ],
 
     // Campagne de dons RGIVE du diocèse : adresse publique du compteur de la page de campagne
-    // (montant collecté, nombre de donateurs, derniers dons). Vide = désactivé (montant saisi dans l'admin).
+    // (montant collecté, nombre de donateurs, derniers dons). Vide = désactivé (0 €).
     'rgive' => [
         'widget_url' => env('RGIVE_WIDGET_URL', 'https://don-nice.catholique.fr/api/campaign-widgets-data/7cfb9e80-9755-4e60-a6c0-0f2c82232618/'),
     ],

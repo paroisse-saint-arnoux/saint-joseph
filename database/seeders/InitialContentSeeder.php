@@ -118,7 +118,6 @@ class InitialContentSeeder extends Seeder
                 'eyebrow' => 'Le Clocher des Bâtisseurs',
                 'title' => 'Faites monter le clocher.',
                 'text' => "Chaque don fait grandir le clocher de Saint-Joseph. Chaque don de 10 € pose une pierre : le clocher s'élève au rythme de la générosité.",
-                'raised' => 1400000,
                 'goal' => 6000000,
                 'goal_label' => 'les cloches en 2030',
                 'quote' => '« Chaque pierre fait monter le clocher. Ensemble, bâtissons-le pour que les cloches sonnent en 2030. »',

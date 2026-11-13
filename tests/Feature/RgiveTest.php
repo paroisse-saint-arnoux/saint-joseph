@@ -18,7 +18,7 @@ class RgiveTest extends TestCase
     {
         parent::setUp();
         config(['services.rgive.widget_url' => self::URL]);
-        Setting::put('home', ['collecte' => ['raised' => 1400000, 'goal' => 6000000]]);
+        Setting::put('home', ['collecte' => ['goal' => 6000000]]);
     }
 
     private function fakeRgive(int $total = 231260): void
@@ -78,12 +78,12 @@ class RgiveTest extends TestCase
         $this->assertSame(250000, app(Rgive::class)->raised());
     }
 
-    public function test_the_admin_amount_is_used_when_rgive_never_answered(): void
+    public function test_nothing_is_collected_when_rgive_never_answered(): void
     {
         Http::fake([self::URL => Http::response(['unexpected' => true])]);
 
-        $this->assertSame(1400000, app(Rgive::class)->raised());
-        $this->get('/')->assertOk()->assertSee('data-raised="1400000"', false)->assertDontSee('Ils viennent de bâtir');
+        $this->assertSame(0, app(Rgive::class)->raised());
+        $this->get('/')->assertOk()->assertSee('data-raised="0"', false)->assertDontSee('Ils viennent de bâtir');
     }
 
     public function test_rgive_can_be_disabled(): void
@@ -91,7 +91,7 @@ class RgiveTest extends TestCase
         config(['services.rgive.widget_url' => '']);
         Http::fake();
 
-        $this->assertSame(1400000, app(Rgive::class)->raised());
+        $this->assertSame(0, app(Rgive::class)->raised());
         Http::assertNothingSent();
     }
 }

@@ -119,11 +119,8 @@ class ManageHome extends SettingsPage
 
                 Tab::make('Collecte')->icon(Heroicon::OutlinedCurrencyEuro)->schema([
                     Grid::make(2)->schema([
-                        TextInput::make('home.collecte.raised')
-                            ->label('Montant collecté (€), en secours')
-                            ->numeric()->minValue(0)->required()
-                            ->helperText('Le site affiche le total de la campagne de dons du diocèse (RGIVE), mis à jour toutes les 5 minutes. Ce montant ne s\'affiche que si RGIVE ne répond pas et qu\'aucun chiffre n\'a encore été reçu.'),
-                        TextInput::make('home.collecte.goal')->label('Objectif (€)')->numeric()->minValue(1)->required(),
+                        TextInput::make('home.collecte.goal')->label('Objectif (€)')->numeric()->minValue(1)->required()
+                            ->helperText('Le montant collecté vient automatiquement de la campagne de dons du diocèse (RGIVE), mis à jour toutes les 5 minutes.'),
                     ]),
                     TextInput::make('home.collecte.eyebrow')->label('Surtitre'),
                     TextInput::make('home.collecte.title')->label('Titre')->required(),

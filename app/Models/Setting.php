@@ -38,7 +38,7 @@ class Setting extends Model
         });
     }
 
-    /** Lecture en notation pointée : Setting::get('home.collecte.raised'). */
+    /** Lecture en notation pointée : Setting::get('home.collecte.goal'). */
     public static function get(string $path, mixed $default = null): mixed
     {
         [$key, $rest] = array_pad(explode('.', $path, 2), 2, null);

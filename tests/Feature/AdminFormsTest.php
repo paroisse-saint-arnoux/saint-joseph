@@ -46,7 +46,7 @@ class AdminFormsTest extends TestCase
     {
         Setting::put('home', [
             'hero' => ['title' => 'Bâtir'], 'decouvrir' => ['title' => 'Découvrir'], 'projet' => ['title' => 'Le projet'],
-            'avancement' => ['title' => 'Avancement'], 'collecte' => ['raised' => 1000, 'goal' => 6000000, 'title' => 'Faites monter le clocher.'],
+            'avancement' => ['title' => 'Avancement'], 'collecte' => ['goal' => 6000000, 'title' => 'Faites monter le clocher.'],
         ]);
 
         $page = Livewire::test(ManageHome::class);

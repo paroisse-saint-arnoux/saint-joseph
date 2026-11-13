@@ -17,7 +17,7 @@ Modifie une section de la page d'accueil. Lire d'abord la page avec get-page (pa
 « content » ne contient que les champs à changer, avec les mêmes noms et la même forme que dans get-page ;
 une liste (facts, stats, buildings, images, steps) fournie remplace toute la liste.
 Dans les titres et textes courts, *texte* = mise en valeur (italique doré) et **texte** = gras.
-Les montants de la collecte (raised, goal) sont des nombres en euros. Le montant collecté affiché vient automatiquement de la campagne de dons RGIVE du diocèse : raised ne sert qu'en secours, inutile de le modifier.
+L'objectif de la collecte (goal) est un nombre en euros. Le montant collecté vient automatiquement de la campagne de dons RGIVE du diocèse : il ne se modifie pas ici.
 TXT)]
 class UpdateHomeSection extends Tool
 {
@@ -30,7 +30,6 @@ class UpdateHomeSection extends Tool
         $data = $request->validate([
             'section' => ['required', 'in:'.implode(',', self::SECTIONS)],
             'content' => ['required', 'array'],
-            'content.raised' => ['sometimes', 'numeric', 'min:0'],
             'content.goal' => ['sometimes', 'numeric', 'min:1'],
             'content.steps.*.status' => ['sometimes', 'in:done,now,todo'],
         ]);

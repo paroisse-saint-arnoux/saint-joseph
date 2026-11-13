@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +12,7 @@ use Throwable;
  *
  * Source : l'adresse publique (sans clé) que la page de la campagne utilise pour son compteur,
  * `/api/campaign-widgets-data/{uuid}/` — non documentée par RGIVE, elle peut changer : le site garde
- * alors le dernier chiffre connu, ou à défaut le montant saisi dans Admin > Page d'accueil > Collecte.
+ * alors le dernier chiffre connu.
  * Mise à jour au plus toutes les 5 minutes (cache) ; un échec n'est retenté qu'après 1 minute.
  */
 class Rgive
@@ -55,10 +54,10 @@ class Rgive
         return $last;
     }
 
-    /** Montant collecté affiché par le site : total RGIVE, sinon le montant saisi dans l'admin (secours). */
+    /** Montant collecté affiché par le site : total RGIVE (0 si RGIVE n'a encore jamais répondu). */
     public function raised(): int
     {
-        return $this->campaign()['raised'] ?? (int) Setting::get('home.collecte.raised', 0);
+        return $this->campaign()['raised'] ?? 0;
     }
 
     /** @return list<array{name: string, city: ?string, amount: int}> */

@@ -162,12 +162,12 @@ Champs de chaque section :
 | `decouvrir` | `eyebrow`, `title`, `text`, `image`, `image_alt` |
 | `projet` | `eyebrow`, `title`, `intro`, `stats`, `buildings`, `images` |
 | `avancement` | `eyebrow`, `title`, `text`, `steps` (chaque étape a un `status` : `done` / `now` / `todo`) |
-| `collecte` | `eyebrow`, `title`, `text`, `quote`, `raised`, `goal`, `goal_label` |
+| `collecte` | `eyebrow`, `title`, `text`, `quote`, `goal`, `goal_label` |
 
 Règles :
 - Un champ inconnu est refusé, et le message d'erreur donne la liste des champs possibles.
 - Une liste fournie (`facts`, `stats`, `buildings`, `images`, `steps`) remplace toute la liste.
-- `raised` et `goal` sont des nombres en euros.
+- `goal` est un nombre en euros. Le montant collecté vient automatiquement de la campagne RGIVE : il ne se modifie pas.
 - Dans les titres et les textes courts, `*texte*` met en valeur (italique doré) et `**texte**` met en gras.
 
 #### `update-legal-page`

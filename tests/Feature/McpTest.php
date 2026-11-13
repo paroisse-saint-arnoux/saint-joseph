@@ -64,15 +64,15 @@ class McpTest extends TestCase
 
     public function test_home_and_legal_pages(): void
     {
-        Setting::put('home', ['collecte' => ['raised' => 1000, 'goal' => 6000000, 'title' => 'Faites monter le clocher.']]);
+        Setting::put('home', ['collecte' => ['goal' => 6000000, 'title' => 'Faites monter le clocher.']]);
         Setting::put('legal', ['mentions' => 'Mentions', 'privacy' => 'Confidentialité']);
 
         SiteServer::actingAs($this->user)->tool(GetPage::class, ['page' => url('/')])->assertSee('Faites monter le clocher.');
         SiteServer::actingAs($this->user)->tool(GetPage::class, ['page' => url('/mentions-legales')])->assertSee('Mentions');
 
-        SiteServer::actingAs($this->user)->tool(UpdateHomeSection::class, ['section' => 'collecte', 'content' => ['raised' => 1550000]])
+        SiteServer::actingAs($this->user)->tool(UpdateHomeSection::class, ['section' => 'collecte', 'content' => ['goal' => 6500000]])
             ->assertOk();
-        $this->assertSame(1550000, Setting::get('home.collecte.raised'));
+        $this->assertSame(6500000, Setting::get('home.collecte.goal'));
         $this->assertSame('Faites monter le clocher.', Setting::get('home.collecte.title'));
 
         SiteServer::actingAs($this->user)->tool(UpdateHomeSection::class, ['section' => 'collecte', 'content' => ['inconnu' => 'x']])
