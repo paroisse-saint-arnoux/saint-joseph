@@ -101,7 +101,7 @@
                 <div class="lvl"><b>Le clocher</b><span>Ensemble : les cloches sonnent en 2030.</span></div>
             </div>
 
-            {{-- Derniers dons de la campagne RGIVE : une ligne à la fois, qui change toutes les 3 s (resources/js/modules/donors.js). --}}
+            {{-- Derniers dons de la campagne RGIVE : une ligne à la fois, qui change toutes les 5 s (resources/js/modules/donors.js). --}}
             @if (! empty($collecte['donors']))
                 <div class="donors-ticker" data-donors-ticker>
                     <span class="donors-label">Ils viennent de bâtir</span>

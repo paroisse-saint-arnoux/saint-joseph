@@ -1,6 +1,6 @@
 // Derniers donateurs (campagne RGIVE) sous « Quel bâtisseur voulez-vous être ? » :
-// une seule ligne visible, qui passe à la suivante toutes les 3 secondes.
-const DELAY = 3000;
+// une seule ligne visible, qui passe à la suivante toutes les 5 secondes.
+const DELAY = 5000;
 
 export function initDonors() {
     document.querySelectorAll('[data-donors-ticker]').forEach((ticker) => {
