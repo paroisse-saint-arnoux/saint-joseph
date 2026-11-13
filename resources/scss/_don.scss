@@ -26,11 +26,9 @@
   .don-direct { display: block; margin-top: 12px; font-size: .9rem; color: $navy; text-decoration: underline; text-decoration-color: $gold; }
 }
 .don-card-embed {
-  @media (max-width: 900px) { order: 1; }
-  background: $paper; border: 1px solid $parchment-2; border-radius: 18px; padding: clamp(10px, 2vw, 20px);
-  min-height: 420px;
+  // Le formulaire RGIVE directement sur le fond de la page
   min-width: 0;
-  // embed.js fixe une largeur en pixels à l'iframe : on la ramène à la largeur disponible
-  iframe { width: 100% !important; max-width: 100%; border: 0; display: block; }
-  @media (max-width: 600px) { padding: 0; border: 0; background: none; }
+  @media (max-width: 900px) { order: 1; }
+  // embed.js impose width/min-width (370 px) à l'iframe : on la ramène à la largeur disponible
+  iframe { width: 100% !important; min-width: 0 !important; max-width: 100%; border: 0; display: block; }
 }
