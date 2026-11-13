@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
+// Serveur de développement derrière Traefik (docker compose --profile front up node) :
+// VITE_DEV_ORIGIN = https://saint-joseph-vite.dev.saint-arnoux.fr. Sinon, http://localhost:5173.
+const devOrigin = process.env.VITE_DEV_ORIGIN ? new URL(process.env.VITE_DEV_ORIGIN) : null;
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -16,7 +20,14 @@ export default defineConfig({
     },
     server: {
         host: '0.0.0.0',
-        hmr: { host: 'localhost' },
+        ...(devOrigin
+            ? {
+                origin: devOrigin.origin,
+                hmr: { host: devOrigin.hostname, protocol: devOrigin.protocol === 'https:' ? 'wss' : 'ws', clientPort: devOrigin.protocol === 'https:' ? 443 : 80 },
+                cors: { origin: /^https?:\/\/([a-z0-9-]+\.)*dev\.saint-arnoux\.fr$/ },
+            }
+            : { hmr: { host: 'localhost' } }),
+        allowedHosts: ['.dev.saint-arnoux.fr', 'localhost'],
         watch: {
             ignored: ['**/storage/framework/views/**', '**/vendor/**', '**/legacy/**'],
         },

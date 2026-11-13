@@ -30,13 +30,16 @@ docker compose exec -u www-data app php artisan storage:link
 npm install && npm run dev
 ```
 
-Dans `.env` pour Docker : `APP_ENV=local`, `APP_DEBUG=true`, `APP_URL=http://localhost:8080`,
+Dans `.env` pour Docker : `APP_ENV=local`, `APP_DEBUG=true` (`APP_URL` est fixé par `docker-compose.yml`),
 `DB_HOST=db`, `DB_DATABASE=sjo2`, `DB_USERNAME=sjo2`, `DB_PASSWORD=sjo2`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`,
 et `ADMIN_EMAIL=votre@email` (premier administrateur).
 
-- Site : http://localhost:8080 — Admin : http://localhost:8080/admin
-- Emails reçus : http://localhost:8025 (Mailpit)
-- Base de données : http://localhost:3000 (DbGate, connexion préconfigurée)
+Tout passe par Traefik sur `*.dev.saint-arnoux.fr` (ce domaine renvoie vers `127.0.0.1`) :
+
+- Site : https://saint-joseph.dev.saint-arnoux.fr — Admin : https://saint-joseph.dev.saint-arnoux.fr/admin
+- Emails reçus : https://saint-joseph-mail.dev.saint-arnoux.fr (Mailpit)
+- Base de données : https://saint-joseph-db.dev.saint-arnoux.fr (DbGate, connexion préconfigurée)
+- Certificat valide : renseigner `CPANEL_USERNAME`, `CPANEL_TOKEN` (cPanel > Sécurité > Jetons d'API), `CPANEL_BASE_URL` (ex. `https://<serveur>.o2switch.net:2083`) et `TRAEFIK_ACME_EMAIL` dans le `.env`, puis `docker compose up -d traefik`. Sans eux, certificat auto-signé (ou utiliser http://).
 - Tests : `docker compose exec -u www-data app php artisan test`
 
 ## Mise en production (première fois)

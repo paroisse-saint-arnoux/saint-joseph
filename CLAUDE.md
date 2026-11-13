@@ -19,7 +19,7 @@ Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jou
 ## Développement (Docker)
 
 ```bash
-docker compose up -d                       # app (PHP 8.5/Apache) :8080, MySQL :3307, Mailpit :8025, DbGate :3000
+docker compose up -d                       # Traefik :80/:443, app (PHP 8.5/Apache), MySQL :3307, Mailpit, DbGate
 docker compose exec -u www-data app php artisan migrate
 docker compose exec -u www-data app php artisan test
 npm install && npm run dev                 # ou : docker compose --profile front up node
@@ -27,9 +27,11 @@ npm run build                              # build de production dans public/bui
 ```
 
 - La machine hôte n'a pas toutes les extensions PHP : **lancer PHP/Composer/artisan dans le conteneur** (`-u www-data`, `-e HOME=/tmp` pour Composer).
-- Emails en local : Mailpit http://localhost:8025 (liens magiques, formulaire de contact).
-- Base de données en local : DbGate http://localhost:3000 (connexion « SJO2 (MySQL locale) » préconfigurée).
-- Admin local : http://localhost:8080/admin — saisir l'email `ADMIN_EMAIL` du `.env`, le lien arrive dans Mailpit.
+- **Traefik** (décision du 13/11/2026, `docker-compose.yml`) : tout le site de dev est servi sur **`*.dev.saint-arnoux.fr`** (le DNS public de ce sous-domaine renvoie `127.0.0.1`), en http et https ; plus de ports 8080 / 8025 / 3000 sur l'hôte (seul MySQL garde `3307`). `APP_URL` et `TRUSTED_PROXIES=*` sont imposés par `docker-compose.yml` au conteneur `app` (priment sur le `.env`) ; `bootstrap/app.php` ne fait confiance aux proxys que si `TRUSTED_PROXIES` est défini (jamais en production). Certificat wildcard Let's Encrypt par défi DNS via l'API cPanel d'O2Switch (`CPANEL_USERNAME`, `CPANEL_TOKEN`, `CPANEL_BASE_URL`, `TRAEFIK_ACME_EMAIL` dans le `.env` local) ; sans eux, certificat auto-signé. Réseau Docker `traefik` à nom fixe : d'autres projets locaux peuvent s'y brancher.
+- Site / admin : https://saint-joseph.dev.saint-arnoux.fr (`/admin` : saisir l'email `ADMIN_EMAIL` du `.env`, le lien arrive dans Mailpit).
+- Emails en local : Mailpit https://saint-joseph-mail.dev.saint-arnoux.fr (liens magiques, formulaire de contact).
+- Base de données en local : DbGate https://saint-joseph-db.dev.saint-arnoux.fr (connexion « SJO2 (MySQL locale) » préconfigurée).
+- Vite : `docker compose --profile front up node` → https://saint-joseph-vite.dev.saint-arnoux.fr (`VITE_DEV_ORIGIN`, `vite.config.js`). Un `npm run dev` sur l'hôte (localhost:5173) ne marche qu'avec le site en http:// (contenu mixte sinon). Tableau de bord Traefik : https://traefik.dev.saint-arnoux.fr.
 - Lien de connexion direct, sans email (tests de rendu, captures Playwright) : `docker compose exec -u www-data app php artisan admin:lien [email]` (désactivé en production).
 - `legacy/` = ancien one-pager statique, gardé comme référence de style/contenu. Non déployé. Pourra être supprimé.
 

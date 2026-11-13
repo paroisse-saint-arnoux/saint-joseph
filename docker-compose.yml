@@ -1,5 +1,53 @@
 # Stack de développement local. Voir CLAUDE.md pour les commandes.
+#
+# Tout passe par Traefik, sur *.dev.saint-arnoux.fr (le DNS public renvoie 127.0.0.1) :
+#   https://saint-joseph.dev.saint-arnoux.fr        site et admin
+#   https://saint-joseph-mail.dev.saint-arnoux.fr   Mailpit (emails reçus)
+#   https://saint-joseph-db.dev.saint-arnoux.fr     DbGate (base de données)
+#   https://saint-joseph-vite.dev.saint-arnoux.fr   serveur Vite (profil « front »)
+#   https://traefik.dev.saint-arnoux.fr             tableau de bord de Traefik
+# Les adresses en http:// fonctionnent aussi.
+#
+# Certificat : *.dev.saint-arnoux.fr chez Let's Encrypt, validé par DNS via l'API cPanel d'O2Switch
+# (CPANEL_USERNAME, CPANEL_TOKEN, CPANEL_BASE_URL, TRAEFIK_ACME_EMAIL dans le .env). Sans eux,
+# Traefik sert un certificat auto-signé (avertissement du navigateur, ou utiliser http://).
+#
+# Le réseau « traefik » a un nom fixe : un autre projet peut s'y brancher (réseau externe « traefik »
+# + labels traefik.*) pour être servi lui aussi sur *.dev.saint-arnoux.fr.
 services:
+  traefik:
+    image: traefik:v3.6.25
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls.certresolver=le
+      - --entrypoints.websecure.http.tls.domains[0].main=dev.saint-arnoux.fr
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.dev.saint-arnoux.fr
+      - --certificatesresolvers.le.acme.email=${TRAEFIK_ACME_EMAIL:-}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.dnschallenge.provider=cpanel
+      - --certificatesresolvers.le.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --api.dashboard=true
+      - --log.level=INFO
+    environment:
+      CPANEL_USERNAME: ${CPANEL_USERNAME:-}
+      CPANEL_TOKEN: ${CPANEL_TOKEN:-}
+      CPANEL_BASE_URL: ${CPANEL_BASE_URL:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks: [traefik]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: Host(`traefik.dev.saint-arnoux.fr`)
+      traefik.http.routers.traefik.service: api@internal
+
   app:
     build:
       context: docker/php
@@ -7,13 +55,20 @@ services:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
     image: sjo2-php
-    ports:
-      - "8080:80"
+    environment:
+      # Remplacent les valeurs du .env (Laravel ne réécrit pas une variable déjà définie).
+      APP_URL: ${DEV_APP_URL:-https://saint-joseph.dev.saint-arnoux.fr}
+      TRUSTED_PROXIES: "*" # Traefik : schéma https et IP du visiteur via X-Forwarded-*
     volumes:
       - .:/var/www/html
     depends_on:
       - db
       - mailpit
+    networks: [default, traefik]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.saint-joseph.rule: Host(`saint-joseph.dev.saint-arnoux.fr`)
+      traefik.http.services.saint-joseph.loadbalancer.server.port: "80"
 
   db:
     # O2Switch fournit MySQL.
@@ -24,20 +79,21 @@ services:
       MYSQL_PASSWORD: sjo2
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3307:3306"
+      - "3307:3306" # MySQL n'est pas du HTTP : accès direct depuis l'hôte
     volumes:
       - mysqldata:/var/lib/mysql
 
   mailpit:
     image: axllent/mailpit
-    ports:
-      - "8025:8025"
+    networks: [default, traefik]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.saint-joseph-mail.rule: Host(`saint-joseph-mail.dev.saint-arnoux.fr`)
+      traefik.http.services.saint-joseph-mail.loadbalancer.server.port: "8025"
 
-  # Interface web d'exploration de la base : http://localhost:3000
+  # Interface web d'exploration de la base
   dbgate:
     image: dbgate/dbgate
-    ports:
-      - "3000:3000"
     environment:
       CONNECTIONS: sjo2
       LABEL_sjo2: SJO2 (MySQL locale)
@@ -51,17 +107,32 @@ services:
       - dbgate:/root/.dbgate
     depends_on:
       - db
+    networks: [default, traefik]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.saint-joseph-db.rule: Host(`saint-joseph-db.dev.saint-arnoux.fr`)
+      traefik.http.services.saint-joseph-db.loadbalancer.server.port: "3000"
 
   node:
     image: node:22-alpine
     working_dir: /app
+    environment:
+      VITE_DEV_ORIGIN: ${VITE_DEV_ORIGIN:-https://saint-joseph-vite.dev.saint-arnoux.fr}
     volumes:
       - .:/app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    ports:
-      - "5173:5173"
     profiles: ["front"]
+    networks: [default, traefik]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.saint-joseph-vite.rule: Host(`saint-joseph-vite.dev.saint-arnoux.fr`)
+      traefik.http.services.saint-joseph-vite.loadbalancer.server.port: "5173"
+
+networks:
+  traefik:
+    name: traefik
 
 volumes:
   mysqldata:
   dbgate:
+  letsencrypt:

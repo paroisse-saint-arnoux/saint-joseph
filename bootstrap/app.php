@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias(['active' => EnsureUserIsActive::class]);
+        // Derrière Traefik en développement (docker-compose.yml) : TRUSTED_PROXIES=*. Non défini en production.
+        if (filled($proxies = env('TRUSTED_PROXIES'))) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', $proxies));
+        }
         // Pas de route « login » : les invités (ex. autorisation OAuth du connecteur Claude) passent par la connexion de l'admin.
         $middleware->redirectGuestsTo(fn () => filament()->getLoginUrl());
     })
