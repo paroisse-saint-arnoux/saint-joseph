@@ -3,6 +3,7 @@
 .engage-grid {
   display: grid; grid-template-columns: 1.2fr .8fr; gap: 28px; align-items: stretch;
   @media (max-width: 900px) { grid-template-columns: 1fr; }
+  &--solo { grid-template-columns: minmax(0, 1fr); max-width: 760px; }
 }
 .newsletter-card {
   background: $paper; border: 1px solid $parchment-2; border-radius: 18px; padding: 38px clamp(22px, 4vw, 42px);

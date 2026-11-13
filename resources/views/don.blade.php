@@ -11,6 +11,7 @@
     'title' => 'Faire un don',
     'description' => 'Soutenez la construction du centre paroissial et de l\'église Saint Joseph au Rouret : faites un don en ligne.',
     'noindex' => true,
+    'engageWithoutDon' => true, // pas de second appel au don dans le bandeau du bas
 ])
 
 @push('head')
@@ -35,7 +36,8 @@
                     <div class="don-gauge-bar"><i style="width: {{ $pct }}%"></i></div>
                     <div class="don-gauge-sub">Objectif : {{ $fmt($goal) }} €</div>
                 </div>
-                <p>1 pierre = 10 €. Chaque don de 10 € pose une pierre du clocher.</p>
+                {{-- Même texte que le bloc don du bas de page (Admin > Autres textes du site) --}}
+                <p>{{ $site['don_text'] ?? 'Votre don est déductible à 66 % de votre impôt sur le revenu : un don de 100 € ne vous coûte que 34 €.' }}</p>
             </aside>
 
             <div class="don-card-embed">

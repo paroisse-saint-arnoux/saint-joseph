@@ -50,7 +50,7 @@
     </main>
 
     @unless (! empty($bare))
-        @include('partials.engage')
+        @include('partials.engage', ['withDon' => empty($engageWithoutDon)])
     @endunless
     @include('partials.footer')
     @stack('scripts')
