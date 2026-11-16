@@ -101,7 +101,7 @@ footer {
 }
 @media (max-width: 420px) { .names { grid-template-columns: 1fr; } }
 
-// Page /croix/liens (générateur de liens UTM, non référencée).
+// Page /qrcodes (liens UTM, liens courts et QR codes, non référencée ; vue qrcodes.blade.php).
 .croix-links {
   [hidden] { display: none !important; }
   main { max-width: 860px; padding-top: 48px; }
@@ -111,9 +111,22 @@ footer {
   .l-help { font-size: 13px; color: $ink-soft; margin-top: 6px; line-height: 1.45; b { color: $navy; } }
   .l-out {
     display: flex; gap: 8px;
-    input { flex: 1; font-size: 14px; font-family: ui-monospace, monospace; }
+    input { flex: 1; min-width: 0; font-size: 14px; font-family: ui-monospace, monospace; }
     .btn { width: auto; margin: 0; padding: 0 22px; font-size: 15px; }
   }
+  .l-error { @extend .error; margin-top: 14px; }
+  .l-result {
+    display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start;
+    margin-top: 24px; padding-top: 22px; border-top: 1px solid $parchment-2;
+  }
+  .l-qr svg, .l-qr img { display: block; width: 100%; height: auto; border: 1px solid $parchment-2; }
+  .l-links label:first-child { margin-top: 0; }
+  .l-downloads {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+    .btn { width: auto; margin: 0; padding: 12px 18px; font-size: 15px; }
+    .btn-ghost { background: #fff; color: $navy !important; border: 1px solid $border; .opt { font-size: 13px; } &:hover { background: $parchment-2; } }
+  }
+  @media (max-width: 620px) { .l-result { grid-template-columns: 1fr; } .l-qr { max-width: 240px; } }
   .l-h2 { font-family: $serif; font-weight: 600; font-size: 30px; color: $navy; margin: 44px 0 12px; }
   .l-table { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }

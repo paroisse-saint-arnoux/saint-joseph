@@ -37,7 +37,8 @@ class ManageSite extends SettingsPage
                         ->rows(3)->maxLength(300),
                     Textarea::make('site.about')->label('Présentation (pied de page)')->rows(2),
                     TextInput::make('site.address')->label('Adresse'),
-                    TextInput::make('site.don_url')->label('Lien de la page de don')->url()->required(),
+                    TextInput::make('site.don_url')->label('Lien de la page de don')->required()
+                        ->helperText('/don : page du site avec le formulaire de don du diocèse.'),
                 ]),
 
                 Tab::make('Réseaux & liens')->icon(Heroicon::OutlinedLink)->schema([

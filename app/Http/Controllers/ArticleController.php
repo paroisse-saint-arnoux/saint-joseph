@@ -25,10 +25,13 @@ class ArticleController extends Controller
             ]);
         }
 
+        // Filtres : seulement les catégories qui ont des articles publiés (plus celle affichée, même vide).
+        $used = Article::published()->distinct()->pluck('category');
+
         return view('articles.index', [
             'articles' => $articles,
             'category' => $category,
-            'categories' => Category::cases(),
+            'categories' => array_values(array_filter(Category::cases(), fn (Category $c) => $c === $category || $used->contains($c))),
         ]);
     }
 

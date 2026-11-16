@@ -22,7 +22,7 @@ class HuileController extends Controller
             'goal' => (int) Setting::get('home.collecte.goal', 0),
             'heroImage' => Setting::get('home.hero.image'),
             'projectImage' => Setting::get('home.projet.images.0'),
-            'donUrl' => Setting::get('site.don_url') ?: 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/',
+            'donUrl' => Setting::get('site.don_url') ?: '/don',
         ])->header('X-Robots-Tag', 'noindex, nofollow');
     }
 

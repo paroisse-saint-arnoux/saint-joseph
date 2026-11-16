@@ -54,6 +54,8 @@ return [
     // Campagne de dons RGIVE du diocèse : adresse publique du compteur de la page de campagne
     // (montant collecté, nombre de donateurs, derniers dons). Vide = désactivé (0 €).
     'rgive' => [
+        // Formulaire de don de la campagne, intégré dans la page /don (seul endroit où il apparaît).
+        'form_url' => env('RGIVE_FORM_URL', 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/'),
         'widget_url' => env('RGIVE_WIDGET_URL', 'https://don-nice.catholique.fr/api/campaign-widgets-data/7cfb9e80-9755-4e60-a6c0-0f2c82232618/'),
     ],
 

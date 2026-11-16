@@ -49,6 +49,7 @@ services:
     environment:
       # Remplacent les valeurs du .env (Laravel ne réécrit pas une variable déjà définie).
       APP_URL: ${DEV_APP_URL:-https://saint-joseph.dev.saint-arnoux.fr}
+      SHORT_URL: https://sj.dev.saint-arnoux.fr
       TRUSTED_PROXIES: "*" # Traefik : schéma https et IP du visiteur via X-Forwarded-*
     volumes:
       - .:/var/www/html
@@ -58,7 +59,7 @@ services:
     networks: [default, traefik]
     labels:
       traefik.enable: "true"
-      traefik.http.routers.saint-joseph.rule: Host(`saint-joseph.dev.saint-arnoux.fr`)
+      traefik.http.routers.saint-joseph.rule: Host(`saint-joseph.dev.saint-arnoux.fr`) || Host(`sj.dev.saint-arnoux.fr`)
       traefik.http.services.saint-joseph.loadbalancer.server.port: "80"
 
   db:

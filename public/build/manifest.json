@@ -3,6 +3,10 @@
     "file": "assets/hanken-grotesk-9jBPE4aV.css",
     "src": "_hanken-grotesk-9jBPE4aV.css"
   },
+  "_latin-600-OZrqg6CG.css": {
+    "file": "assets/latin-600-OZrqg6CG.css",
+    "src": "_latin-600-OZrqg6CG.css"
+  },
   "_opsz-B5Un8056.css": {
     "file": "assets/opsz-B5Un8056.css",
     "src": "_opsz-B5Un8056.css"
@@ -125,23 +129,23 @@
     ]
   },
   "resources/js/croix.js": {
-    "file": "assets/croix-COz06V5J.js",
+    "file": "assets/croix-1b1kG6yC.js",
     "name": "croix",
     "src": "resources/js/croix.js",
     "isEntry": true,
     "css": [
-      "assets/croix-OZrqg6CG.css",
-      "assets/hanken-grotesk-9jBPE4aV.css"
+      "assets/hanken-grotesk-9jBPE4aV.css",
+      "assets/latin-600-OZrqg6CG.css"
     ],
     "assets": [
-      "assets/cormorant-garamond-latin-500-normal-BsRWmXhO.woff2",
-      "assets/cormorant-garamond-latin-500-normal-zIXX3Q-H.woff",
-      "assets/cormorant-garamond-latin-600-normal-Co1r35X9.woff2",
-      "assets/cormorant-garamond-latin-600-normal-2CBVLo0M.woff",
       "assets/hanken-grotesk-cyrillic-ext-wght-normal-D_UHSL_T.woff2",
       "assets/hanken-grotesk-vietnamese-wght-normal-CHiFlh_0.woff2",
       "assets/hanken-grotesk-latin-ext-wght-normal-Dg-wlmqe.woff2",
-      "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2"
+      "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2",
+      "assets/cormorant-garamond-latin-500-normal-BsRWmXhO.woff2",
+      "assets/cormorant-garamond-latin-500-normal-zIXX3Q-H.woff",
+      "assets/cormorant-garamond-latin-600-normal-Co1r35X9.woff2",
+      "assets/cormorant-garamond-latin-600-normal-2CBVLo0M.woff"
     ]
   },
   "resources/js/huile.js": {
@@ -163,6 +167,26 @@
       "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2"
     ]
   },
+  "resources/js/qrcodes.js": {
+    "file": "assets/qrcodes-G4Hf9ttx.js",
+    "name": "qrcodes",
+    "src": "resources/js/qrcodes.js",
+    "isEntry": true,
+    "css": [
+      "assets/hanken-grotesk-9jBPE4aV.css",
+      "assets/latin-600-OZrqg6CG.css"
+    ],
+    "assets": [
+      "assets/hanken-grotesk-cyrillic-ext-wght-normal-D_UHSL_T.woff2",
+      "assets/hanken-grotesk-vietnamese-wght-normal-CHiFlh_0.woff2",
+      "assets/hanken-grotesk-latin-ext-wght-normal-Dg-wlmqe.woff2",
+      "assets/hanken-grotesk-latin-wght-normal-CaVRRdDk.woff2",
+      "assets/cormorant-garamond-latin-500-normal-BsRWmXhO.woff2",
+      "assets/cormorant-garamond-latin-500-normal-zIXX3Q-H.woff",
+      "assets/cormorant-garamond-latin-600-normal-Co1r35X9.woff2",
+      "assets/cormorant-garamond-latin-600-normal-2CBVLo0M.woff"
+    ]
+  },
   "resources/scss/app.scss": {
     "file": "assets/app-CJCKWABB.css",
     "name": "app",
@@ -182,7 +206,7 @@
     "isEntry": true
   },
   "resources/scss/croix.scss": {
-    "file": "assets/croix-CBUxG3oD.css",
+    "file": "assets/croix-CBj-Fx92.css",
     "name": "croix",
     "names": [
       "croix.css"

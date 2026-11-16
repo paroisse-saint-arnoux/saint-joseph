@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Domaine des liens courts de la page /qrcodes (sj.saint-arnoux.fr redirige vers ce site).
+    'short_url' => env('SHORT_URL', 'https://sj.saint-arnoux.fr'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

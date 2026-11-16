@@ -1,7 +1,7 @@
 @if (app()->isProduction() && filled(config('services.matomo.url')) && filled(config('services.matomo.site_id')))
     @php
         // Adresse de la page de don : sert à reconnaître aussi les liens de don écrits dans les articles.
-        $donUrl = \App\Models\Setting::get('site.don_url') ?: 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/';
+        $donUrl = \App\Models\Setting::get('site.don_url') ?: '/don';
     @endphp
     {{-- Matomo auto-hébergé, sans cookie : pas de bandeau de consentement nécessaire. --}}
     <script>
@@ -21,7 +21,7 @@
         // (attribut data-don, sinon « article » pour un lien dans le texte d'un article, ou « autre »),
         // nom = page où l'on a cliqué.
         (function() {
-            var donUrl = @json(rtrim($donUrl, '/'));
+            var donUrl = @json(rtrim(url($donUrl), '/'));
             document.addEventListener('click', function(e) {
                 var a = e.target.closest && e.target.closest('a[href]');
                 if (!a) return;

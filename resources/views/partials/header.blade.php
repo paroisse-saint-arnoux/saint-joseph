@@ -1,4 +1,4 @@
-@php $donUrl = $site['don_url'] ?? 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/'; @endphp
+@php $donUrl = $site['don_url'] ?? '/don'; @endphp
 <header class="site-header" id="header">
     <div class="wrap nav-bar">
         <a href="{{ route('home') }}" class="brand">
@@ -9,7 +9,7 @@
             <a href="{{ route('home') }}#decouvrir">Découvrir</a>
             <a href="{{ route('home') }}#collecte">Soutenir</a>
             <a href="{{ route('articles.index') }}" @class(['active' => request()->routeIs('articles.*')])>Le projet</a>
-            <a href="{{ $donUrl }}" class="btn-don" data-don="en-tete" target="_blank" rel="noopener">Faire un don</a>
+            <a href="{{ $donUrl }}" class="btn-don" data-don="en-tete">Faire un don</a>
         </nav>
         <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-controls="menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>

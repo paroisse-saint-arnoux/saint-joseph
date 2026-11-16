@@ -2,7 +2,7 @@
      la div data-rgive-src par une iframe ; nos domaines, dev compris, sont autorisés côté RGIVE).
      Textes : Admin > Contenu > Page de don (réglage `don`, DonController). --}}
 @php
-    $donUrl = $site['don_url'] ?? 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/';
+    $formUrl = config('services.rgive.form_url');
     $goal = max($goal, 1);
     $pct = min(100, round($raised / $goal * 100, 1));
     $fmt = fn ($n) => number_format($n, 0, ',', ' ');
@@ -49,7 +49,7 @@
 
             <div class="don-card-embed">
                 {{-- ?type=regular : onglet « Don mensuel » sélectionné d'office (paramètre d'URL accepté par RGIVE) --}}
-                <div data-rgive-src="{{ $donUrl }}?type=regular"></div>
+                <div data-rgive-src="{{ $formUrl }}?type=regular"></div>
             </div>
         </div>
     </section>

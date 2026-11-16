@@ -8,7 +8,7 @@ const devOrigin = process.env.VITE_DEV_ORIGIN ? new URL(process.env.VITE_DEV_ORI
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/scss/app.scss', 'resources/scss/preview.scss', 'resources/js/app.js', 'resources/js/admin/cropper.js', 'resources/scss/consultation.scss', 'resources/js/consultation.js', 'resources/scss/croix.scss', 'resources/js/croix.js', 'resources/scss/huile.scss', 'resources/js/huile.js'],
+            input: ['resources/scss/app.scss', 'resources/scss/preview.scss', 'resources/js/app.js', 'resources/js/admin/cropper.js', 'resources/scss/consultation.scss', 'resources/js/consultation.js', 'resources/scss/croix.scss', 'resources/js/croix.js', 'resources/js/qrcodes.js', 'resources/scss/huile.scss', 'resources/js/huile.js'],
             refresh: true,
         }),
     ],

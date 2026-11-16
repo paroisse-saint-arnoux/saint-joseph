@@ -103,4 +103,19 @@ class ArticlePagesTest extends TestCase
     {
         $this->get('/')->assertOk();
     }
+
+    public function test_the_filter_only_shows_categories_with_published_articles(): void
+    {
+        Article::factory()->create(['category' => Category::Architecture]);
+        Article::factory()->draft()->create(['category' => Category::Budget]);
+
+        $this->get('/le-projet')->assertOk()
+            ->assertSee('href="'.route('articles.category', Category::Architecture).'"', false)
+            ->assertDontSee('href="'.route('articles.category', Category::Budget).'"', false) // seulement un brouillon
+            ->assertDontSee('href="'.route('articles.category', Category::Presse).'"', false);
+
+        // Catégorie vide affichée : son filtre reste visible (actif).
+        $this->get('/le-projet/presse')->assertOk()
+            ->assertSee('href="'.route('articles.category', Category::Presse).'"', false);
+    }
 }

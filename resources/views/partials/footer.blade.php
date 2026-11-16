@@ -1,5 +1,5 @@
 @php
-    $donUrl = $site['don_url'] ?? 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/';
+    $donUrl = $site['don_url'] ?? '/don';
     $team = \App\Models\Article::published()->where('category', \App\Enums\Category::Equipe)->ordered()->first();
 @endphp
 <footer class="site-footer">
@@ -16,7 +16,7 @@
                 <a href="{{ route('articles.index') }}">Les articles</a>
                 <a href="{{ $team?->url() ?? route('articles.category', \App\Enums\Category::Equipe) }}">Qui sommes-nous</a>
                 <a href="{{ route('contact') }}">Contact</a>
-                <a href="{{ $donUrl }}" data-don="pied-de-page" target="_blank" rel="noopener">Faire un don</a>
+                <a href="{{ $donUrl }}" data-don="pied-de-page">Faire un don</a>
             </div>
             <div class="foot-col">
                 <h4>Nous suivre</h4>

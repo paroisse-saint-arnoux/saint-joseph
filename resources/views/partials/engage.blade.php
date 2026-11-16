@@ -1,5 +1,5 @@
 {{-- Bandeau présent sur toutes les pages : newsletter + don (sans le bloc don si $withDon = false, ex. page /don). --}}
-@php $donUrl = $site['don_url'] ?? 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/'; @endphp
+@php $donUrl = $site['don_url'] ?? '/don'; @endphp
 <section class="engage" id="newsletter">
     <div @class(['wrap engage-grid', 'engage-grid--solo' => ! ($withDon ?? true)])>
         <div class="newsletter-card reveal">
@@ -39,7 +39,7 @@
             <span class="eyebrow">Faire un don</span>
             <h2>{{ $site['don_title'] ?? 'Chaque pierre compte.' }}</h2>
             <p>{{ $site['don_text'] ?? '' }}</p>
-            <a class="cta-primary" href="{{ $donUrl }}" data-don="bandeau-don" target="_blank" rel="noopener">Faire un don &rarr;</a>
+            <a class="cta-primary" href="{{ $donUrl }}" data-don="bandeau-don">Faire un don &rarr;</a>
         </aside>
         @endif
     </div>

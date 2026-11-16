@@ -12,8 +12,23 @@ use App\Http\Controllers\LibrarySearchController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\ShortLinkController;
 use App\Http\Controllers\SitemapController;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+
+// Domaine des liens courts (sj.saint-arnoux.fr, config app.short_url) : redirection sans session ni cookie,
+// rien n'est compté. En premier : ces routes ne répondent que sur ce domaine.
+Route::domain(parse_url(config('app.short_url'), PHP_URL_HOST))
+    ->withoutMiddleware([StartSession::class, ShareErrorsFromSession::class, PreventRequestForgery::class, EncryptCookies::class, AddQueuedCookiesToResponse::class])
+    ->group(function () {
+        Route::get('/{path?}', [ShortLinkController::class, 'short'])->where('path', '.*')->name('short-link');
+    });
 
 Route::get('/', HomeController::class)->name('home');
 
@@ -45,7 +60,11 @@ Route::prefix('consultation')->name('consultation.')->controller(ConsultationCon
 Route::get('/croix', [CroixController::class, 'show'])->name('croix');
 Route::post('/croix', [CroixController::class, 'store'])->middleware('throttle:croix-signup')->name('croix.store');
 Route::get('/croix/vote', [CroixController::class, 'vote'])->name('croix.vote');
-Route::get('/croix/liens', [CroixController::class, 'links'])->name('croix.links'); // générateur de liens UTM, non référencé
+Route::redirect('/croix/liens', '/qrcodes', 301); // ancienne adresse du générateur de liens
+
+// Générateur de liens UTM, liens courts et QR codes (public, non référencé).
+Route::get('/qrcodes', [QrCodeController::class, 'show'])->name('qrcodes');
+Route::post('/qrcodes', [QrCodeController::class, 'store'])->middleware('throttle:30,10,qrcodes')->name('qrcodes.store');
 
 // Opération « huile d'olive » : page ouverte par le QR code des étiquettes (non référencée).
 Route::get('/huile', [HuileController::class, 'show'])->name('huile');
@@ -63,3 +82,6 @@ Route::middleware('signed')->group(function () {
     Route::get('/connexion/{token}', [MagicLinkController::class, 'show'])->name('magic-link.show');
     Route::post('/connexion/{token}', [MagicLinkController::class, 'login'])->middleware('throttle:10,1,magic-link')->name('magic-link.login');
 });
+
+// Lien court arrivé sur le domaine principal (sj.saint-arnoux.fr redirigé en gardant le chemin).
+Route::fallback([ShortLinkController::class, 'fallback']);

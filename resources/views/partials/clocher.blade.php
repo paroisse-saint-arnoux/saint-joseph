@@ -5,7 +5,7 @@
     $raised = (float) ($collecte['raised'] ?? 0);
     $goal = max((float) ($collecte['goal'] ?? 6000000), 1);
     $goalStones = $goal / 10;
-    $donUrl = $site['don_url'] ?? 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/';
+    $donUrl = $site['don_url'] ?? '/don';
     $fmt = fn ($n) => number_format($n, 0, ',', ' ');
 @endphp
 <section class="collecte section" id="collecte" data-raised="{{ $raised }}" data-goal="{{ $goal }}">
@@ -70,7 +70,7 @@
 
                 {{-- Apparaît quand on a choisi un niveau ci-dessous --}}
                 <div class="clocher-give" id="clocherGive" hidden>
-                    <a href="{{ $donUrl }}" data-don="clocher-simulation" target="_blank" rel="noopener">Réaliser ce don maintenant&nbsp;! <span id="clocherGiveAmount"></span></a>
+                    <a href="{{ $donUrl }}" data-don="clocher-simulation">Réaliser ce don maintenant&nbsp;! <span id="clocherGiveAmount"></span></a>
                     <button type="button" class="clocher-reset" id="clocherReset">Recommencer</button>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                     <div class="kpi"><div class="v">{{ number_format(max($goal - $raised, 0) / 1000000, 1, ',', ' ') }}&nbsp;M€</div><div class="l">Reste à financer</div></div>
                 </div>
                 <div class="cta-clocher">
-                    <a class="primary" href="{{ $donUrl }}" data-don="collecte" target="_blank" rel="noopener">Faire un don &rarr;</a>
+                    <a class="primary" href="{{ $donUrl }}" data-don="collecte">Faire un don &rarr;</a>
                 </div>
                 @if (filled($collecte['quote'] ?? null))
                     <p class="clocher-msg">{{ $collecte['quote'] }}</p>

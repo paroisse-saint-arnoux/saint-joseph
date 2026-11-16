@@ -6,6 +6,7 @@ use App\Models\ConsultationParticipant;
 use App\Models\ConsultationProject;
 use App\Models\ConsultationVote;
 use chillerlan\QRCode\Common\EccLevel;
+use chillerlan\QRCode\Data\QRMatrix;
 use chillerlan\QRCode\Output\QROutputInterface;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
@@ -155,10 +156,27 @@ class ConsultationStats
         return $path;
     }
 
-    /** QR code (SVG pour l'écran, PNG haute définition pour l'impression). */
-    public static function qrCode(string $url, string $format = 'svg'): string
+    /**
+     * QR code (SVG pour l'écran, PNG haute définition pour l'impression). Transparent : seuls les modules sombres sont dessinés.
+     * $color : couleur des modules sombres (#rrggbb), noir par défaut.
+     */
+    public static function qrCode(string $url, string $format = 'svg', bool $transparent = false, ?string $color = null): string
     {
+        $moduleValues = [];
+        if ($color) {
+            // Le PNG (GD) veut [r, g, b], le SVG une couleur CSS.
+            $value = $format === 'png' ? array_map('hexdec', str_split(ltrim($color, '#'), 2)) : $color;
+            foreach ((new \ReflectionClass(QRMatrix::class))->getConstants() as $name => $type) {
+                if (str_starts_with($name, 'M_') && ($type & QRMatrix::IS_DARK) === QRMatrix::IS_DARK) {
+                    $moduleValues[$type] = $value;
+                }
+            }
+        }
+
         $options = new QROptions([
+            'moduleValues' => $moduleValues,
+            'imageTransparent' => $transparent, // PNG : le blanc (fond et modules clairs) devient transparent
+            'drawLightModules' => ! $transparent, // SVG : pas de modules clairs (le SVG n'a pas de fond)
             'outputType' => $format === 'png' ? QROutputInterface::GDIMAGE_PNG : QROutputInterface::MARKUP_SVG,
             'outputBase64' => false,
             'eccLevel' => EccLevel::M,

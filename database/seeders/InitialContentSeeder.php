@@ -131,14 +131,13 @@ class InitialContentSeeder extends Seeder
             'description' => "La Paroisse Saint-Arnoux bâtit l'église Saint Joseph et son centre paroissial au Rouret (Alpes-Maritimes). Découvrez le projet et soutenez la construction par un don.",
             'about' => 'Centre paroissial et église Saint Joseph, portés par la Paroisse Saint-Arnoux, Association Diocésaine de Nice, au Rouret (06).',
             'address' => '30 Allée du Pré des Roures · 06650 Le Rouret',
-            'don_url' => 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/',
+            'don_url' => '/don',
             'facebook_url' => 'https://www.facebook.com/saint.joseph.le.rouret',
             'linkedin_url' => 'https://www.linkedin.com/company/saint-joseph-le-b%C3%A2tisseur/',
             'useful_links' => [
                 ['label' => 'Paroisse Saint-Arnoux', 'url' => 'https://saint-arnoux.fr/'],
                 ['label' => 'Diocèse de Nice', 'url' => 'https://nice.catholique.fr/'],
-                ['label' => 'Plateforme de don du diocèse', 'url' => 'https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/'],
-                ['label' => 'Commune du Rouret', 'url' => 'https://lerouret.fr/'],
+                                ['label' => 'Commune du Rouret', 'url' => 'https://lerouret.fr/'],
             ],
             'newsletter_title' => 'Suivez la construction.',
             'newsletter_text' => 'Recevez des nouvelles du projet : avancement du chantier, temps forts et rendez-vous de la communauté.',
@@ -319,7 +318,7 @@ L'aménagement et la construction des bâtiments paroissiaux représentent un co
 
 ## Comment faire un don ?
 
-- **En ligne**, de façon sécurisée, sur la [plateforme de don du diocèse](https://don-nice.catholique.fr/centre-paroissial-st-arnoux-rouret/).
+- **En ligne**, de façon sécurisée, sur la [plateforme de don du diocèse](/don).
 - **Par chèque** : *informations à compléter (ordre, adresse d'envoi, mention à indiquer au dos).*
 
 ## Puis-je bénéficier d'une déduction fiscale ?
