@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -54,10 +55,19 @@ class Rgive
         return $last;
     }
 
-    /** Montant collecté affiché par le site : total RGIVE (0 si RGIVE n'a encore jamais répondu). */
+    /**
+     * Montant collecté affiché par le site : total RGIVE (0 si RGIVE n'a encore jamais répondu)
+     * + montant fixe saisi dans les réglages (`site.raised_offset`, dons reçus hors RGIVE).
+     */
     public function raised(): int
     {
-        return $this->campaign()['raised'] ?? 0;
+        return ($this->campaign()['raised'] ?? 0) + $this->offset();
+    }
+
+    /** Montant ajouté au total RGIVE (Admin > Contenu > Autres textes du site > Don). */
+    public function offset(): int
+    {
+        return max(0, (int) Setting::get('site.raised_offset', 0));
     }
 
     /** @return list<array{name: string, city: ?string, amount: int}> */

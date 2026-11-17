@@ -46,6 +46,25 @@ class RgiveTest extends TestCase
             ->assertSeeInOrder(['Jean', 'a posé 1 pierre']);
     }
 
+    public function test_the_offset_from_the_settings_is_added_to_the_rgive_total(): void
+    {
+        $this->fakeRgive();
+        Setting::put('site', ['raised_offset' => 850000]);
+
+        $this->assertSame(1081260, app(Rgive::class)->raised());
+        $this->get('/')->assertOk()
+            ->assertSee('data-raised="1081260"', false)
+            ->assertSee('1 081 260 €');
+    }
+
+    public function test_the_offset_alone_is_shown_when_rgive_is_disabled(): void
+    {
+        config(['services.rgive.widget_url' => null]);
+        Setting::put('site', ['raised_offset' => 850000]);
+
+        $this->assertSame(850000, app(Rgive::class)->raised());
+    }
+
     public function test_the_huile_page_uses_the_rgive_total(): void
     {
         $this->fakeRgive();

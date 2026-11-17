@@ -60,6 +60,10 @@ class ManageSite extends SettingsPage
                     Textarea::make('site.newsletter_text')->label('Texte du bloc newsletter')->rows(2),
                     TextInput::make('site.don_title')->label('Titre du bloc don'),
                     Textarea::make('site.don_text')->label('Texte du bloc don')->rows(2),
+                    TextInput::make('site.raised_offset')
+                        ->label('Montant à ajouter au total RGIVE')
+                        ->helperText('Dons reçus hors de la campagne RGIVE : ce montant est ajouté au total RGIVE partout où le montant collecté est affiché (clocher de l\'accueil, page de don, page huile).')
+                        ->numeric()->integer()->minValue(0)->suffix('€')->default(0),
                 ]),
 
                 Tab::make('Pages légales')->icon(Heroicon::OutlinedScale)->schema([
