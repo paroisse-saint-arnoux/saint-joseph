@@ -8,7 +8,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * Tableau de bord : clics sur les boutons « Faire un don » (événements Matomo de catégorie « Don »,
- * tous emplacements confondus), jour par jour, semaine par semaine ou mois par mois.
+ * tous emplacements confondus) et dons effectués dans le formulaire intégré à /don (catégorie « Don effectué »),
+ * jour par jour, semaine par semaine ou mois par mois.
  */
 class DonationClicks extends ChartWidget
 {
@@ -16,7 +17,7 @@ class DonationClicks extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    protected ?string $heading = 'Clics sur « Faire un don »';
+    protected ?string $heading = 'Clics sur « Faire un don » et dons effectués';
 
     protected ?string $maxHeight = '260px';
 
@@ -40,12 +41,17 @@ class DonationClicks extends ChartWidget
         $data = $this->clicks();
         $clicks = array_sum(array_column($data, 'clicks'));
         $visits = array_sum(array_column($data, 'visits'));
+        $donations = array_sum(array_column($data, 'donations'));
+        $fmt = fn (int $n) => number_format($n, 0, ',', ' ');
 
-        return $clicks === 0
-            ? 'Aucun clic sur la période (suivi en place depuis le 10/11/2026). Un clic mène à la plateforme de don du diocèse : ce n\'est pas forcément un don.'
-            : sprintf('%s clic%s sur la période, au cours de %s visite%s. Un clic mène à la plateforme de don du diocèse : ce n\'est pas forcément un don.',
-                number_format($clicks, 0, ',', ' '), $clicks > 1 ? 's' : '',
-                number_format($visits, 0, ',', ' '), $visits > 1 ? 's' : '');
+        $text = $clicks === 0
+            ? 'Aucun clic sur la période (suivi en place depuis le 10/11/2026).'
+            : sprintf('%s clic%s sur la période, au cours de %s visite%s.', $fmt($clicks), $clicks > 1 ? 's' : '', $fmt($visits), $visits > 1 ? 's' : '');
+
+        return $text.' '.($donations === 0
+            ? 'Aucun don effectué dans le formulaire de la page de don (suivi en place depuis le 17/11/2026).'
+            : sprintf('%s don%s effectué%s dans le formulaire de la page de don.', $fmt($donations), $donations > 1 ? 's' : '', $donations > 1 ? 's' : ''))
+            .' Les dons faits directement sur le site du diocèse ne sont pas comptés.';
     }
 
     protected function getData(): array
@@ -58,6 +64,11 @@ class DonationClicks extends ChartWidget
                 'data' => array_values(array_column($data, 'clicks')),
                 'backgroundColor' => '#C5A24B',
                 'borderRadius' => 3,
+            ], [
+                'label' => 'Dons effectués',
+                'data' => array_values(array_column($data, 'donations')),
+                'backgroundColor' => '#00204E',
+                'borderRadius' => 3,
             ]],
             'labels' => array_map(fn ($key) => $this->label((string) $key), array_keys($data)),
         ];
@@ -66,7 +77,7 @@ class DonationClicks extends ChartWidget
     protected function getOptions(): array
     {
         return [
-            'plugins' => ['legend' => ['display' => false]],
+            'plugins' => ['legend' => ['display' => true, 'position' => 'bottom']],
             'scales' => ['y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0]]],
         ];
     }
@@ -76,7 +87,7 @@ class DonationClicks extends ChartWidget
         return 'bar';
     }
 
-    /** @return array<string, array{clicks: int, visits: int}> */
+    /** @return array<string, array{clicks: int, visits: int, donations: int}> */
     private function clicks(): array
     {
         [$period, $count] = self::RANGES[$this->filter] ?? self::RANGES['30'];

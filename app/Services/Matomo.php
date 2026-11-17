@@ -39,16 +39,23 @@ class Matomo
      * Clics sur les boutons de don (événements de catégorie « Don », tous emplacements confondus),
      * période par période : $period = day, week ou month, sur les $count dernières périodes.
      *
-     * @return array<string, array{clicks: int, visits: int}> clé = période Matomo (AAAA-MM-JJ, « début,fin » ou AAAA-MM)
+     * Avec, pour chaque période, les dons effectués dans le formulaire RGIVE intégré à /don (catégorie « Don effectué »).
+     *
+     * @return array<string, array{clicks: int, visits: int, donations: int}> clé = période Matomo (AAAA-MM-JJ, « début,fin » ou AAAA-MM)
      */
     public function donationClicks(string $period = 'day', int $count = 30): array
     {
         $data = $this->call('Events.getCategory', ['period' => $period, 'date' => 'last'.$count, 'filter_limit' => -1]);
 
         return collect($data)->map(function ($rows) {
-            $row = collect(is_array($rows) ? $rows : [])->firstWhere('label', 'Don') ?? [];
+            $rows = collect(is_array($rows) ? $rows : []);
+            $row = $rows->firstWhere('label', 'Don') ?? [];
 
-            return ['clicks' => (int) ($row['nb_events'] ?? 0), 'visits' => (int) ($row['nb_visits'] ?? 0)];
+            return [
+                'clicks' => (int) ($row['nb_events'] ?? 0),
+                'visits' => (int) ($row['nb_visits'] ?? 0),
+                'donations' => (int) ($rows->firstWhere('label', 'Don effectué')['nb_events'] ?? 0),
+            ];
         })->all();
     }
 

@@ -61,14 +61,17 @@ class DashboardTest extends TestCase
                     ['label' => 'Autre', 'nb_events' => 50, 'nb_visits' => 40],
                     ['label' => 'Don', 'nb_events' => 3, 'nb_visits' => 2],
                 ],
-                now()->toDateString() => [['label' => 'Don', 'nb_events' => 4, 'nb_visits' => 3]],
+                now()->toDateString() => [
+                    ['label' => 'Don', 'nb_events' => 4, 'nb_visits' => 3],
+                    ['label' => 'Don effectué', 'nb_events' => 2, 'nb_visits' => 2],
+                ],
             ]),
             'month' => Http::response(['2026-10' => [], '2026-11' => [['label' => 'Don', 'nb_events' => 9, 'nb_visits' => 6]]]),
         });
 
-        $this->assertSame(['clicks' => 0, 'visits' => 0], app(Matomo::class)->donationClicks('month', 2)['2026-10']);
+        $this->assertSame(['clicks' => 0, 'visits' => 0, 'donations' => 0], app(Matomo::class)->donationClicks('month', 2)['2026-10']);
 
-        Livewire::test(DonationClicks::class)->assertSee('7 clics sur la période, au cours de 5 visites');
+        Livewire::test(DonationClicks::class)->assertSee('7 clics sur la période, au cours de 5 visites')->assertSee('2 dons effectués');
         Livewire::test(DonationClicks::class)->set('filter', '365')->assertSee('9 clics');
 
         Http::assertSent(fn (Request $request) => $request['method'] === 'Events.getCategory' && $request['date'] === 'last30');
