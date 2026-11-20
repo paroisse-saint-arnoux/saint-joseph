@@ -59,6 +59,7 @@ class ShortLinks
                 route('croix', absolute: false) => 'Croix du Pape',
                 route('croix.vote', absolute: false) => 'Croix du Pape — directement au site de vote',
                 route('huile', absolute: false) => 'Huile d\'olive',
+                route('huile.order', absolute: false) => 'Huile d\'olive — réserver des bouteilles',
                 route('consultation.start', absolute: false) => 'Consultation sur les projets d\'architecture',
             ],
             'Catégories d\'articles' => collect(Category::cases())
@@ -80,6 +81,9 @@ class ShortLinks
     public static function campaignFor(string $path): string
     {
         $path = explode('#', $path)[0];
+        if ($path === '/commande-huile') {
+            return 'huile';
+        }
         foreach (['croix', 'huile', 'consultation', 'don'] as $campaign) {
             if ($path === "/$campaign" || str_starts_with($path, "/$campaign/")) {
                 return $campaign;

@@ -44,6 +44,8 @@ return [
         'croix_list_id' => (int) env('BREVO_CROIX_LIST_ID', 7),
         // Liste « Huile d'olive » : contacts inscrits depuis la page /huile (QR code des étiquettes).
         'huile_list_id' => (int) env('BREVO_HUILE_LIST_ID', 8),
+        // Liste « Commandes d'huile » : personnes qui ont réservé des bouteilles sur /commande-huile.
+        'huile_order_list_id' => (int) env('BREVO_HUILE_COMMANDE_LIST_ID', 9),
     ],
 
     'turnstile' => [

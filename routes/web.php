@@ -11,6 +11,7 @@ use App\Http\Controllers\LibraryArchiveController;
 use App\Http\Controllers\LibrarySearchController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\OilOrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\ShortLinkController;
@@ -69,6 +70,9 @@ Route::post('/qrcodes', [QrCodeController::class, 'store'])->middleware('throttl
 // Opération « huile d'olive » : page ouverte par le QR code des étiquettes (non référencée).
 Route::get('/huile', [HuileController::class, 'show'])->name('huile');
 Route::post('/huile', [HuileController::class, 'store'])->middleware('throttle:huile-signup')->name('huile.store');
+// Réservation de bouteilles d'huile, à retirer à la kermesse (non référencée).
+Route::get('/commande-huile', [OilOrderController::class, 'show'])->name('huile.order');
+Route::post('/commande-huile', [OilOrderController::class, 'store'])->middleware('throttle:huile-order')->name('huile.order.store');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 

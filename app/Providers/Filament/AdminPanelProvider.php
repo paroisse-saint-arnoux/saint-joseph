@@ -45,7 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(false)
             ->sidebarCollapsibleOnDesktop()
             // Ordre du menu : Stats, Contenu, Consultation, Administration.
-            ->navigationGroups(['Stats', 'Contenu', 'Consultation', 'Administration'])
+            ->navigationGroups(['Stats', 'Contenu', 'Huile d\'olive', 'Consultation', 'Administration'])
             ->navigationItems([
                 NavigationItem::make('Voir le site')
                     ->url('/', shouldOpenInNewTab: true)

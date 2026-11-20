@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Services\Brevo;
 use App\Services\Rgive;
+use App\Support\OilOrders;
 use App\Support\SpamGuard;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,7 @@ class HuileController extends Controller
             'heroImage' => Setting::get('home.hero.image'),
             'projectImage' => Setting::get('home.projet.images.0'),
             'donUrl' => Setting::get('site.don_url') ?: '/don',
+            'orderOpen' => OilOrders::isOpen(), // réservation de bouteilles (/commande-huile)
         ])->header('X-Robots-Tag', 'noindex, nofollow');
     }
 

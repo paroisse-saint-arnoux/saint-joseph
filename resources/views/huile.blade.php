@@ -51,10 +51,21 @@
         <p class="eyebrow">Votre huile</p>
         <h2>Une huile d'ici, faite ensemble.</h2>
         <p>Les olives ont été récoltées le <b>samedi 7 novembre 2026</b>, sur les oliviers du terrain de la future église et chez des paroissiens. L'huile a ensuite été pressée spécialement pour nous au <a href="https://www.domaine-h.com/le-moulin" target="_blank" rel="noopener">Moulin d'H</a>.</p>
+        @include('partials.huile-carousel')
         <figure class="visual">
             <img src="{{ asset('images/huile-moulin-d-h.webp') }}" alt="Le Moulin d'H : la trémie de réception des olives et la machine de lavage devant le moulin en pierre" width="1200" height="517" loading="lazy">
             <figcaption>Le Moulin d'H, où notre huile a été pressée. Photo ©&nbsp;Domaine&nbsp;H</figcaption>
         </figure>
+        @if ($orderOpen)
+            <a class="order-cta" href="{{ route('huile.order') }}">
+                <img src="{{ asset('images/huile-bouteilles.webp') }}" alt="" width="900" height="1142" loading="lazy">
+                <div>
+                    <b>Offrez cette huile pour Noël</b>
+                    <span>Réservez des bouteilles, à retirer à la kermesse.</span>
+                    <span class="go">Réserver →</span>
+                </div>
+            </a>
+        @endif
     </section>
 
     <section class="block">
