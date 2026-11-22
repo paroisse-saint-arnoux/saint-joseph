@@ -52,7 +52,7 @@ class OilOrderTest extends TestCase
 
     public function test_the_stock_set_by_the_migration(): void
     {
-        $this->assertSame([['250 mL', 1700, 50], ['500 mL', 3000, 100], ['750 mL', 4000, 20]],
+        $this->assertSame([['250 mL', 1300, 50], ['500 mL', 2300, 100], ['750 mL', 3000, 20]],
             OilProduct::ordered()->get()->map(fn ($p) => [$p->label, $p->price_cents, $p->stock])->all());
     }
 
@@ -61,7 +61,7 @@ class OilOrderTest extends TestCase
         $this->get('/commande-huile')->assertOk()
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
             ->assertSee('noindex', false)
-            ->assertSee('250 mL')->assertSee("17\u{00A0}€")->assertSee("30\u{00A0}€")->assertSee("40\u{00A0}€")
+            ->assertSee('250 mL')->assertSee("13\u{00A0}€")->assertSee("23\u{00A0}€")->assertSee("30\u{00A0}€")
             ->assertSee('kermesse du dimanche 29 novembre 2026, salle Charvet')
             ->assertSee('Réserver mes bouteilles')
             ->assertDontSee('SJO2');
@@ -80,7 +80,7 @@ class OilOrderTest extends TestCase
         $this->assertSame('marie@example.com', $order->email);
         $this->assertSame('+33612345678', $order->phone);
         $this->assertSame('06 12 34 56 78', $order->phoneForDisplay());
-        $this->assertSame(2 * 1700 + 4000, $order->total_cents);
+        $this->assertSame(2 * 1300 + 3000, $order->total_cents);
         $this->assertSame(OilOrderStatus::Reserved, $order->status);
         $this->assertSame('2 × 250 mL, 1 × 750 mL', $order->summary());
 
@@ -97,7 +97,7 @@ class OilOrderTest extends TestCase
         $this->assertNotNull($order->fresh()->brevo_synced_at);
 
         // La confirmation reste affichée, avec le numéro de commande.
-        $this->get('/commande-huile')->assertOk()->assertSee('Merci Marie')->assertSee('H-001')->assertSee("74\u{00A0}€");
+        $this->get('/commande-huile')->assertOk()->assertSee('Merci Marie')->assertSee('H-001')->assertSee("56\u{00A0}€");
         $this->get('/commande-huile?nouvelle=1')->assertOk()->assertDontSee('H-001');
     }
 
@@ -107,7 +107,7 @@ class OilOrderTest extends TestCase
 
         (new OilOrderMail($order->load('items')))
             ->assertHasSubject('Votre réservation d\'huile d\'olive n° H-001')
-            ->assertSeeInHtml('H-001')->assertSeeInHtml('500 mL')->assertSeeInHtml('90')
+            ->assertSeeInHtml('H-001')->assertSeeInHtml('500 mL')->assertSeeInHtml('69')
             ->assertSeeInHtml('salle Charvet');
     }
 
