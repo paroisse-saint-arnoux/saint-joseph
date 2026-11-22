@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -70,8 +71,9 @@ class OilOrderResource extends Resource
     {
         $products = OilProduct::ordered()->get();
 
-        return $schema->components([
-            Section::make()->columns(2)->schema([
+        // Une seule colonne : statut et date en tête, puis les bouteilles, puis les coordonnées.
+        return $schema->columns(1)->components([
+            Grid::make(['default' => 2])->schema([
                 TextEntry::make('status')->label('Statut')->badge(),
                 TextEntry::make('created_at')->label('Commandée le')->dateTime('d/m/Y à H:i'),
             ]),
@@ -114,6 +116,7 @@ class OilOrderResource extends Resource
         return EditAction::make()
             ->label('Modifier')
             ->modalHeading(fn (OilOrder $record) => 'Commande '.$record->number)
+            ->modalCancelActionLabel('Fermer')
             ->mutateRecordDataUsing(function (array $data, OilOrder $record) {
                 foreach (OilProduct::ordered()->pluck('id') as $id) {
                     $data['qty_'.$id] = (int) $record->items->where('product_id', $id)->sum('quantity');
