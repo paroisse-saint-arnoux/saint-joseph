@@ -9,7 +9,6 @@ use App\Models\OilProduct;
 use App\Support\OilOrders;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Textarea;
@@ -18,7 +17,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
@@ -71,22 +69,19 @@ class OilOrderResource extends Resource
     {
         $products = OilProduct::ordered()->get();
 
-        // Une seule colonne : statut et date en tête, puis les bouteilles, puis les coordonnées.
+        // Compact, pour tenir sur un écran de téléphone : pas de sections ni d'aides, statut et date dans le sous-titre
+        // de la fenêtre. Le total est recalculé pendant la saisie ; le stock suit à l'enregistrement.
         return $schema->columns(1)->components([
-            Grid::make(['default' => 2])->schema([
-                TextEntry::make('status')->label('Statut')->badge(),
-                TextEntry::make('created_at')->label('Commandée le')->dateTime('d/m/Y à H:i'),
-            ]),
-            // Quantités et tarif réduit : le total est recalculé pendant la saisie ; le stock suit à l'enregistrement.
-            Section::make('Bouteilles')->columns(['default' => 3])->schema([
-                ...$products->map(fn (OilProduct $product) => TextInput::make('qty_'.$product->id)
+            Grid::make(['default' => 3])->schema(
+                $products->map(fn (OilProduct $product) => TextInput::make('qty_'.$product->id)
                     ->label($product->label)
                     ->numeric()->integer()->minValue(0)->maxValue(999)->required()->default(0)
-                    ->live(debounce: 400))->all(),
-                Checkbox::make('discounted')->label('Tarif réduit')->live()->columnSpanFull()
-                    ->helperText('−'.OilOrders::DISCOUNT_PERCENT.' % sur toute la commande.'),
-                TextEntry::make('new_total')->label('Total')->columnSpanFull()
-                    ->weight(FontWeight::Bold)->size(TextSize::Large)
+                    ->live(debounce: 400))->all()
+            ),
+            Grid::make(['default' => 2])->schema([
+                Checkbox::make('discounted')->label('Tarif réduit −'.OilOrders::DISCOUNT_PERCENT."\u{00A0}%")->live(),
+                TextEntry::make('new_total')->hiddenLabel()->alignEnd()
+                    ->weight(FontWeight::Bold)
                     ->state(function (Get $get, ?OilOrder $record) use ($products) {
                         $full = $products->sum(function (OilProduct $product) use ($get, $record) {
                             $price = $record?->items->firstWhere('product_id', $product->id)?->unit_price_cents ?? $product->price_cents;
@@ -95,27 +90,34 @@ class OilOrderResource extends Resource
                         });
                         $total = OilOrders::totalCents($full, (bool) $get('discounted'));
 
-                        return OilOrders::money($total).($total !== $full ? ' (au lieu de '.OilOrders::money($full).')' : '');
+                        return 'Total : '.OilOrders::money($total).($total !== $full ? ' (au lieu de '.OilOrders::money($full).')' : '');
                     }),
             ]),
-            Section::make('Coordonnées')->columns(2)->schema([
+            Grid::make(['default' => 2])->schema([
                 TextInput::make('first_name')->label('Prénom')->required()->maxLength(80),
                 TextInput::make('last_name')->label('Nom')->required()->maxLength(80),
-                TextInput::make('phone')->label('Téléphone')->tel()->required()->maxLength(30)
-                    ->helperText('Format international : +33612345678.'),
-                TextInput::make('email')->label('Email')->email()->required()->maxLength(190),
-                Textarea::make('notes')->label('Note interne')->rows(3)->columnSpanFull()
-                    ->helperText('Visible seulement dans l\'admin et dans l\'export (paiement, remarque…).'),
             ]),
+            Grid::make(['default' => 1, 'sm' => 2])->schema([
+                TextInput::make('phone')->label('Téléphone')->tel()->required()->maxLength(30)->placeholder('+33612345678'),
+                TextInput::make('email')->label('Email')->email()->required()->maxLength(190),
+            ]),
+            Textarea::make('notes')->label('Note interne')->rows(2)->placeholder('Paiement, remarque… (visible seulement dans l\'admin et l\'export)'),
         ]);
     }
 
-    /** Fenêtre « Modifier » : quantités, tarif réduit, coordonnées ; « Annuler la commande » en bas à gauche. */
+    /**
+     * Bouton crayon de chaque commande : quantités, tarif réduit, coordonnées, note ; en bas de la fenêtre,
+     * « Annuler la commande » ou « Remettre à retirer » selon le statut.
+     */
     public static function editAction(): EditAction
     {
         return EditAction::make()
             ->label('Modifier')
-            ->modalHeading(fn (OilOrder $record) => 'Commande '.$record->number)
+            ->iconButton()
+            ->tooltip('Modifier')
+            ->modalHeading(fn (OilOrder $record) => 'Commande '.$record->number.' · '.$record->status->getLabel())
+            ->modalDescription(fn (OilOrder $record) => 'Commandée le '.$record->created_at->timezone(config('app.timezone'))->format('d/m/Y à H:i'))
+            ->modalSubmitActionLabel('Enregistrer')
             ->modalCancelActionLabel('Fermer')
             ->mutateRecordDataUsing(function (array $data, OilOrder $record) {
                 foreach (OilProduct::ordered()->pluck('id') as $id) {
@@ -142,17 +144,35 @@ class OilOrderResource extends Resource
                     throw new Halt;
                 }
             })
-            ->extraModalFooterActions(fn (OilOrder $record) => $record->status === OilOrderStatus::Cancelled ? [] : [
+            ->extraModalFooterActions(fn (OilOrder $record) => [
                 Action::make('cancelOrder')
                     ->label('Annuler la commande')
-                    ->icon('heroicon-o-x-mark')
                     ->color('danger')
+                    ->outlined()
+                    ->visible($record->status !== OilOrderStatus::Cancelled)
                     ->requiresConfirmation()
                     ->modalHeading('Annuler la commande '.$record->number.' ?')
                     ->modalDescription('Ses bouteilles reviennent dans le stock et peuvent de nouveau être réservées. La personne n\'est pas prévenue.')
                     ->modalSubmitActionLabel('Annuler la commande')
                     ->modalCancelActionLabel('Retour')
                     ->action(fn () => OilOrders::cancel($record))
+                    ->cancelParentActions()
+                    ->after(self::refreshStock()),
+                Action::make('reopen')
+                    ->label('Remettre « à retirer »')
+                    ->color('gray')
+                    ->visible($record->status !== OilOrderStatus::Reserved)
+                    ->requiresConfirmation()
+                    ->modalDescription($record->status === OilOrderStatus::Cancelled
+                        ? 'Les bouteilles de cette commande seront de nouveau retirées du stock.'
+                        : 'La commande sera de nouveau marquée comme non retirée.')
+                    ->action(function () use ($record) {
+                        try {
+                            OilOrders::reopen($record);
+                        } catch (ValidationException $e) {
+                            Notification::make()->title($e->getMessage())->danger()->send();
+                        }
+                    })
                     ->cancelParentActions()
                     ->after(self::refreshStock()),
             ])
@@ -207,38 +227,8 @@ class OilOrderResource extends Resource
             ->filters([
                 SelectFilter::make('status')->label('Statut')->options(OilOrderStatus::class),
             ])
-            ->recordActions([
-                ActionGroup::make([
-                    self::editAction(),
-                    Action::make('reopen')
-                        ->label('Remettre « à retirer »')
-                        ->icon('heroicon-o-arrow-uturn-left')
-                        ->color('gray')
-                        ->visible(fn (OilOrder $record) => $record->status !== OilOrderStatus::Reserved)
-                        ->requiresConfirmation()
-                        ->modalDescription(fn (OilOrder $record) => $record->status === OilOrderStatus::Cancelled
-                            ? 'Les bouteilles de cette commande seront de nouveau retirées du stock.'
-                            : 'La commande sera de nouveau marquée comme non retirée.')
-                        ->action(function (OilOrder $record) {
-                            try {
-                                OilOrders::reopen($record);
-                            } catch (ValidationException $e) {
-                                Notification::make()->title($e->getMessage())->danger()->send();
-                            }
-                        })
-                        ->after(self::refreshStock()),
-                    Action::make('resend')
-                        ->label('Renvoyer l\'e-mail')
-                        ->icon('heroicon-o-envelope')
-                        ->color('gray')
-                        ->visible(fn (OilOrder $record) => $record->status === OilOrderStatus::Reserved)
-                        ->requiresConfirmation()
-                        ->modalDescription(fn (OilOrder $record) => 'Le récapitulatif de la commande sera de nouveau envoyé à '.$record->email.'.')
-                        ->action(fn (OilOrder $record) => OilOrders::sendConfirmation($record)
-                            ? Notification::make()->title('E-mail envoyé')->success()->send()
-                            : Notification::make()->title('L\'e-mail n\'a pas pu être envoyé')->danger()->send()),
-                ]),
-            ]);
+            ->recordActions([self::editAction()])
+            ->recordAction('edit');
     }
 
     public static function getPages(): array
