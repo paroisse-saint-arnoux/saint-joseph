@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\OilOrders;
 use App\Support\SpamGuard;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -212,7 +213,7 @@ class OilOrderTest extends TestCase
             ->assertTableColumnStateSet('bottles_'.$this->medium->id, 2, $other)
             ->assertTableColumnStateSet('bottles_'.$this->small->id, '·', $other)
             ->callTableAction('collect', $other)
-            ->callTableAction('cancel', $order)
+            ->callAction([TestAction::make('edit')->table($order), TestAction::make('cancelOrder')])
             ->callAction('stocks', ['add_'.$this->small->id => -42, 'add_'.$this->medium->id => 5, 'add_'.$this->large->id => 0]);
 
         $this->assertSame(OilOrderStatus::Cancelled, $order->fresh()->status);
@@ -250,5 +251,40 @@ class OilOrderTest extends TestCase
         $order->refresh();
         $this->assertSame(2 * 1300 + 2300 + 3000, $order->total_cents);
         $this->assertSame([1300, 2300, 3000], $order->items()->orderBy('id')->pluck('unit_price_cents')->all());
+    }
+
+    public function test_an_order_can_be_edited_in_the_admin_with_the_stock_and_the_reduced_price(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => Role::Admin, 'is_active' => true]));
+        $order = OilOrders::place(['first_name' => 'Marie', 'last_name' => 'Martin', 'email' => 'm@example.com', 'phone' => '+33612345678'],
+            [$this->small->id => 2, $this->large->id => 1]);
+
+        // 2 × 250 mL + 1 × 750 mL → 1 × 250 mL + 7 × 500 mL (au-delà de 5 : permis dans l'admin), tarif réduit.
+        Livewire::test(ManageOilOrders::class)
+            ->mountTableAction('edit', $order)
+            ->assertTableActionDataSet(['qty_'.$this->small->id => 2, 'qty_'.$this->medium->id => 0, 'qty_'.$this->large->id => 1, 'discounted' => false])
+            ->setTableActionData(['qty_'.$this->small->id => 1, 'qty_'.$this->medium->id => 7, 'qty_'.$this->large->id => 0, 'discounted' => true, 'notes' => 'Bénévole'])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        $order->refresh()->load('items');
+        $this->assertSame('1 × 250 mL, 7 × 500 mL', $order->summary());
+        $this->assertTrue($order->discounted);
+        $this->assertSame((1300 + 7 * 2300) / 2, $order->total_cents);
+        $this->assertSame('Bénévole', $order->notes);
+        $this->assertSame([49, 93, 20], OilProduct::ordered()->pluck('stock')->all());
+
+        (new OilOrderMail($order))->assertSeeInHtml('Tarif réduit')->assertSeeInHtml("−87\u{00A0}€");
+
+        // Pas plus que le stock : 20 bouteilles de 750 mL au plus.
+        Livewire::test(ManageOilOrders::class)
+            ->callTableAction('edit', $order, ['qty_'.$this->small->id => 1, 'qty_'.$this->medium->id => 7, 'qty_'.$this->large->id => 21]);
+        $this->assertSame(20, $this->large->fresh()->stock);
+        $this->assertSame(0, (int) $order->items()->where('product_id', $this->large->id)->sum('quantity'));
+
+        // Sans le tarif réduit : prix plein.
+        Livewire::test(ManageOilOrders::class)
+            ->callTableAction('edit', $order, ['discounted' => false])->assertHasNoTableActionErrors();
+        $this->assertSame(1300 + 7 * 2300, $order->fresh()->total_cents);
     }
 }

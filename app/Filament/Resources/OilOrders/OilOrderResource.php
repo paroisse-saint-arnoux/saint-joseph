@@ -11,15 +11,18 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
+use Filament\Support\Exceptions\Halt;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -65,12 +68,35 @@ class OilOrderResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $products = OilProduct::ordered()->get();
+
         return $schema->components([
             Section::make()->columns(2)->schema([
-                TextEntry::make('summary')->label('Bouteilles')->columnSpanFull()
-                    ->state(fn (OilOrder $record) => $record->summary().' — '.$record->total()),
                 TextEntry::make('status')->label('Statut')->badge(),
                 TextEntry::make('created_at')->label('Commandée le')->dateTime('d/m/Y à H:i'),
+            ]),
+            // Quantités et tarif réduit : le total est recalculé pendant la saisie ; le stock suit à l'enregistrement.
+            Section::make('Bouteilles')->columns(['default' => 3])->schema([
+                ...$products->map(fn (OilProduct $product) => TextInput::make('qty_'.$product->id)
+                    ->label($product->label)
+                    ->numeric()->integer()->minValue(0)->maxValue(999)->required()->default(0)
+                    ->live(debounce: 400))->all(),
+                Checkbox::make('discounted')->label('Tarif réduit')->live()->columnSpanFull()
+                    ->helperText('−'.OilOrders::DISCOUNT_PERCENT.' % sur toute la commande.'),
+                TextEntry::make('new_total')->label('Total')->columnSpanFull()
+                    ->weight(FontWeight::Bold)->size(TextSize::Large)
+                    ->state(function (Get $get, ?OilOrder $record) use ($products) {
+                        $full = $products->sum(function (OilProduct $product) use ($get, $record) {
+                            $price = $record?->items->firstWhere('product_id', $product->id)?->unit_price_cents ?? $product->price_cents;
+
+                            return max(0, (int) $get('qty_'.$product->id)) * $price;
+                        });
+                        $total = OilOrders::totalCents($full, (bool) $get('discounted'));
+
+                        return OilOrders::money($total).($total !== $full ? ' (au lieu de '.OilOrders::money($full).')' : '');
+                    }),
+            ]),
+            Section::make('Coordonnées')->columns(2)->schema([
                 TextInput::make('first_name')->label('Prénom')->required()->maxLength(80),
                 TextInput::make('last_name')->label('Nom')->required()->maxLength(80),
                 TextInput::make('phone')->label('Téléphone')->tel()->required()->maxLength(30)
@@ -80,6 +106,54 @@ class OilOrderResource extends Resource
                     ->helperText('Visible seulement dans l\'admin et dans l\'export (paiement, remarque…).'),
             ]),
         ]);
+    }
+
+    /** Fenêtre « Modifier » : quantités, tarif réduit, coordonnées ; « Annuler la commande » en bas à gauche. */
+    public static function editAction(): EditAction
+    {
+        return EditAction::make()
+            ->label('Modifier')
+            ->modalHeading(fn (OilOrder $record) => 'Commande '.$record->number)
+            ->mutateRecordDataUsing(function (array $data, OilOrder $record) {
+                foreach (OilProduct::ordered()->pluck('id') as $id) {
+                    $data['qty_'.$id] = (int) $record->items->where('product_id', $id)->sum('quantity');
+                }
+
+                return $data;
+            })
+            ->using(function (OilOrder $record, array $data) {
+                $quantities = [];
+                foreach ($data as $key => $value) {
+                    if (str_starts_with($key, 'qty_')) {
+                        $quantities[(int) substr($key, 4)] = (int) $value;
+                        unset($data[$key]);
+                    }
+                }
+                unset($data['new_total']);
+
+                try {
+                    return OilOrders::update($record, $data, $quantities);
+                } catch (ValidationException $e) {
+                    Notification::make()->title(collect($e->errors())->flatten()->implode(' '))->danger()->send();
+
+                    throw new Halt;
+                }
+            })
+            ->extraModalFooterActions(fn (OilOrder $record) => $record->status === OilOrderStatus::Cancelled ? [] : [
+                Action::make('cancelOrder')
+                    ->label('Annuler la commande')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Annuler la commande '.$record->number.' ?')
+                    ->modalDescription('Ses bouteilles reviennent dans le stock et peuvent de nouveau être réservées. La personne n\'est pas prévenue.')
+                    ->modalSubmitActionLabel('Annuler la commande')
+                    ->modalCancelActionLabel('Retour')
+                    ->action(fn () => OilOrders::cancel($record))
+                    ->cancelParentActions()
+                    ->after(self::refreshStock()),
+            ])
+            ->after(self::refreshStock());
     }
 
     public static function table(Table $table): Table
@@ -132,7 +206,7 @@ class OilOrderResource extends Resource
             ])
             ->recordActions([
                 ActionGroup::make([
-                    EditAction::make()->label('Modifier')->after(self::refreshStock()),
+                    self::editAction(),
                     Action::make('reopen')
                         ->label('Remettre « à retirer »')
                         ->icon('heroicon-o-arrow-uturn-left')
@@ -149,17 +223,6 @@ class OilOrderResource extends Resource
                                 Notification::make()->title($e->getMessage())->danger()->send();
                             }
                         })
-                        ->after(self::refreshStock()),
-                    Action::make('cancel')
-                        ->label('Annuler')
-                        ->icon('heroicon-o-x-mark')
-                        ->color('danger')
-                        ->visible(fn (OilOrder $record) => $record->status !== OilOrderStatus::Cancelled)
-                        ->requiresConfirmation()
-                        ->modalHeading(fn (OilOrder $record) => 'Annuler la commande '.$record->number.' ?')
-                        ->modalDescription('Ses bouteilles reviennent dans le stock et peuvent de nouveau être réservées. La personne n\'est pas prévenue.')
-                        ->modalSubmitActionLabel('Annuler la commande')
-                        ->action(fn (OilOrder $record) => OilOrders::cancel($record))
                         ->after(self::refreshStock()),
                     Action::make('resend')
                         ->label('Renvoyer l\'e-mail')

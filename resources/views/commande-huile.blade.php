@@ -51,6 +51,9 @@
                     @foreach ($order->items as $item)
                         <tr><td>{{ $item->quantity }} × {{ $item->label }}</td><td>{{ OilOrders::money($item->totalCents()) }}</td></tr>
                     @endforeach
+                    @if ($order->discounted)
+                        <tr><td>Tarif réduit (−{{ OilOrders::DISCOUNT_PERCENT }}&nbsp;%)</td><td>−{{ OilOrders::money($order->fullPriceCents() - $order->total_cents) }}</td></tr>
+                    @endif
                 </tbody>
                 <tfoot><tr><th>Total</th><th>{{ $order->total() }}</th></tr></tfoot>
             </table>

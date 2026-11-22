@@ -12,7 +12,7 @@ use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 
 /** Réservation de bouteilles d'huile (page /commande-huile), retirée et réglée à la kermesse. */
-#[Fillable(['first_name', 'last_name', 'email', 'phone', 'total_cents', 'notes'])]
+#[Fillable(['first_name', 'last_name', 'email', 'phone', 'total_cents', 'discounted', 'notes'])]
 class OilOrder extends Model
 {
     protected function casts(): array
@@ -20,6 +20,7 @@ class OilOrder extends Model
         return [
             'status' => OilOrderStatus::class,
             'total_cents' => 'integer',
+            'discounted' => 'boolean',
             'collected_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'confirmation_sent_at' => 'datetime',
@@ -59,6 +60,12 @@ class OilOrder extends Model
     public function bottles(): int
     {
         return (int) $this->items->sum('quantity');
+    }
+
+    /** Total des bouteilles au prix plein, avant le tarif réduit. */
+    public function fullPriceCents(): int
+    {
+        return (int) $this->items->sum(fn (OilOrderItem $item) => $item->totalCents());
     }
 
     public function total(): string

@@ -14,6 +14,9 @@ Votre réservation d'huile d'olive est bien enregistrée. Gardez précieusement 
 @foreach ($order->items as $item)
 | {{ $item->label }} ({{ OilOrders::money($item->unit_price_cents) }}) | {{ $item->quantity }} | {{ OilOrders::money($item->totalCents()) }} |
 @endforeach
+@if ($order->discounted)
+| Tarif réduit (−{{ OilOrders::DISCOUNT_PERCENT }}&nbsp;%) | | −{{ OilOrders::money($order->fullPriceCents() - $order->total_cents) }} |
+@endif
 | **Total** | **{{ $order->bottles() }}** | **{{ $order->total() }}** |
 </x-mail::table>
 

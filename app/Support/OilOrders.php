@@ -37,6 +37,15 @@ class OilOrders
         return self::settings()['open'];
     }
 
+    /** Réduction du « tarif réduit » (coché dans l'admin), sur toute la commande. */
+    public const DISCOUNT_PERCENT = 50;
+
+    /** Total d'une commande : prix plein, ou −50 % au tarif réduit (arrondi au centime). */
+    public static function totalCents(int $fullPriceCents, bool $discounted): int
+    {
+        return $discounted ? (int) round($fullPriceCents * (100 - self::DISCOUNT_PERCENT) / 100) : $fullPriceCents;
+    }
+
     /** 1700 → « 17 € », 1750 → « 17,50 € » (espace insécable). */
     public static function money(int $cents): string
     {
@@ -146,6 +155,67 @@ class OilOrders
             || $brevo->addContact($email, $list, $attributes);
     }
 
+    /**
+     * Modification d'une commande dans l'admin : coordonnées, note, quantités ([product_id => nombre], sans plafond
+     * de 5) et tarif réduit. Le stock suit l'écart de quantités (sauf pour une commande annulée, dont les bouteilles
+     * sont déjà revenues dans le stock). Une bouteille ajoutée prend le prix actuel du format ; les autres gardent le leur.
+     *
+     * @throws ValidationException si le stock ne suffit pas, ou s'il ne reste aucune bouteille
+     */
+    public static function update(OilOrder $order, array $data, array $quantities): OilOrder
+    {
+        $quantities = array_map(fn ($q) => max(0, (int) $q), $quantities);
+        if (array_sum($quantities) === 0) {
+            throw ValidationException::withMessages(['quantities' => 'Il faut au moins une bouteille. Pour retirer toutes les bouteilles, annulez la commande.']);
+        }
+
+        DB::transaction(function () use ($order, $data, $quantities) {
+            $order->load('items');
+            $products = OilProduct::whereIn('id', array_keys($quantities))->lockForUpdate()->get()->keyBy('id');
+            $affectsStock = $order->status !== OilOrderStatus::Cancelled;
+
+            $errors = [];
+            foreach ($quantities as $id => $quantity) {
+                $product = $products->get($id);
+                $current = (int) $order->items->where('product_id', $id)->sum('quantity');
+                if ($product && $affectsStock && $quantity - $current > $product->stock) {
+                    $errors["quantities.$id"] = 'Stock insuffisant : on ne peut ajouter que '.$product->stock.' bouteille'.($product->stock > 1 ? 's' : '').' de '.$product->label.'.';
+                }
+            }
+            if ($errors) {
+                throw ValidationException::withMessages($errors);
+            }
+
+            foreach ($quantities as $id => $quantity) {
+                if (! ($product = $products->get($id))) {
+                    continue;
+                }
+                $item = $order->items->firstWhere('product_id', $id);
+                $current = $item?->quantity ?? 0;
+                if ($quantity === $current) {
+                    continue;
+                }
+                if ($affectsStock) {
+                    $product->decrement('stock', $quantity - $current);
+                }
+                if ($quantity === 0) {
+                    $item->delete();
+                } elseif ($item) {
+                    $item->update(['quantity' => $quantity]);
+                } else {
+                    $order->items()->create(['product_id' => $id, 'label' => $product->label, 'unit_price_cents' => $product->price_cents, 'quantity' => $quantity]);
+                }
+            }
+
+            $order->fill($data);
+            $order->load('items');
+            $order->total_cents = self::totalCents($order->fullPriceCents(), (bool) $order->discounted);
+            $order->save();
+        });
+
+        return $order;
+    }
+
     public static function collect(OilOrder $order): void
     {
         if ($order->status === OilOrderStatus::Cancelled) {
@@ -245,7 +315,7 @@ class OilOrders
         $writer->addRow(Row::fromValues([
             'N°', 'Date', 'Prénom', 'Nom', 'Téléphone', 'Email',
             ...$products->map(fn (OilProduct $p) => $p->label),
-            'Bouteilles', 'Total (€)', 'Statut', 'Retirée le', 'Note',
+            'Bouteilles', 'Total (€)', 'Tarif réduit', 'Statut', 'Retirée le', 'Note',
         ], $bold));
 
         OilOrder::with('items')->orderBy('id')->each(function (OilOrder $order) use ($writer, $products) {
@@ -259,6 +329,7 @@ class OilOrders
                 ...$products->map(fn (OilProduct $p) => (int) $order->items->where('product_id', $p->id)->sum('quantity')),
                 $order->bottles(),
                 $order->total_cents / 100,
+                $order->discounted ? 'oui' : '',
                 $order->status->getLabel(),
                 $order->collected_at?->timezone(config('app.timezone'))->format('d/m/Y H:i'),
                 $order->notes,
