@@ -38,9 +38,9 @@ class OilOrders
     }
 
     /** Réduction du « tarif réduit » (coché dans l'admin), sur toute la commande. */
-    public const DISCOUNT_PERCENT = 50;
+    public const DISCOUNT_PERCENT = 20;
 
-    /** Total d'une commande : prix plein, ou −50 % au tarif réduit (arrondi au centime). */
+    /** Total d'une commande : prix plein, ou −20 % au tarif réduit (arrondi au centime). */
     public static function totalCents(int $fullPriceCents, bool $discounted): int
     {
         return $discounted ? (int) round($fullPriceCents * (100 - self::DISCOUNT_PERCENT) / 100) : $fullPriceCents;

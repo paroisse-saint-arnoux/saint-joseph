@@ -270,11 +270,11 @@ class OilOrderTest extends TestCase
         $order->refresh()->load('items');
         $this->assertSame('1 × 250 mL, 7 × 500 mL', $order->summary());
         $this->assertTrue($order->discounted);
-        $this->assertSame((1300 + 7 * 2300) / 2, $order->total_cents);
+        $this->assertSame((int) round((1300 + 7 * 2300) * 0.8), $order->total_cents);
         $this->assertSame('Bénévole', $order->notes);
         $this->assertSame([49, 93, 20], OilProduct::ordered()->pluck('stock')->all());
 
-        (new OilOrderMail($order))->assertSeeInHtml('Tarif réduit')->assertSeeInHtml("−87\u{00A0}€");
+        (new OilOrderMail($order))->assertSeeInHtml('Tarif réduit')->assertSeeInHtml("−34,80\u{00A0}€");
 
         // Pas plus que le stock : 20 bouteilles de 750 mL au plus.
         Livewire::test(ManageOilOrders::class)
