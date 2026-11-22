@@ -85,15 +85,21 @@ class OilOrderController extends Controller
         }
 
         $clean = fn (string $v) => mb_substr(trim(preg_replace('/\s+/u', ' ', $v)), 0, 80);
+        $customer = [
+            'first_name' => $clean($data['first_name']),
+            'last_name' => $clean($data['last_name']),
+            'email' => mb_strtolower(trim($data['email'])),
+            'phone' => $phone,
+        ];
         try {
-            $order = OilOrders::place([
-                'first_name' => $clean($data['first_name']),
-                'last_name' => $clean($data['last_name']),
-                'email' => mb_strtolower(trim($data['email'])),
-                'phone' => $phone,
-            ], $quantities);
+            $order = OilOrders::place($customer, $quantities);
         } catch (ValidationException $e) {
-            return $back()->withInput()->withErrors($e->errors());
+            // Pas assez de bouteilles : on garde quand même le contact dans Brevo (liste 9), pour le prévenir
+            // quand d'autres bouteilles seront remises en stock, et on l'invite à nous contacter.
+            dispatch(fn () => OilOrders::addToBrevo($customer['email'], $customer['first_name'], $customer['last_name'], $customer['phone']))
+                ->afterResponse();
+
+            return $back()->withInput()->withErrors($e->errors())->with('oil_stock_short', true);
         }
 
         $request->session()->put('oil_order_id', $order->id);

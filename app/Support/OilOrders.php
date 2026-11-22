@@ -120,21 +120,30 @@ class OilOrders
     /** Ajoute la personne à la liste Brevo des commandes (si Brevo refuse le numéro, nouvel essai sans). */
     public static function syncBrevo(OilOrder $order): bool
     {
+        $ok = self::addToBrevo($order->email, $order->first_name, $order->last_name, $order->phone);
+        if ($ok) {
+            $order->forceFill(['brevo_synced_at' => now()])->save();
+        }
+
+        return $ok;
+    }
+
+    /**
+     * Ajoute le contact à la liste Brevo des commandes (9), avec son mobile ; nouvel essai sans `SMS` si Brevo le refuse.
+     * Aussi utilisé quand une réservation est refusée faute de stock : on garde le contact pour le prévenir.
+     */
+    public static function addToBrevo(string $email, string $firstName, string $lastName, ?string $phone): bool
+    {
         $brevo = app(Brevo::class);
         if (! $brevo->isConfigured()) {
             return false;
         }
 
         $list = (int) config('services.brevo.huile_order_list_id');
-        $attributes = ['PRENOM' => $order->first_name, 'NOM' => $order->last_name];
-        $ok = $brevo->addContact($order->email, $list, $attributes + ['SMS' => $order->phone])
-            || $brevo->addContact($order->email, $list, $attributes);
+        $attributes = ['PRENOM' => $firstName, 'NOM' => $lastName];
 
-        if ($ok) {
-            $order->forceFill(['brevo_synced_at' => now()])->save();
-        }
-
-        return $ok;
+        return ($phone && $brevo->addContact($email, $list, $attributes + ['SMS' => $phone]))
+            || $brevo->addContact($email, $list, $attributes);
     }
 
     public static function collect(OilOrder $order): void

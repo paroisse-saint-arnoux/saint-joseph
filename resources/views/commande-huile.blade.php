@@ -91,6 +91,9 @@
                 @if ($errors->any())
                     <div class="error" role="alert">
                         @foreach (array_unique($errors->all()) as $message)<p>{{ $message }}</p>@endforeach
+                        @if (session('oil_stock_short'))
+                            <p>D'autres bouteilles vont être remises en stock d'ici Noël&nbsp;: <a href="{{ route('contact') }}">contactez-nous</a> pour en réserver, nous avons bien noté vos coordonnées. Vous pouvez aussi réserver les bouteilles encore disponibles ci-dessous.</p>
+                        @endif
                     </div>
                 @endif
 
@@ -104,8 +107,8 @@
                                 <span class="price">{{ OilOrders::money($product->price_cents) }}</span>
                                 @if ($max === 0)
                                     <span class="stock">Épuisé</span>
-                                @elseif ($product->stock <= 10)
-                                    <span class="stock">Plus que {{ $product->stock }}&nbsp;!</span>
+                                @else
+                                    <span class="stock-count">(stock&nbsp;: {{ $product->stock }}&nbsp;bouteille{{ $product->stock > 1 ? 's' : '' }})</span>
                                 @endif
                             </label>
                             <div class="qty">

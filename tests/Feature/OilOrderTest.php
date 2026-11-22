@@ -124,11 +124,19 @@ class OilOrderTest extends TestCase
     {
         $this->large->update(['stock' => 2]);
 
-        $this->order([$this->large->id => 3])->assertSessionHasErrors('quantities.'.$this->large->id);
+        $this->order([$this->large->id => 3])->assertSessionHasErrors('quantities.'.$this->large->id)
+            ->assertSessionHas('oil_stock_short');
         $this->assertSame(2, $this->large->fresh()->stock);
         $this->assertSame(0, OilOrder::count());
 
-        $this->get('/commande-huile')->assertSee('Plus que 2');
+        // Le contact est quand même gardé dans Brevo (liste 9), et invité à nous écrire.
+        Http::assertSent(fn (Request $r) => $r->url() === 'https://api.brevo.com/v3/contacts'
+            && $r['email'] === 'marie@example.com' && $r['listIds'] === [9]
+            && $r['attributes'] === ['PRENOM' => 'Marie', 'NOM' => 'Martin', 'SMS' => '+33612345678']);
+        $this->followingRedirects();
+        $this->order([$this->large->id => 3])
+            ->assertSee('Il ne reste que 2 bouteilles de 750 mL.')->assertSee('remises en stock d\'ici Noël', false)->assertSee('contactez-nous')
+            ->assertSee('(stock&nbsp;: 2&nbsp;bouteilles)', false)->assertSee('(stock&nbsp;: 100&nbsp;bouteilles)', false);
         $this->large->update(['stock' => 0]);
         $this->get('/commande-huile')->assertSee('Épuisé');
 
