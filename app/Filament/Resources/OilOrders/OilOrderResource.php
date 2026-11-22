@@ -118,7 +118,6 @@ class OilOrderResource extends Resource
             ->modalHeading(fn (OilOrder $record) => 'Commande '.$record->number.' · '.$record->status->getLabel())
             ->modalDescription(fn (OilOrder $record) => 'Commandée le '.$record->created_at->timezone(config('app.timezone'))->format('d/m/Y à H:i'))
             ->modalSubmitActionLabel('Enregistrer')
-            ->modalCancelActionLabel('Fermer')
             ->mutateRecordDataUsing(function (array $data, OilOrder $record) {
                 foreach (OilProduct::ordered()->pluck('id') as $id) {
                     $data['qty_'.$id] = (int) $record->items->where('product_id', $id)->sum('quantity');
@@ -144,16 +143,17 @@ class OilOrderResource extends Resource
                     throw new Halt;
                 }
             })
-            ->extraModalFooterActions(fn (OilOrder $record) => [
+            // « Supprimer » (ou « Remettre à retirer ») à gauche, « Enregistrer » à droite ; pas de bouton « Fermer » (croix en haut).
+            ->modalFooterActions(fn (EditAction $action, OilOrder $record) => [
                 Action::make('cancelOrder')
-                    ->label('Annuler la commande')
+                    ->label('Supprimer')
                     ->color('danger')
                     ->outlined()
                     ->visible($record->status !== OilOrderStatus::Cancelled)
                     ->requiresConfirmation()
-                    ->modalHeading('Annuler la commande '.$record->number.' ?')
-                    ->modalDescription('Ses bouteilles reviennent dans le stock et peuvent de nouveau être réservées. La personne n\'est pas prévenue.')
-                    ->modalSubmitActionLabel('Annuler la commande')
+                    ->modalHeading('Supprimer la commande '.$record->number.' ?')
+                    ->modalDescription('Ses bouteilles reviennent dans le stock et peuvent de nouveau être réservées. La commande reste dans la liste, marquée « Annulée ». La personne n\'est pas prévenue.')
+                    ->modalSubmitActionLabel('Supprimer')
                     ->modalCancelActionLabel('Retour')
                     ->action(fn () => OilOrders::cancel($record))
                     ->cancelParentActions()
@@ -175,6 +175,7 @@ class OilOrderResource extends Resource
                     })
                     ->cancelParentActions()
                     ->after(self::refreshStock()),
+                $action->getModalSubmitAction()->extraAttributes(['style' => 'margin-inline-start: auto']),
             ])
             ->after(self::refreshStock());
     }
