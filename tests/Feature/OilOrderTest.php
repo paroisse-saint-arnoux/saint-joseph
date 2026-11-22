@@ -227,4 +227,20 @@ class OilOrderTest extends TestCase
         $this->assertGreaterThan(1000, filesize($path));
         unlink($path);
     }
+
+    public function test_orders_placed_at_the_old_prices_get_the_new_ones(): void
+    {
+        $order = OilOrders::place(['first_name' => 'Marie', 'last_name' => 'Martin', 'email' => 'm@example.com', 'phone' => '+33612345678'],
+            [$this->small->id => 2, $this->medium->id => 1, $this->large->id => 1]);
+        $order->items()->where('label', '250 mL')->update(['unit_price_cents' => 1700]);
+        $order->items()->where('label', '500 mL')->update(['unit_price_cents' => 3000]);
+        $order->items()->where('label', '750 mL')->update(['unit_price_cents' => 4000]);
+        $order->update(['total_cents' => 2 * 1700 + 3000 + 4000]);
+
+        (require database_path('migrations/2026_11_22_100000_apply_new_oil_prices_to_orders.php'))->up();
+
+        $order->refresh();
+        $this->assertSame(2 * 1300 + 2300 + 3000, $order->total_cents);
+        $this->assertSame([1300, 2300, 3000], $order->items()->orderBy('id')->pluck('unit_price_cents')->all());
+    }
 }
