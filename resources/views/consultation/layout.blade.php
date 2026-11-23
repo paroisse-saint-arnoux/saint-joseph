@@ -8,8 +8,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#00204E">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-saint-joseph.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-saint-joseph.png') }}">
+    @include('partials.icons')
     @vite(['resources/scss/consultation.scss', 'resources/js/consultation.js'])
     @include('partials.matomo')
 </head>

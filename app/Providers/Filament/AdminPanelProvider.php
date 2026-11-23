@@ -37,7 +37,6 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->brandName('Saint Joseph — Admin')
-            ->favicon(asset('images/logo-saint-joseph.png'))
             ->colors([
                 'primary' => Color::hex('#C5A24B'),
                 'gray' => Color::Slate,
@@ -75,6 +74,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             // Avertit si l'on quitte une page avec des modifications non enregistrées.
             ->unsavedChangesAlerts()
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('filament.head'))
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.scripts'))
             ->authMiddleware([
                 Authenticate::class,

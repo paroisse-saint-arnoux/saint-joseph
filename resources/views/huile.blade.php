@@ -19,8 +19,7 @@
     <meta name="description" content="{{ $description }}">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#00204E">
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-saint-joseph.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-saint-joseph.png') }}">
+    @include('partials.icons')
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Église Saint Joseph — Le Rouret">
     <meta property="og:title" content="{{ $title }}">

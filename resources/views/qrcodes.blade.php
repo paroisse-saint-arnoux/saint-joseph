@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>QR codes et liens — Église Saint Joseph</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-saint-joseph.png') }}">
+    @include('partials.icons')
     @vite(['resources/scss/croix.scss', 'resources/js/qrcodes.js'])
 </head>
 <body class="croix croix-links">

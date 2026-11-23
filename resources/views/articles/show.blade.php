@@ -29,7 +29,7 @@
                 'datePublished' => $article->published_at?->toAtomString(),
                 'dateModified' => $article->updated_at?->toAtomString(),
                 'mainEntityOfPage' => $url,
-                'publisher' => ['@type' => 'Organization', 'name' => 'Paroisse Saint-Arnoux', 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/logo-saint-joseph.png')]],
+                'publisher' => ['@type' => 'Organization', 'name' => 'Paroisse Saint-Arnoux', 'logo' => ['@type' => 'ImageObject', 'url' => asset('images/favicon-512.png')]],
             ]), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
         </script>
     @endif

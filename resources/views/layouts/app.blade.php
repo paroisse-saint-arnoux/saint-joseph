@@ -18,8 +18,7 @@
     @else
         <link rel="canonical" href="{{ $canonical }}">
     @endif
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-saint-joseph.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-saint-joseph.png') }}">
+    @include('partials.icons')
 
     {{-- Open Graph (Facebook, WhatsApp, LinkedIn) --}}
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
