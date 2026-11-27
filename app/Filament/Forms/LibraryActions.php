@@ -7,6 +7,7 @@ use App\Support\Images;
 use App\Support\Library;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
@@ -50,14 +51,11 @@ class LibraryActions
         return self::base('galleryFromLibrary', 'Ajouter des photos à la galerie', multiple: true)
             ->modalSubmitActionLabel('Ajouter à la galerie')
             ->action(function (array $data, Get $get, Set $set) {
-                $items = $get('gallery') ?? [];
-                foreach (self::images($data) as $image) {
-                    $items[(string) Str::uuid()] = [
-                        'path' => [(string) Str::uuid() => Library::copyForArticle($image, 'articles/galerie')],
-                        'alt' => $image->alt ?: $image->title,
-                    ];
-                }
+                [$items, $skipped] = GalleryPhotos::addLibraryImages($get('gallery') ?? [], self::images($data));
                 $set('gallery', $items);
+                if ($skipped) {
+                    Notification::make()->title(GalleryPhotos::skippedMessage($skipped))->warning()->send();
+                }
             });
     }
 

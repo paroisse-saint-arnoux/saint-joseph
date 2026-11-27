@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Articles\Pages;
 
+use App\Filament\Resources\Articles\Pages\Concerns\DropsGalleryPhotos;
 use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Articles\Schemas\ArticleForm;
 use Filament\Actions\DeleteAction;
@@ -9,6 +10,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditArticle extends EditRecord
 {
+    use DropsGalleryPhotos;
+
     protected static string $resource = ArticleResource::class;
 
     protected function mutateFormDataBeforeSave(array $data): array

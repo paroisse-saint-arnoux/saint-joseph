@@ -92,15 +92,15 @@ class ArticleForm
                             ->description('Photos affichées en carrousel à la fin de l\'article.')
                             ->collapsible()
                             ->schema([
+                                View::make('filament.forms.gallery-drop'),
                                 Repeater::make('gallery')
                                     ->hiddenLabel()
                                     ->hintAction(LibraryActions::gallery())
                                     ->schema([
                                         ImageUpload::make('path', 'articles/galerie')->label('Photo')->required(),
                                         TextInput::make('alt')
-                                            ->label('Description de la photo')
-                                            ->helperText('Lue par les personnes malvoyantes et affichée en légende.')
-                                            ->required()
+                                            ->label('Légende')
+                                            ->helperText('Affichée sous la photo et lue par les personnes malvoyantes.')
                                             ->maxLength(190),
                                     ])
                                     ->grid(2)

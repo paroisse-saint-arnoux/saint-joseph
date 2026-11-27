@@ -304,8 +304,39 @@ class LibraryTest extends TestCase
 
         $article->refresh();
         $this->assertStringStartsWith('articles/', $article->og_image);
-        $this->assertSame(['La chorale', 'Le parvis au soleil'], array_column($article->gallery, 'alt'));
+        // Légende = description de l'image (la chorale n'en a pas : pas de légende, le titre n'est pas repris).
+        $this->assertSame([null, 'Le parvis au soleil'], array_column($article->gallery, 'alt'));
         $this->assertSame(['gallery', 'gallery', 'og_image'], LibraryUsage::where('article_id', $article->id)->orderBy('field')->pluck('field')->all());
+    }
+
+    public function test_several_photos_dropped_at_once_join_the_gallery_without_duplicates(): void
+    {
+        Library::add($this->photo(25, 800, 600, 'jpg'), 'deja.jpg', 'Déjà là', 'La procession');
+        $article = Article::factory()->draft()->create(['gallery' => []]);
+        $photo = fn (string $name, int $seed, string $format = 'jpg', int $w = 800, int $h = 600) => UploadedFile::fake()
+            ->createWithContent($name, file_get_contents($this->photo($seed, $w, $h, $format)));
+
+        Livewire::test(EditArticle::class, ['record' => $article->id])
+            ->set('galleryDrop', [$photo('deja.jpg', 25), $photo('vue_du-parvis.png', 26, 'png'), $photo('vue_du-parvis.png', 26, 'png')])
+            ->assertHasNoErrors()
+            ->assertSet('galleryDrop', [])
+            ->assertNotified('1 photo était déjà dans la galerie : elle n\'a pas été ajoutée une deuxième fois.')
+            // Même photo glissée une deuxième fois, dans une autre taille : écartée aussi.
+            ->set('galleryDrop', [$photo('procession-petite.jpg', 25, 'jpg', 400, 300), $photo('autre.jpg', 27)])
+            ->assertNotified()
+            ->callAction(TestAction::make('galleryFromLibrary')->schemaComponent('gallery'), ['images' => LibraryImage::pluck('id')->all()])
+            ->assertHasNoActionErrors()
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $article->refresh();
+        // Légende = description de la bibliothèque ; sinon pas de légende (jamais le nom du fichier), et ce n'est pas bloquant.
+        $this->assertSame(['La procession', null, null], array_column($article->gallery, 'alt'));
+        foreach ($article->gallery as $item) {
+            $this->assertStringStartsWith('articles/galerie/', $item['path']);
+            Storage::disk('public')->assertExists($item['path']);
+        }
+        $this->assertSame(3, LibraryImage::count());
     }
 
     public function test_unused_copies_are_cleaned_up_after_a_day(): void
