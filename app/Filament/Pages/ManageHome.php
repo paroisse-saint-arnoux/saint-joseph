@@ -53,7 +53,7 @@ class ManageHome extends SettingsPage
                         ->label('Texte de présentation')
                         ->toolbarButtons([['bold', 'italic', 'link'], ['bulletList'], ['undo', 'redo']]),
                     Grid::make(2)->schema([
-                        ImageUpload::make('home.decouvrir.image', 'accueil')->label('Illustration (facultative)'),
+                        ImageUpload::make('home.decouvrir.image', 'accueil')->label('Illustration'),
                         TextInput::make('home.decouvrir.image_alt')->label('Description de l\'illustration')->requiredWith('home.decouvrir.image'),
                     ]),
                 ]),
