@@ -71,8 +71,31 @@
   margin-top: 54px;
   h2 { font-size: 1.6rem; color: $navy; margin-bottom: 18px; }
   .carousel { border-radius: 16px; overflow: hidden; background: $navy-900; }
-  .carousel-item img { width: 100%; height: clamp(260px, 55vw, 560px); object-fit: contain; display: block; }
+  .carousel { position: relative; }
+  .carousel-item img { width: 100%; height: clamp(260px, 55vw, 560px); object-fit: contain; display: block; cursor: zoom-in; }
   .carousel-caption { background: rgba($navy-900, .6); border-radius: 10px; padding: 8px 14px; left: 10%; right: 10%; bottom: 36px; font-size: .9rem; }
+}
+
+.gallery-zoom {
+  position: absolute; top: 12px; right: 12px; z-index: 3; width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center; border: 0; background: rgba($navy-900, .55); color: #fff; cursor: pointer; transition: background .2s;
+  svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  &:hover, &:focus-visible { background: rgba($navy-900, .85); }
+}
+
+// Galerie en plein écran (modale créée par resources/js/modules/gallery.js)
+.gallery-lightbox {
+  .modal-content { background: $navy-900; border-radius: 0; }
+  .btn-close { position: absolute; top: 16px; right: 16px; z-index: 5; width: 1.4em; height: 1.4em; opacity: .9; }
+  .carousel, .carousel-inner, .carousel-item { height: 100%; }
+  .carousel-item { position: relative; }
+  .carousel-item.active, .carousel-item-next, .carousel-item-prev { display: flex; align-items: center; justify-content: center; }
+  .carousel-item img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; padding: 56px 0 64px; }
+  .gallery-lightbox-caption {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); max-width: 90%; text-align: center;
+    color: #fff; background: rgba(0, 0, 0, .45); border-radius: 10px; padding: 6px 14px; font-size: .9rem;
+  }
+  .carousel-control-prev, .carousel-control-next { width: 12%; }
 }
 
 // Partage

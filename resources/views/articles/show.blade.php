@@ -69,7 +69,7 @@
             @if ($gallery)
                 <div class="gallery">
                     <h2>En images</h2>
-                    <div id="gallery" class="carousel slide" data-bs-ride="false">
+                    <div id="gallery" class="carousel slide">
                         @if (count($gallery) > 1)
                             <div class="carousel-indicators">
                                 @foreach ($gallery as $i => $img)
@@ -89,6 +89,7 @@
                             <button class="carousel-control-prev" type="button" data-bs-target="#gallery" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Précédente</span></button>
                             <button class="carousel-control-next" type="button" data-bs-target="#gallery" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Suivante</span></button>
                         @endif
+                        <button type="button" class="gallery-zoom" data-gallery-zoom aria-label="Voir la galerie en grand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
                     </div>
                 </div>
             @endif

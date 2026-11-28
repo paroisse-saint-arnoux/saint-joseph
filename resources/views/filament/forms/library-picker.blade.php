@@ -4,22 +4,40 @@
             state: $wire.$entangle(@js($getStatePath())),
             multiple: @js($isMultiple()),
             url: @js(route('library.search')),
-            q: '', page: 1, items: [], hasMore: false, loading: false,
+            q: '', page: 1, items: [], hasMore: false, loading: false, request: 0,
             init() {
                 if (! Array.isArray(this.state)) this.state = [];
                 this.load(true);
                 this.$watch('q', Alpine.debounce(() => this.load(true), 350));
+                // Défilement infini : la page suivante se charge quand le bas de la grille approche
+                new IntersectionObserver((entries) => {
+                    if (entries.some((e) => e.isIntersecting)) this.more();
+                }, { root: this.$refs.grid, rootMargin: '0px 0px 300px 0px' }).observe(this.$refs.sentinel);
             },
             async load(reset) {
                 if (reset) this.page = 1;
+                const request = ++this.request;
                 this.loading = true;
-                const response = await fetch(this.url + '?' + new URLSearchParams({ q: this.q, page: this.page }), { headers: { Accept: 'application/json' } });
-                const data = await response.json();
-                this.items = reset ? data.items : [...this.items, ...data.items];
-                this.hasMore = data.hasMore;
-                this.loading = false;
+                try {
+                    const response = await fetch(this.url + '?' + new URLSearchParams({ q: this.q, page: this.page }), { headers: { Accept: 'application/json' } });
+                    const data = await response.json();
+                    if (request !== this.request) return; // une recherche plus récente a été lancée
+                    this.items = reset ? data.items : [...this.items, ...data.items];
+                    this.hasMore = data.hasMore;
+                } finally {
+                    if (request === this.request) this.loading = false;
+                }
+                // Si la grille n'est pas encore pleine, la sentinelle reste visible sans nouvel événement
+                this.$nextTick(() => {
+                    const grid = this.$refs.grid;
+                    if (this.hasMore && grid.scrollHeight <= grid.clientHeight + 300) this.more();
+                });
             },
-            more() { this.page++; this.load(false) },
+            more() {
+                if (this.loading || ! this.hasMore) return;
+                this.page++;
+                this.load(false);
+            },
             toggle(id) {
                 const on = this.state.includes(id);
                 this.state = this.multiple ? (on ? this.state.filter((i) => i !== id) : [...this.state, id]) : (on ? [] : [id]);
@@ -40,6 +58,7 @@
             .sj-picker-title { font-size: .75rem; padding: 6px 8px; line-height: 1.25; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
             .sj-picker-rank { position: absolute; top: 6px; left: 6px; z-index: 1; min-width: 24px; height: 24px; border-radius: 12px; background: #00204E; color: #fff;
                 font-size: .75rem; font-weight: 700; display: grid; place-items: center; padding: 0 6px; }
+            .sj-picker-more { grid-column: 1 / -1; min-height: 1px; text-align: center; color: #6b7280; font-size: .8rem; }
             .sj-picker-empty { color: #6b7280; padding: 30px; text-align: center; }
         </style>
 
@@ -55,7 +74,7 @@
             </x-filament::link>
         </div>
 
-        <div class="sj-picker-grid">
+        <div class="sj-picker-grid" x-ref="grid">
             <template x-for="item in items" x-bind:key="item.id">
                 <button type="button" class="sj-picker-item" x-bind:class="{ 'is-on': state.includes(item.id) }" x-on:click="toggle(item.id)" x-bind:title="item.title + ' (' + item.dimensions + ' px)'">
                     <span class="sj-picker-rank" x-show="state.includes(item.id)" x-text="multiple ? rank(item.id) : '✓'"></span>
@@ -64,11 +83,11 @@
                 </button>
             </template>
             <div class="sj-picker-empty" x-show="! loading && ! items.length" x-cloak>Aucune image trouvée.</div>
+            <div class="sj-picker-more" x-ref="sentinel"><span x-show="loading && items.length" x-cloak>Chargement…</span></div>
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:.875rem; color:#6b7280;">
             <span x-text="state.length ? state.length + (state.length > 1 ? ' images choisies' : ' image choisie') + (multiple ? ' (dans l\'ordre des numéros)' : '') : (multiple ? 'Cliquez sur les images à ajouter.' : 'Cliquez sur une image.')"></span>
-            <x-filament::button size="sm" color="gray" x-show="hasMore" x-on:click="more()" x-bind:disabled="loading">Voir plus d'images</x-filament::button>
         </div>
     </div>
 </x-dynamic-component>
