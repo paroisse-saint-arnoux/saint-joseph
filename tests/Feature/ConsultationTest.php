@@ -58,7 +58,8 @@ class ConsultationTest extends TestCase
         $this->assertDatabaseHas('consultation_participants', ['email' => 'marie@example.com']);
 
         $this->get("/consultation/projet/{$first->id}")->assertOk()
-            ->assertSee($first->name)->assertSee($first->architect)
+            // Projets anonymes : ni nom d'agence ni architecte, seulement « Projet 1 » et la maquette.
+            ->assertSee('Projet 1')->assertDontSee($first->name)->assertDontSee($first->architect)
             ->assertSee('Je n\'aime pas du tout')->assertSee('J\'aime beaucoup')
             ->assertSee('marie@example.com');
     }

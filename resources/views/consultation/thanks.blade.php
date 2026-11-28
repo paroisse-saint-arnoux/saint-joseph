@@ -17,7 +17,7 @@
             <li>
                 <a href="{{ route('consultation.project', $p) }}">
                     <span @class(['cs-nav-item', 'is-done' => $overall !== null])>{{ $i + 1 }}</span>
-                    <span class="cs-summary-name">{{ $p->name }}</span>
+                    <span class="cs-summary-name">Projet {{ $i + 1 }}</span>
                     <span class="cs-summary-vote">{{ $overall === null ? 'Donner mon avis' : Consultation::SCALES['overall']['steps'][$overall] }}</span>
                 </a>
             </li>

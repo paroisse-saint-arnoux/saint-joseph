@@ -1,4 +1,4 @@
-@extends('consultation.layout', ['title' => $project->name])
+@extends('consultation.layout', ['title' => 'Projet '.($index + 1)])
 
 @section('nav')
     <nav class="cs-nav" aria-label="Les projets">
@@ -9,7 +9,7 @@
                     <a href="{{ route('consultation.project', $p) }}"
                        @class(['cs-nav-item', 'is-current' => $p->is($project), 'is-done' => in_array($p->id, $voted)])
                        @if ($p->is($project)) aria-current="page" @endif
-                       aria-label="Projet {{ $i + 1 }} : {{ $p->name }}{{ in_array($p->id, $voted) ? ' (avis donné)' : '' }}">{{ $i + 1 }}</a>
+                       aria-label="Projet {{ $i + 1 }}{{ in_array($p->id, $voted) ? ' (avis donné)' : '' }}">{{ $i + 1 }}</a>
                 </li>
             @endforeach
         </ol>
@@ -20,25 +20,14 @@
     <article class="cs-project">
         <figure class="cs-model">
             @if ($project->modelPhotoUrl())
-                <img src="{{ $project->modelPhotoUrl() }}" alt="Maquette du projet {{ $project->name }}">
+                <img src="{{ $project->modelPhotoUrl() }}" alt="Maquette du projet {{ $index + 1 }}">
             @else
                 <div class="cs-model-placeholder">Maquette n°&nbsp;{{ $index + 1 }}</div>
             @endif
         </figure>
 
-        <h1 class="cs-title">{{ $project->name }}</h1>
+        <h1 class="cs-title">Projet {{ $index + 1 }}</h1>
 
-        <div class="cs-architect">
-            @if ($project->architectPhotoUrl())
-                <img src="{{ $project->architectPhotoUrl() }}" alt="" width="84" height="105">
-            @endif
-            <div>
-                <b>{{ $project->architect }}</b>
-                @if ($project->agency && $project->agency !== $project->name)<span>{{ $project->agency }}</span>@endif
-                @if ($project->architect_title)<span>{{ $project->architect_title }}</span>@endif
-                @if ($project->city)<span class="cs-city">{{ $project->city }}</span>@endif
-            </div>
-        </div>
 
         <form method="POST" action="{{ route('consultation.save', $project) }}" class="cs-vote" data-vote>
             @csrf
